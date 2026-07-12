@@ -1,0 +1,165 @@
+\newpage
+
+\section{Related Work}
+\label{ch:related_work}
+
+The task of translating natural language into executable SPARQL queries is a cornerstone of the Semantic Web, acting as the primary interface between human intent and structured data. While early approaches focused on rigid mapping and combinatorial search, the emergence of Large Language Models (LLMs) has introduced a new paradigm centered on autonomous reasoning and agentic workflows. This chapter examines the evolution of Knowledge Graph Question Answering (KGQA) systems, evaluates their performance on foundational benchmarks, and identifies the structural limitations that motivate the development of the domain-agnostic, refinement-based framework proposed in this thesis.
+
+\subsection{Knowledge Graphs and Schematic Heterogeneity}
+KGQA systems depend on a variety of structured resources, each presenting distinct challenges for automated query generation. General-purpose Knowledge Graphs, such as Wikidata and DBpedia, contain billions of triples spanning diverse domains. While these repositories provide a vast landscape for information retrieval, their massive schemas—comprising thousands of properties and classes—make manual mapping or simple fine-tuning difficult. The informal nature of natural language often creates a ``lexical gap'' between user intent and the canonical labels used within these graphs~\cite{hoffner_survey_2017}.
+
+Domain-specific knowledge bases in fields such as healthcare or finance provide high-precision data but utilize specialized vocabularies that are often absent from the general training corpora of standard language models. Earlier research has identified that the primary barrier to effective retrieval is not the absence of data, but the heterogeneity of ontological structures and the technical complexity of the SPARQL language itself~\cite{diefenbach_core_2018, pereira_systematic_2022}.
+
+The fundamental challenge lies in the structural and semantic mismatch between informal natural language and complex graph ontologies. Translating a common query such as ``Where was Albert Einstein born?'' into an executable SPARQL query requires more than simple keyword mapping. It necessitates the precise identification of canonical entities and the selection of the correct predicate (e.g., \texttt{wdt:P19} in Wikidata versus \texttt{dbo:birthPlace} in DBpedia) from among thousands of potential candidates. Navigating this schematic heterogeneity requires sophisticated semantic reasoning and dynamic context-awareness that transcends the capabilities of traditional lexical similarity.
+
+\subsection{Traditional Text-to-SPARQL Approaches}
+Historically, the Text-to-SPARQL task has been tackled through pipelines that rely on lexical matching, embeddings, or syntactic translation. While foundational, these approaches exhibit severe limitations in scalability and adaptability.
+
+\subsubsection{Combinatorial and Lexical Search Strategies}
+The baseline for domain-agnostic, multilingual KGQA was established by systems such as \textbf{QAnswer}~\cite{diefenbach2019qanswer}, which served as the official baseline for the QALD-10 challenge. QAnswer employs a combinatorial search strategy operating in two primary phases: candidate generation and query exploration. First, it maps natural language mentions to potential URI candidates using a large-scale index of labels and aliases. Second, it explores the valid SPARQL joins that can connect these candidates, utilizing a probabilistic model to identify the most likely query graph.
+
+While effective—achieving a Macro F1 score of 0.5776—this approach is fundamentally constrained by its reliance on surface-level lexical matching. This makes it highly susceptible to the ``lexical gap,'' where user queries utilize synonyms or informal terminology (e.g., ``the Big Apple'' for New York City) not present in formal KG labels. Furthermore, as the search space expands to encompass massive schemas like Wikidata, the system encounters a combinatorial explosion. Without a semantic reasoning layer to prune the search tree, the number of possible joins increases exponentially with query complexity, often leading to timeouts or logically valid but semantically incorrect joins.
+
+\subsubsection{Ranking and Embedding-Based Approaches}
+To move beyond verbatim string matching, research shifted toward \textbf{Ranking Approaches} that utilize transformer-based models to capture the semantic intent behind a question. These systems typically employ a dual-encoder architecture to map natural language questions and KG entities/relations into a shared, high-dimensional embedding space~\cite{baramiia2022ranking}. By calculating the cosine similarity between the question vector and property vectors using approximate nearest neighbor (ANN) searches, these systems can identify semantically related predicates even when surface forms differ. This methodology reached a baseline F1 of 0.4281.
+
+However, these methods are primarily ``one-shot'' in nature; they rely on supervised training over static embeddings that are frozen once the model is deployed. A critical limitation is the lack of a semantic recovery mechanism. These models do not understand the graph topology; they merely calculate proximity in a vector space. Consequently, if the initial ranking fails to capture the correct property, the system has no way to diagnose the execution error or attempt a refinement. 
+
+\subsubsection{Intermediate Representations and Rule-Based Graphs}
+Addressing the structural mismatch between natural language and SPARQL syntax led to the exploration of intermediate semantic layers. The \textbf{AMR-to-SPARQL} framework~\cite{shivashankar2022amr} utilizes Abstract Meaning Representation (AMR) to perform a graph-to-graph transformation. Questions are parsed into a rooted, labeled, directed AMR graph representing the semantic structure of the sentence. This graph is then converted into a SPARQL query via a series of handcrafted rule-based transformations.
+
+While achieving a Macro F1 of 0.4909, this approach relies on the assumption that semantic structures can be mapped to graph structures through fixed logic. As knowledge graphs evolve, the manual engineering of rule cascades becomes prohibitively complex, causing these systems to struggle with nested queries, cross-lingual entities, and the long tail of specialized properties.
+
+\subsubsection{Neural Machine Translation (NMT) and the Seq2Seq Baseline}
+The most successful traditional paradigm treats Text-to-SPARQL as a sequence-to-sequence (Seq2Seq) translation task. The \textbf{SPARQL-QA} system~\cite{santana2022sparqlqa} models query generation similarly to Neural Machine Translation (NMT), using a BiLSTM-based encoder-decoder architecture to produce query templates filled with URIs via a Named Entity Recognition (NER) module. This approach reached a peak performance of 0.59 Macro F1 on QALD-10.
+
+Despite achieving state-of-the-art results for traditional models, NMT systems exhibit significant ``black-box'' limitations:
+\begin{itemize}
+    \item \textbf{Dependency on Training Data:} They require massive amounts of paired training data, making them domain-specific rather than cross-domain agnostic.
+    \item \textbf{Pipeline Brittleness:} They follow a linear, non-iterative process. If a generated template is syntactically correct but returns no results, the system terminates without attempting an alternative.
+    \item \textbf{Lack of Transparency:} They provide no reasoning traces, making it impossible to debug the logical steps the model took to select a specific predicate.
+\end{itemize}
+
+\subsection{Foundational KGQA Baselines and Their Limitations}
+\label{sec:baseline_limitations}
+
+The most prominent efforts to establish domain-agnostic question answering over expansive knowledge graphs like Wikidata have relied heavily on combinatorial and lexical baseline systems, with \textbf{QAnswer}~\cite{diefenbach2019qanswer} serving as the official benchmark for the QALD-10 challenge. QAnswer demonstrated the potential of large-scale index-based retrieval by mapping natural language mentions directly to Wikidata labels and aliases. 
+
+However, deep analysis of these traditional pipelines reveals substantial quality and precision issues when navigating complex or ambiguous queries. Table~\ref{tab:lexical_errors} illustrates a characteristic failure mode of these systems: because they rely primarily on surface-level text matching without understanding the underlying graph topology, they frequently fall victim to profound entity and predicate ambiguities.
+
+\begin{table}[htbp]
+\centering
+\caption{Characteristic Lexical Mapping Errors in Traditional KGQA Systems}
+\label{tab:lexical_errors}
+\begin{tabular}{p{3.5cm}p{5.5cm}p{4.5cm}}
+\hline
+\textbf{Natural Language Mention} & \textbf{Traditional Lexical Mapping (Incorrect/Ambiguous)} & \textbf{Correct Wikidata Target} \\
+\hline
+``Bill Gates'' & Bill Gates (Q4909115) \newline \textit{documentary film} & Bill Gates (Q5284) \newline \textit{human/philanthropist} \\
+\vspace{0.1cm}
+``born in'' & birth name (wdt:P1477) \newline \textit{or} date of birth (wdt:P569) & place of birth (wdt:P19) \\
+\vspace{0.1cm}
+``country'' & country (wdt:P17) \newline \textit{applied directly to Person} & country of citizenship (wdt:P27) \\
+\vspace{0.1cm}
+``Apple'' & Apple (Q89) \newline \textit{fruit} & Apple Inc. (Q312) \newline \textit{technology company} \\
+\hline
+\end{tabular}
+\end{table}
+
+As demonstrated in Table~\ref{tab:lexical_errors}, a purely lexical search for an entity like ``Bill Gates'' might indiscriminately return the target philanthropist, his similarly named father, or a documentary film sharing the identical text label. Similarly, relational phrases like ``born in'' can logically refer to a date, a birth name, or a location depending on the surrounding context. Traditional systems lack the contextual awareness to disambiguate these entities dynamically. 
+
+Furthermore, these systems struggle heavily with structural mismatches. For example, if a user asks, ``Which country was Bill Gates born in?'', a traditional combinatorial system might attempt to apply the \texttt{country (wdt:P17)} predicate directly to the person entity. However, in the Wikidata topology, \texttt{wdt:P17} is rarely applied to humans; instead, one must traverse from the person via \texttt{place of birth (wdt:P19)} to a city, and then use \texttt{country (wdt:P17)}, or use \texttt{country of citizenship (wdt:P27)}. 
+
+These mapping errors have concrete consequences for downstream execution. If the entity linking stage selects the documentary film instead of the person, or selects a structurally invalid predicate, the subsequent SPARQL query will syntactically execute but return an empty or incorrect result set. The prevalence of such errors in traditional NMT and combinatorial systems fundamentally limits their precision—typically peaking around 59\%—and highlights the critical need for a system that can ground entity selection in local topological subgraphs rather than relying solely on string similarity.
+
+\subsection{The Shift to Large Language Models in KGQA}
+Recent surveys~\cite{perevalov_multilingual_2024, song_advancements_2023, zhang_review_2021} suggest that the design space is shifting away from frozen NMT models toward foundational Large Language Models (LLMs). Unlike NMT models that require task-specific fine-tuning—which often exhibit severe limitations in generating complex SPARQL queries~\cite{mecharnia_performance_2025}—LLMs leverage zero-shot and few-shot In-Context Learning (ICL) to translate natural language into structured query languages~\cite{dabramo_investigating_2025, meloni_exploring_2025}.
+
+\subsubsection{Prompting Strategies: From Zero-Shot to Chain-of-Thought}
+Early LLM applications to KGQA relied on zero-shot prompting, which frequently resulted in ``schema hallucinations''—the generation of plausible-sounding but non-existent properties (e.g., hallucinating \texttt{wdt:bornIn} instead of \texttt{wdt:P19}). To mitigate this, Few-Shot Prompting introduced static examples into the context window, though it struggled to cover the millions of properties in modern KGs.
+
+More recently, \textbf{Chain-of-Thought (CoT)} reasoning~\cite{deng_recent_2022} forces the LLM to explicitly align entities in the question with the retrieved schema before outputting the final query. This step-by-step logical deduction significantly reduces subject-object inversions and logical join errors, forming the basis for the reasoning traces utilized in this thesis.
+
+\subsubsection{Retrieval-Augmented Generation (RAG) for Schema Linking}
+Because LLMs are bounded by finite context windows, Retrieval-Augmented Generation (RAG)~\cite{lewis2020rag} is utilized for \textbf{Dynamic Schema Linking}. The system embeds the target ontology into a dense vector space~\cite{hu_empirical_2023}. When a question is posed, it retrieves the top-$k$ most semantically relevant schema elements.
+
+However, standard RAG vector similarity cannot capture the topological constraints of a graph (e.g., knowing a property can only connect a ``Person'' to a ``Location''). This thesis advances standard RAG by introducing a \textit{Hybrid Retrieval} approach combining dense vector search with topological subgraph extraction (1st-hop neighbors), grounding the RAG context in the actual structural reality of the graph. Furthermore, grounding LLMs with actual Knowledge Graph context has been shown to significantly reduce parametric hallucinations, making the models more trustworthy in open-ended settings~\cite{sui_can_2025}.
+
+\subsubsection{Agentic Workflows and Autonomous Reasoning}
+To overcome the limitations of linear LLM pipelines, research has increasingly focused on \textbf{Agentic Workflows}~\cite{weng2023agents}. By integrating LLMs with tool-use capabilities and cyclical graph frameworks (such as LangGraph), agents can perform iterative collaborative reasoning and self-critique~\cite{zhao_agentict2srobust_2025, perevalov_text--sparql_2025}. This allows the system to autonomously diagnose syntax errors, adjust its reasoning, and retry, effectively closing the loop between generation and execution.
+
+\subsection{KGQA Benchmarks and Evaluation Frameworks}
+The objective evaluation of Text-to-SPARQL systems requires standardized benchmarks that accurately reflect the complexities of natural language and semantic web data.
+
+\subsubsection{The QALD and LC-QuAD Datasets}
+The \textbf{Question Answering over Linked Data (QALD)} challenge series has been the gold standard for evaluating KGQA systems since 2011. This thesis utilizes the \textbf{QALD-10} benchmark~\cite{usbeck2019benchmarking}, alongside insights from datasets like LC-QuAD~\cite{steinmetz_what_2021}, which provide highly complex, multilingual datasets (English, German, Russian, Chinese). Furthermore, our system leverages \textbf{LC-QuAD 2.0}~\cite{dubey2019lcquad} as the foundational corpus for our Dynamic Few-Shot Learning (DFSL) index, allowing the agent to retrieve syntactically relevant examples at runtime.
+
+\subsubsection{The GERBIL QA Platform}
+To ensure rigorous, reproducible evaluation, we utilize the \textbf{GERBIL QA} platform~\cite{usbeck2019benchmarking, usbeck2019gerbilqa}. GERBIL employs a modified Macro F1-score tailored for KGQA. For instance, if a system correctly generates a valid query that returns an empty set (when the ground-truth answer is also empty), GERBIL awards a score of 1.0. This strict evaluation ensures that the performance gains reported by our framework are empirically sound and comparable to historical baselines.
+
+\subsection{Research Gaps and Thesis Objectives}
+\label{sec:research_gaps}
+The preceding analysis reveals four critical gaps that existing work fails to adequately address:
+
+\begin{enumerate}
+    \item \textbf{Topological Alignment:} Traditional models often generate hallucinated predicates that do not exist in the target graph. There is a need for systems that ground candidate entities in their local graph topology through runtime schema discovery.
+    \item \textbf{Cross-Domain Generalization:} Most high-performing traditional systems are tied to specific datasets. There is a lack of domain-agnostic frameworks that can navigate previously unseen schemas in a zero-shot manner.
+    \item \textbf{Transparency and Explainability:} Black-box NMT models offer no insight into why a specific query was generated. Agentic workflows must provide interpretable reasoning traces essential for debugging complex query failures.
+    \item \textbf{Iterative Self-Correction:} Standard pipelines are single-pass. There is a need for execution-guided loops that utilize endpoint feedback to automatically repair and refine queries~\cite{zhao_agentict2srobust_2025}.
+\end{enumerate}
+
+This thesis directly addresses these gaps through three main contributions:
+\begin{itemize}
+    \item An \textbf{LLM-driven agentic workflow} that decomposes query generation into modular stages, providing a transparent reasoning trace for every generated query.
+    \item A \textbf{Hybrid RAG-based schema linking strategy} that establishes a domain-agnostic approach, achieving robust precision on QALD-10 without the need for task-specific fine-tuning.
+    \item An \textbf{Iterative Refinement Loop} that leverages execution feedback from the knowledge graph endpoint to autonomously diagnose and repair logical and syntactic errors in real-time.
+\end{itemize}
+
+\subsection{Overview of Wikidata: Goal, Structure, and Statistics}
+\label{sec:wikidata_overview}
+
+To properly contextualize the operational environment of the proposed agentic framework, it is essential to understand the underlying data infrastructure driving modern Semantic Web systems. \textbf{Wikidata} is a free, collaborative, multilingual secondary database hosted by the Wikimedia Foundation. Its primary \textbf{goal} is to act as a central, machine-readable repository of structured data that supports Wikimedia projects, external applications, and global artificial intelligence systems.
+
+Unlike standard RDF knowledge graphs that rely exclusively on simple, flat \textit{Subject-Predicate-Object} triples, Wikidata employs a highly expressive, document-oriented data model. According to the official Wikidata Glossary, the ontology is built upon several deeply nested structural components:
+
+\subsubsection*{1. Core Entities: Items, Properties, and Lexemes}
+The overarching base elements of Wikidata are \textbf{Entities}. Every entity possesses a unique identifier (URI) and a multilingual \textit{fingerprint} consisting of a Canonical Label, a Description, and Aliases (synonyms). Entities are categorized into three primary namespaces:
+
+\begin{itemize}
+    \item \textbf{Items (Q-nodes):} Represent real-world objects, concepts, or events. They are assigned identifiers prefixed with the letter 'Q'. For example, \texttt{wd:Q83958} represents the city of \textit{Skopje}, and \texttt{wd:Q1166649} represents the concept of \textit{Computer Science}. As of 2026, Wikidata contains over \textbf{121 million Items}.
+    
+    \item \textbf{Properties (P-nodes):} Define the relational attributes, categories, or data values that connect Items. Properties are prefixed with 'P' and strictly enforce specific data types (e.g., expecting a target Item, a raw string, geographical coordinates, or a mathematical quantity). For example, \texttt{wdt:P17} represents \textit{country}, and \texttt{wdt:P1082} represents \textit{population}. There are currently over \textbf{12,000 Properties}.
+    
+    \item \textbf{Lexemes (L-nodes):} Entities used to describe lexicographical and linguistic data, structured separately from conceptual Items. Prefix with 'L', they model how words behave in different languages, consisting of \textit{Forms} (conjugations/declensions) and \textit{Senses} (meanings). For example, \texttt{L46141} represents the Macedonian noun \textit{"вода"} (water), containing grammatical forms for singular, plural, and definite states. Wikidata currently hosts over \textbf{1.5 million Lexemes}.
+\end{itemize}
+
+\subsubsection*{2. The Knowledge Structure: Claims, Statements, and Qualifiers}
+The actual factual knowledge in Wikidata is constructed by connecting these entities using a highly reified architecture:
+
+\begin{itemize}
+    \item \textbf{Claims:} A base unit of information about an Item, consisting strictly of a Property and a Value. For example, a claim on the Item for \textit{Skopje} (\texttt{Q83958}) might pair the Property \textit{population} (\texttt{P1082}) with the Value \textit{526,502}.
+    
+    \item \textbf{Qualifiers:} Additional property-value pairs that refine, modify, or provide specific boundaries to a Claim. Rather than asserting absolute, timeless facts, Wikidata uses qualifiers to introduce temporal scoping or contextual constraints. Modifying the previous population claim, we apply the qualifier \textit{point in time} (\texttt{P580}) with the value \textit{2021}.
+    
+    \item \textbf{References:} Pointers to external sources that verify the factual accuracy of a Claim, adhering to Wikidata's core philosophy of verifiability over absolute truth. The population claim above would include a reference pointing to the \textit{State Statistical Office of North Macedonia} (\texttt{Q3089422}).
+    
+    \item \textbf{Rank:} Because knowledge evolves, Wikidata allows multiple contradictory claims for the same property, differentiated by Rank (\textit{Preferred}, \textit{Normal}, or \textit{Deprecated}). For example, the 2021 population census is marked as \textbf{Preferred} (returned by default queries), the older 2002 census is marked as \textbf{Normal} (kept for historical record), and an ancient, mathematically proven inaccurate estimate is marked as \textbf{Deprecated}.
+    
+    \item \textbf{Statements:} The ultimate, fully-assembled knowledge unit. A Statement is the culmination of a \textit{Claim}, all of its associated \textit{Qualifiers}, its \textit{References}, and its \textit{Rank}. Navigating these complex Statements in SPARQL requires traversing reified nodes using specific namespace prefixes (e.g., \texttt{p:}, \texttt{ps:}, and \texttt{pq:}).
+\end{itemize}
+
+\subsubsection*{3. Data Integrity and Web Integration: Constraints, Pages, and Sites}
+To maintain the quality and interconnectedness of billions of data points, Wikidata utilizes automated rules and external integrations:
+
+\begin{itemize}
+    \item \textbf{Constraints:} Machine-readable rules applied to Properties to enforce ontological integrity and prevent logical contradictions. For example, a \textit{Type Constraint} on the property \textit{place of birth} (\texttt{P19}) dictates that its target value \textit{must} be a geographical location or administrative territory. If a user attempts to state someone was born in "Computer Science" (\texttt{Q1166649}), the constraint flags it as an ontological violation.
+    
+    \item \textbf{Pages and SiteLinks:} Wikidata serves as the central structural hub for the entire Wikimedia ecosystem. A \textbf{Page} refers to the actual web interface rendering an entity. More importantly, \textbf{SiteLinks} map a single Wikidata Q-node to its corresponding Wikipedia pages across over 300 languages. For instance, the SiteLinks for \texttt{Q83958} connect the English Wikipedia site (\texttt{enwiki}) page for "Skopje" with the Macedonian Wikipedia site (\texttt{mkwiki}) page for "Скопје", forming the backbone of multilingual cross-referencing.
+\end{itemize}
+
+\subsubsection*{4. Architectural Boundaries of the Proposed Framework}
+As of 2026, the scale of this repository is massive, having accumulated nearly \textbf{2.5 billion edits}. To navigate this immense volume of data, our proposed framework establishes a strict architectural boundary regarding how this information is consumed. 
+
+To ensure maximum coverage for entity resolution, the local Qdrant vector index embeds exactly \textbf{100\%} of Wikidata's core entity vocabulary—encompassing the multilingual \textit{fingerprints} (Labels and Descriptions) of all 121+ million Items and 12,000+ Properties. 
+
+However, the system embeds exactly \textbf{0\%} of the underlying factual graph. The billions of Claims, Qualifiers, Statements, Lexemes, and SiteLinks are intentionally excluded from the local vector space. By explicitly isolating the entity metadata from the structural graph, the semantic embeddings are strictly utilized for Schema and Entity Alignment. The system does not perform factual retrieval or graph traversal locally; all logical multi-hop traversals over Wikidata's complex reified Statements, constraints, and ranks rely entirely on the live Wikidata SPARQL endpoint.

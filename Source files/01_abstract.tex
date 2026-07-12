@@ -1,0 +1,15 @@
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+\renewcommand{\abstractname}{\large Abstract}
+\phantomsection
+\addcontentsline{toc}{section}{\abstractname}
+
+
+\begin{abstract}
+
+     The expansion of structured knowledge graphs has made vast amounts of data available. However, accessing this information remains a challenge due to the technical complexity of the SPARQL query language. Traditional Text-to-SPARQL approaches, which typically rely on supervised fine-tuning or rule-based templates, demonstrate a peak precision of 59\% but remain limited by their lack of transparency and a dependency on domain-specific training. This thesis proposes a novel agentic framework designed to bridge the gap between natural language and the Semantic Web through LLM-driven reasoning. The methodology introduces a multi-stage architecture that integrates Retrieval-Augmented Generation (RAG) for dynamic schema linking. Experimental results, evaluated on the QALD-10 dataset, indicate that while the agentic workflow achieves a raw precision of 50\%, it offers significantly domain agnostic approach that eliminates the need for task-specific pretraining, while providing interpretable reasoning traces. This research concludes that LLM-driven agentic methodologies provide a more scalable and transparent foundation for real-world Semantic Web applications, where the ability to generalize across new schemas and refine queries is as critical as raw execution accuracy.
+
+    \textbf{Keywords:} \textit{knowledge graph question answering, LLM agent, entity linking, Wikidata, embedding, semantic web}
+\end{abstract}
