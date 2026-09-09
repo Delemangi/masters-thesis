@@ -1,0 +1,25 @@
+{
+  "compiler_version": "Tectonic 0.17.0",
+  "observed_date": "2026-09-07",
+  "files": {
+    "tectonic.exe": {
+      "bytes": 51538432,
+      "sha256": "99ffcfdbf1ebf8bdda9e791942e3d06aedb12463fddc33f07de6f5211c8bf08d",
+      "retained": true
+    },
+    "tectonic.zip": {
+      "bytes": 21060223,
+      "sha256": "f61ce51f0b0ade1015b7de7ef368541c5424e9756ecbd0d7af97d6d48030845f",
+      "retained": false,
+      "removed_date": "2026-09-07",
+      "removal_reason": "Redundant download; extracted compiler was verified against the archive before deletion."
+    },
+    "fonts.conf": {
+      "bytes": 192,
+      "sha256": "40429c466f5da4721762252b46f90a3e2c614d86a2c4e8ac4832aabc7c5a4ded",
+      "retained": true,
+      "note": "Font cache path updated for draft/ folder rename."
+    }
+  },
+  "note": "Existing local artifact hashes; no new downloads or independent supply-chain verification."
+}

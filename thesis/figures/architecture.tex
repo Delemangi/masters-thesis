@@ -1,0 +1,98 @@
+% Native, grayscale-readable source architecture. Required TikZ library: arrows.meta.
+% Explicit two/three-line labels avoid paragraph wrapping in boxes.
+% Target dimensions: below 17 cm wide and approximately 8.3 cm tall, at 8 pt.
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  font=\fontsize{8}{9.2}\selectfont,
+  box/.style={draw=black!75,line width=.45pt,rounded corners=1.5pt,
+    fill=white,align=center,inner xsep=3pt,inner ysep=4pt,
+    minimum height=.65cm},
+  tested/.style={box,line width=1.25pt,fill=black!6},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  exchange/.style={arrows={{Stealth[length=1.6mm,width=1.15mm]}-{Stealth[length=1.6mm,width=1.15mm]}},line width=.5pt},
+  optional/.style={exchange,dashed},
+  note/.style={align=left,inner sep=0pt},
+  edgeword/.style={fill=white,inner sep=1.5pt,align=center}
+]
+  % Preparation: archival originals are distinct from FAQ records.
+  \node[note,font=\fontsize{8}{9.2}\selectfont\bfseries,anchor=west]
+    at (0,.95) {PREPARATION};
+  \node[box,minimum width=1.8cm] (originals) at (.9,0)
+    {Originals\\PDF / DOCX};
+  \node[box,minimum width=2.05cm] (markdown) at (3.2,0)
+    {Markdown\\review required};
+  \node[box,minimum width=2.55cm] (ingest) at (6.05,0)
+    {Ingestion / worker\\chunk + embed};
+  \node[box,minimum width=2.65cm] (vectors) at (9.55,0)
+    {PostgreSQL\\pgvector index};
+  \node[box,minimum width=3.1cm] (gpu) at (13.75,0)
+    {GPU service\\embed + rerank};
+  \draw[flow] (originals) -- (markdown);
+  \draw[flow] (markdown) -- (ingest);
+  \draw[flow] (ingest) -- (vectors);
+  \node[note,anchor=south] (faq) at (6.05,.95) {FAQ records};
+  \draw[flow] (faq.south) -- (ingest.north);
+  \draw[exchange] (ingest.north east) -- (7.5,.85)
+    -- node[edgeword,above] {embeddings} (13.75,.85) -- (gpu.north);
+
+  % Serving: reply arrows denote request/stream exchanges, not shared state.
+  \node[note,font=\fontsize{8}{9.2}\selectfont\bfseries,anchor=west]
+    at (0,-1.05) {SERVING};
+  \node[box,minimum width=1.25cm] (web) at (.65,-1.8) {Web UI};
+  \node[box,minimum width=1.85cm] (bff) at (2.7,-1.8)
+    {Next.js BFF};
+  \node[box,minimum width=1.85cm] (discord) at (2.7,-2.9)
+    {Discord\\adapter};
+  \node[box,minimum width=1.8cm] (api) at (5.5,-2.35)
+    {FastAPI\\chat API};
+  \node[tested,minimum width=3.1cm,minimum height=1cm] (retrieval)
+    at (9,-2.35) {Retrieval + prompt\\selection + context};
+  \node[box,minimum width=3.1cm,minimum height=1cm] (agent)
+    at (13.75,-2.35) {Provider agent\\hosted / local LLM};
+  \draw[exchange] (web) -- (bff);
+  \draw[exchange] (bff.east) -- (4.12,-1.8) |- (api.north west);
+  \draw[exchange] (discord.east) -- (4.12,-2.9) |- (api.south west);
+  \draw[flow] (api) -- (retrieval);
+  \draw[flow] (vectors.south) -- (9.55,-1.05) -| (retrieval.north);
+  \draw[exchange] (gpu.south west) -- (11.85,-1.05)
+    -- (10.85,-1.05) |- (retrieval.north east);
+  \draw[flow] (retrieval) -- node[edgeword,above] {prompt} (agent);
+
+  % Experimental transport is an alternative to provider-agent execution.
+  \node[box,minimum width=2.7cm] (luna) at (5.5,-4.05)
+    {Controlled Luna\\Chat Completions};
+  \draw[flow,line width=.8pt] (retrieval.south west)
+    -- (7.45,-4.05) -- node[edgeword,above] {replay} (luna.east);
+
+  % Structured records stay outside the FAQ/document embedding path.
+  \node[box,minimum width=2.55cm] (localmcp) at (10.1,-4.05)
+    {Local MCP\\Python tools};
+  \node[box,minimum width=3.05cm] (facultymcp) at (14.35,-4.05)
+    {Faculty API / MCP\\Spring AI + JPA};
+  \draw[optional] (agent.south west) -- (12.2,-3.3)
+    -- (10.1,-3.3) -- (localmcp.north);
+  \draw[optional] (agent.south east) -- (15.3,-3.3)
+    -- (14.35,-3.3) -- (facultymcp.north);
+  \node[box,minimum width=2.2cm] (assets) at (8.2,-5.55)
+    {JSON assets\\courses / staff\\rooms / sessions};
+  \node[box,minimum width=2.8cm] (adapters) at (11.05,-5.55)
+    {Dedicated APIs\\EduPage timetables\\faculty thesis lists};
+  \node[box,minimum width=3.05cm] (facultydb) at (14.35,-5.55)
+    {Faculty PostgreSQL\\operational records};
+  \draw[flow] (assets.north) -- (8.2,-4.75) -| (localmcp.south);
+  \draw[flow] (adapters.north) -- (11.05,-4.75) -| (localmcp.south);
+  \draw[flow] (facultydb) -- (facultymcp);
+
+  \node[note,text width=16.35cm,anchor=north west] at (0,-6.55)
+    {\textbf{Bold border:} production retrieval/prompt code tested. \enspace
+     \textbf{Dashed arrows:} optional MCP, not evaluated.\\
+     Controlled Luna replaces the provider agent. Storage, stream resumption and monitoring are omitted.};
+\end{tikzpicture}}
+\caption{FINKI Hub architecture and the components tested.
+Structured-data lookup is separate from document/FAQ retrieval. Reading static feeds does not establish how those feeds are published.
+The diagram shows features found in the inspected code; not all were verified in deployment.}
+\label{fig:architecture}
+\end{figure}

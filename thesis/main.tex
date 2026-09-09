@@ -1,0 +1,52 @@
+\documentclass[a4paper,12pt]{article}
+\input{setup}
+
+\newcommand{\UniversityName}{Ss. Cyril and Methodius University}
+\newcommand{\FacultyName}{Faculty of Computer Science and Engineering}
+\newcommand{\ProjectType}{Master's Thesis}
+\newcommand{\ProjectTitle}{A Reference Architecture for Building Domain-Specific Retrieval-Augmented Conversational Assistants}
+\newcommand{\ProjectMentor}{Prof. Dr. Riste Stojanov}
+\newcommand{\ProjectCandidate}{Stefan Milev}
+\newcommand{\ProjectCandidateIndex}{249053}
+\newcommand{\ProjectDate}{First working manuscript -- September 2026}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\input{sections/titlepage}
+\setlength{\parindent}{15pt}
+\fontsize{12pt}{14pt}\selectfont
+\pagenumbering{roman}
+\hypersetup{pageanchor=true}
+\input{sections/abstract}
+\clearpage
+\input{sections/status}
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\listoftables
+\clearpage
+\input{sections/abbreviations}
+\clearpage
+\pagenumbering{arabic}
+\thesischapter{chapters/01_introduction}
+\thesischapter{chapters/02_background}
+\thesischapter{chapters/03_data}
+\thesischapter{chapters/04_architecture}
+\thesischapter{chapters/05_implementation}
+\thesischapter{chapters/06_methodology}
+\thesischapter{chapters/07_results}
+\thesischapter{chapters/08_discussion}
+\thesischapter{chapters/09_conclusion}
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\begingroup
+\small\setstretch{1.15}
+\bibliographystyle{plain}
+\bibliography{references}
+\endgroup
+\clearpage
+\appendix
+\input{appendices/reproducibility}
+\end{document}

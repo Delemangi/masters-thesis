@@ -1,0 +1,12 @@
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+This thesis examines how effectively FINKI Hub answers student questions and provides useful guidance. Its reference architecture separates source preparation, retrieval, generation and channel delivery. The account covers institutional documents, structured services, web and Discord interfaces, distinguishing inspected features from the components tested experimentally.
+
+The main controlled evaluation uses 96 historical email questions and 96 questions from selectively recorded chatbot logs, after a separate 20-question pilot. Production retrieval and prompt code are replayed with controlled Luna generation; live agents, tools and conversation history are excluded. Four fixed policies cross a shared or separate FAQ/document score threshold with an all-below-threshold fallback. References and primary judgments are AI assessments, supported by quotation checks, repeated judgments and a local cross-model sensitivity analysis.
+
+Under a shared threshold without fallback, supported-answer or useful-routing labels occur in 31 of 96 email cases and 53 of 96 production cases. Lowering the document threshold changes these totals to 30 and 52. The paired difference is $-1.04$ percentage points in each frame, with 95\% intervals of $[-8.33,6.25]$ and $[-7.29,5.21]$. More context and greater reference-quotation availability do not establish improved assistance. Incomplete answers and unsupported claims remain common. Empty reference fact sets and substantial assessor disagreement prevent treating the absolute scores as validated factual accuracy.
+
+The findings motivate closer attention to completeness, source applicability and clarification rather than assuming that additional retrieved text improves answers. Evaluation of full conversations and live tools remains future work. Administrative savings are outside scope.
+
+\noindent\textbf{Keywords:} retrieval-augmented generation; university assistance; reference architecture; Macedonian; answer quality; automated assessment.

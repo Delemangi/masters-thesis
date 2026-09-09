@@ -1,0 +1,80 @@
+\section{Reproducibility and evidence records}
+\label{app:reproducibility}
+
+\subsection{What can be reproduced from retained artifacts}
+
+The study retains a chain from selected questions to reported outcomes. It begins with the sampling manifest and case records, continues through captured retrieval candidates and model prompts, and ends with raw responses, assessment records and aggregates. Reproduction has several meanings along this chain. Recalculating a count from saved labels is an offline analysis. Repeating retrieval against a changed live database is a different operation. Calling a hosted model again is another inference run and need not reproduce the same answer text.
+
+The manuscript does not claim that the Overleaf archive contains this entire chain. That archive is an independently compilable document package. Private question text and case-level answers remain outside it. A researcher with authorized access to the local evidence can inspect the saved inputs and regenerate the reported analysis without new inference. Public reproduction of the complete private-data study would require a separately reviewed data release, which is not part of this manuscript.
+
+\begin{longtable}{@{}p{0.26\linewidth}p{0.32\linewidth}p{0.34\linewidth}@{}}
+\caption{Evidence records and the questions they support. Local paths identify artifact roles, not public download locations.}\label{tab:evidence-records}\\
+\toprule
+Record & Local artifact or collection & Review question \\
+\midrule
+\endfirsthead
+\toprule
+Record & Local artifact or collection & Review question \\
+\midrule
+\endhead
+Sample and protocol & Controlled-study protocol and sampling manifest & Which questions, policies and exclusions were fixed? \\
+Source consistency & Repository hashes and captured candidate records & Which implementation and source text were tested? \\
+References & Frozen reference files and quotation checks & What facts, actions and uncertainty did assessment use? \\
+Generation & Prompt mapping and raw answer records & Which requests were unique, reused, rejected or completed? \\
+Assessment & Primary, repeated and local judgment records & What did each assessor return, and which records were valid? \\
+Analysis & \texttt{results.json} and generated tables & How do guarded labels become reported counts and intervals? \\
+Review workbook & Restricted case-level workbook & Can a reviewer trace an outcome to evidence and raw text? \\
+Reference extension & Offline audit and initial review queue & Which rejected quotations have possible other-source matches? \\
+Architecture & Dated repository/source review & Which features are observed in source versus deployment? \\
+Telemetry & Saved query definitions and aggregates & Which events, periods and timing boundaries were measured? \\
+\bottomrule
+\end{longtable}
+
+The original reference freeze covers 220 files. Hash checks detect subsequent byte changes to those retained inputs; they do not establish the factual correctness of the files. Seven additional protected study outputs include aggregate results, generated tables, reference and generation manifests, budget accounting, local control results and the private review workbook. The preservation checks used while writing this thesis verify that manuscript expansion does not silently change the experiment.
+
+\subsection{Executed assessment fields}
+
+The distinction between proposed and executed schemas is part of reproducibility. Earlier notes proposed exhaustive fact, claim, action and citation arrays. The completed run used a compact overall category and three flags, plus explanation and quotations. A future assessment pipeline can add richer fields, but that change cannot be attributed retrospectively to the saved judgments.
+
+\begin{longtable}{@{}p{0.40\linewidth}p{0.52\linewidth}@{}}
+\caption{Fields in the executed primary judgment schema.}\label{tab:judgment-fields}\\
+\toprule
+Field & Meaning and limit \\
+\midrule
+\endfirsthead
+\toprule
+Field & Meaning and limit \\
+\midrule
+\endhead
+\texttt{overall} & One permitted response category; subject to structural consistency and the separate reference-success guard. \\
+\texttt{unsupported\_material\_claim} & Boolean or unspecified flag for a consequential unsupported claim; not an exhaustive externally validated claim inventory. \\
+\texttt{all\_required\_facts\_covered} & Coverage relative to the supplied reference; an empty fact set can make this weak evidence of substantive completeness. \\
+\texttt{citation\_supported} & The judge's citation-support flag; not an independent check of every displayed link. \\
+\texttt{rationale} & A required explanation of the decision; plausible wording does not establish correctness. \\
+\texttt{evidence\_quotes} & Source identifiers and quotation text supplied by the judge; structural validation is not semantic entailment. \\
+\bottomrule
+\end{longtable}
+
+The reference schema separately records answerability, facts, required action, currentness and uncertainty. A fact includes its statement, source identifier and quoted text. Raw removed facts remain available for review. A passing reference may contain no retained facts, so a reader should inspect both validity and fact count before interpreting a direct-answer label as evidence of factual completeness.
+
+\subsection{Denominators and dependence}
+
+Several counts appear similar while describing different objects. A question is the paired unit of the policy comparison. A question--policy record assigns an outcome under one retrieval policy. A unique generation call produces one answer that may be reused by several policy records. An assessment record judges an answer, and a flag comparison uses only pairs with the necessary specified values. Confusing these levels inflates apparent sample size or changes the meaning of a percentage.
+
+The main study contains 192 questions and 768 question--policy records. Sixteen records reject overlong inputs, leaving 752 generation-eligible records and 354 unique main answers. The separate pilot adds 39 answers. Assessment sensitivity uses a subset of 48 unique answers, not 48 independent questions under every policy. Reference failures and invalid judgments can affect several nominal records when the underlying answer is reused.
+
+The paired bootstrap resamples question groups and carries their policies together. It does not resample each nominal policy outcome independently. The reported intervals therefore preserve the pairing that defines the treatment comparison. They still condition on the saved assessment labels. Reproducing the arithmetic exactly does not make the underlying references or judgments more accurate.
+
+\subsection{A practical offline review sequence}
+
+First verify the manifests and artifact hashes. Next reconstruct the question and policy counts, retaining rejected inputs and invalid assessments. Then inspect the mapping from unique answers to nominal policy records and confirm that reused prompts have identical inputs. Recompute the guarded outcome categories and paired contrasts before examining interpretation. Finally compare the regenerated tables with the manuscript and inspect the PDF for missing references or damaged layout.
+
+This order helps localize a discrepancy. A changed reference hash is an input problem; an incorrect join between answer and policy records is an aggregation problem; an accurate table accompanied by an overbroad claim is an interpretation problem. Each requires a different correction. The research records preserve earlier outputs and explicit later diagnostics so that a correction can be reviewed without pretending the original experiment had different methods.
+
+Case-level review can then examine the substantive evidence: whether the source applies, whether the reference includes the needed conditions, and whether the answer fulfills them. Such review is distinct from mechanical delivery verification. The existing optional human-review fields must remain unreviewed until an actual human reviewer completes them. An AI-generated review must be identified as an AI review even if it uses a second model or a detailed rubric.
+
+\subsection{Document and study independence}
+
+The short paper and the full thesis are separate LaTeX documents. The short paper presents a focused account within ten pages. This thesis expands the system, data, methods and interpretation, while referring to the same completed experimental records. It does not multiply the evidence by reporting it at greater length. The bibliography and source assets needed for each manuscript are included in its own export.
+
+The original template and supplied example theses are retained separately as local references. They inform organization and formatting but contribute no inherited experiments, publication claims or acknowledgements to this work. The current thesis is a working manuscript whose next revisions should improve clarity, source review and evaluation coverage. Those revisions can build on the retained evidence without concealing the boundaries of what has already been completed.

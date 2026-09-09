@@ -1,0 +1,85 @@
+# This repository is for the two Overleaf manuscripts. Keep the complete local
+# research workspace excluded in clones too, without relying on .git/info/exclude.
+/RESOURCES.md
+/research/
+/context/
+/archive/
+/docs/
+/scripts/
+
+# Private case-level evidence at any depth (keep locally, never in paper ZIPs).
+private/
+
+# Credentials and newly copied private spreadsheet inputs.
+.env
+.env.*
+auth.json
+credentials.json
+credentials.*.json
+secrets.json
+secrets.*.json
+posthog.txt
+id_rsa
+id_ed25519
+*.pem
+*.key
+*.p12
+*.pfx
+*.xlsx
+*.xlsm
+*.xls
+*.xltx
+
+# LaTeX temporary files; retain source figures, including intentional PDFs.
+*.aux
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.run.xml
+*.synctex.gz
+*.xdv
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.nav
+*.snm
+*.vrb
+
+# Machine-local tooling and disposable Python/editor caches.
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.codegraph/
+torchinductor_*/
+.local-artifacts/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.bak
+*.swp
+*.swo
+*~
+/debug.log
+/%SystemDrive%/
+
+# The manuscript source is maintained; compiler/build products remain local.
+/draft/build/
+/draft/cache/
+/draft/overleaf-draft.zip
+# Historical tables retained for local verification; not active manuscript inputs.
+/draft/answer_results.tex
+/draft/results.tex
+/draft/retrieval_results.tex
+/thesis/build/
+/thesis/cache/
+/thesis/*.zip
+/draft/tools/*
+!/draft/tools/fonts.conf
+!/draft/tools/README.md
+!/draft/tools/runtime-manifest.json

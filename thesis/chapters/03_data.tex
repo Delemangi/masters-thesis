@@ -1,0 +1,109 @@
+\section{Requirements, data and source preparation}
+\label{ch:data}
+
+\subsection{From student questions to an evaluation task}
+
+The assistant operates in a setting where the same institution publishes information in several forms. A frequently asked question may have a short editorial answer. A study regulation may require a reader to connect a general rule with an exception in another article. A timetable is a structured record that can change during the semester. An individual student's registration state belongs to an authenticated service. Treating all four as interchangeable text would hide differences in authority, freshness and the action an assistant can legitimately perform.
+
+For this thesis, effectiveness concerns the information and guidance returned to the user. A response should address the question, include important conditions, and distinguish an explanation from an action. When available evidence does not support a direct answer, a useful clarification or referral may be the appropriate outcome. This definition motivates separate measurements of supported answering and useful routing. It does not assume that every question should produce a factual answer, or that a polite response is sufficient.
+
+The requirements arise from the observed application and available question sources. Historical correspondence provides longer descriptions of institutional problems. Selectively recorded chatbot questions provide examples of how people address a conversational interface. Neither source is a complete specification of user needs. In particular, the correspondence predates the controlled experiment, and the recorded chatbot messages do not include the full conversations used in production. These differences are retained throughout sampling and analysis.
+
+\begin{table}[htbp]
+\centering
+\caption{Effectiveness requirements and the evidence available in this thesis. These are analytical requirements, not separately measured acceptance rates.}
+\label{tab:requirements}
+\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}XX@{}}
+\toprule
+Requirement & Observable evidence & Important boundary \\
+\midrule
+Answer the actual question & Required facts, conditions and response text & References are AI-produced and may be incomplete. \\
+Avoid unsupported claims & Source excerpts and material-claim judgments & Quotation occurrence does not establish entailment. \\
+Give a useful next step & Clarification, verification or referral in the answer & Guidance is not completed institutional action. \\
+Keep evidence traceable & Source identifiers, captured context and prompt & A traceable source can still be outdated. \\
+Deliver the response & Recorded completion, disconnection and timing & Completion is not an answer-quality label. \\
+Support different interfaces & Shared API and channel adapters & Full web and Discord behavior is outside the replay experiment. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{The institutional knowledge corpus}
+
+The audited corpus contains 74 FAQ records and 19 documents, split into 1,403 document chunks. The earlier frozen retrieval corpus contains 1,477 vectors, corresponding to the FAQ and chunk records used there. These counts describe the inspected material. They do not establish that every relevant faculty rule, course page or student procedure is represented, and they are not a promise that a later deployment has the same contents.
+
+FAQ records and document chunks have different roles. An FAQ normally connects a recognizable question to a compact answer. It may be particularly effective for recurring requests with stable wording and an editorially selected response. A document passage often expresses a rule without repeating the wording of the student's question. Several passages may be needed to establish the rule, its conditions and the relevant procedure. A retrieval policy that uses one numerical rejection threshold for both source types may therefore affect them differently.
+
+This observation motivates the threshold experiment, but it is not itself evidence that different thresholds improve responses. Lowering a document threshold admits additional passages, including passages that the reranker finds weakly related. Whether these passages help depends on their contents and on how generation uses them. The corpus description consequently supports a hypothesis about evidence selection; answer-level evaluation is still required to examine that hypothesis.
+
+The documents repository retains original files and converted Markdown. The implementation review found mechanisms for extracting embedded text and transcribing scanned pages, followed by a documented requirement to inspect conversions. This thesis cannot certify that every conversion received that review. It treats conversion quality as part of the evidence chain: an error introduced before indexing can remain perfectly reproducible in retrieval and generation.
+
+The source record also carries information that should not be confused with the text itself. A stable document name supports updates, a title helps identify a source, a source URL helps a reader locate the original, and a content hash helps determine whether submitted text changed. None of these fields alone establishes legal or institutional applicability. The date of an upload may differ from the date on which a rule took effect. An original PDF and its Markdown rendering may describe the same source while having different file hashes.
+
+\subsection{Authority, currentness and individual applicability}
+
+Institutional answers require more than finding a sentence that resembles the question. Faculty rules and university rules may govern different situations. In the audited literature and source review, transfer provisions appear in the faculty rules from 2013 and the university regulations from 2019, with a 2022 supplement~\cite{finki2013study,ukim2019study,ukim2022supplement}. Their existence does not establish that one provision applies to every request containing the word ``transfer.'' The relevant situation and effective rule must be identified.
+
+The cited fee schedule applies from the 2024/25 academic year until replacement~\cite{finki2024fees}. The thesis records that source qualification without issuing current fee advice. A student may ask about an exemption, a payment already shown in an account, or a procedure for proving eligibility. A passage about a general exemption does not reveal the student's recorded status. An effective response should explain the public information and identify what remains to be verified.
+
+This distinction also affects reference construction. A reference can contain an exact quotation yet overstate its applicability. Conversely, an appropriately cautious answer may be useful even when the evidence cannot establish an individual outcome. For that reason, the assessment records required actions, currentness and uncertainty alongside facts. These fields make unresolved questions visible, although they remain AI assessments rather than institutional adjudications.
+
+\subsection{Historical university correspondence}
+
+The supplied university contact archive contains 1,693 incoming-question/reply rows. It was provided as a spreadsheet and examined locally with permission. A reply is evidence of a historical exchange, not an automatically correct reference answer for a new experiment. Its interpretation can depend on the date, the student's circumstances, information omitted from the export, and changes in rules or systems.
+
+An earlier review created several question collections with different purposes. A 240-case purposive pool emphasized challenging scripts and routes within topics. A separate probability sample contained 320 groups used in the earlier evaluation. There were also development and pilot materials. These collections must not be merged merely because they originate from the same workbook. Purposeful challenge coverage and archive-level sampling answer different questions.
+
+The selection differences are substantial. The reconnaissance reported Macedonian Cyrillic in 71.94\% of the archive but 39.17\% of the 240-case pool; romanized Macedonian rose from 7.15\% to 37.08\%. Those observations explain why the challenge pool cannot stand in for typical demand. Weighting only by a broad topic cannot repair selection that also favors particular scripts or difficult examples within that topic.
+
+For the controlled Luna experiment, 96 email cases were randomly selected from the 320 previously evaluated groups. A separate 20-case email pilot supported execution checks. Selection did not use new answer-quality labels. However, prior examination of the email cases matters: the main email subset is not a newly collected, untouched holdout. Its results describe the frozen experiment on those cases and should not be advertised as independent confirmation on entirely unseen institutional demand.
+
+The earlier selected email material had a median question length of 306 characters. Longer questions can include several conditions, destinations and requested actions. They may ask for a procedure rather than a single fact. An answer can therefore cite relevant evidence and still be incomplete. The assessment-control example in Chapter~\ref{ch:methodology} illustrates why checking one correct fee statement is insufficient for a question that also asks what documents to submit and where.
+
+\subsection{Questions recorded by the chatbot}
+
+The production question frame was derived from a subset of recorded requests. The archived telemetry window contains 699 chatbot requests, but only 172 have recorded message text. Two of those contain no word tokens. Normalizing the remaining 170 turns gives 148 unique question groups, from which the main experiment samples 96 cases. The messages with recorded text are from July, while the broader telemetry window extends beyond that month.
+
+This sequence is important for interpreting the production label. It means questions observed in the deployed application, not a representative sample of all deployed use. Selective logging may omit particular periods, paths or request types. Normalization removes exact repeats under its rules but does not establish semantic independence. Two differently worded questions can concern the same issue, while a repeated short message can mean different things in different conversations.
+
+Only the latest user turn is retained for the experiment. Conversation history is excluded. A request such as a follow-up reference to an earlier answer can therefore be under-specified in replay. The system may appropriately ask for clarification, or an assessor may disagree about whether a direct response is possible. These are not automatically retrieval failures. They may instead reflect the absence of information that was available in the original interaction.
+
+The production turns have a median length of 31.5 characters, much shorter than the earlier selected email material. They include conversational messages as well as institutional questions. Differences in measured outcomes between email and production can therefore reflect length, task type, prior context and selection, alongside language or script. This thesis reports the two frames separately rather than attributing their differences to one of those factors.
+
+\begin{table}[htbp]
+\centering
+\caption{Question sources and their role in the controlled experiment. Counts refer to distinct stages and must not be summed as independent samples.}
+\label{tab:data-flow}
+\begin{tabularx}{\linewidth}{@{}p{0.34\linewidth}rX@{}}
+\toprule
+Collection or stage & Count & Role or limitation \\
+\midrule
+Contact archive rows & 1,693 & Historical demand; replies are not current ground truth. \\
+Previously evaluated email groups & 320 & Sampling frame for the main email subset. \\
+Main email questions & 96 & Selected before new answer generation; previously examined. \\
+Email execution pilot & 20 & Separate from main estimates. \\
+Recorded chatbot requests & 699 & Broader descriptive telemetry window. \\
+Requests with recorded text & 172 & Selectively logged July messages. \\
+Token-bearing user turns & 170 & Two tokenless records excluded from grouping. \\
+Normalized production groups & 148 & Frame for sampling; semantic duplicates can remain. \\
+Main production questions & 96 & Latest turns only; history unavailable in replay. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Application limits and retained failures}
+
+The actual chat schema rejects questions longer than 2,000 characters. Four main email questions exceed this limit. The experiment retains each question in all four policy denominators and records the resulting sixteen input-rejection outcomes. It does not shorten these questions or generate substitute answers. This preserves the distinction between the selected task and a modified task that the application would accept.
+
+As a result, each frame and policy still contains 96 selected cases, while generation eligibility differs: 92 email and 96 production cases can proceed. Reporting only eligible inputs would answer a narrower question. The full denominator captures this interface boundary as a limitation of the tested configuration, while separate execution counts explain how many model calls were possible.
+
+The same principle applies to later failures. A missing or unusable judgment is not a successful answer. An empty or contradictory assessment should not disappear from the sample because it is inconvenient to aggregate. The methodology makes these states explicit and preserves both raw records and the rules that produce the final reported category.
+
+\subsection{Evidence separation and responsible reuse}
+
+The knowledge corpus, demand questions and assessment references are separate artifacts. Correspondence and telemetry were used to define evaluation tasks; they were not automatically ingested into the chatbot's knowledge base. References were generated from a bounded source pool, not copied from the historical replies. Keeping these roles separate reduces confusion about what the assistant knew and what the evaluator expected.
+
+Raw questions, generated answers and case-level review records remain in restricted local research files. The manuscript uses aggregate counts and a carefully paraphrased observed example. The original question's personal wording, category and program are not reproduced in that illustration. The manuscript export excludes spreadsheets, credentials, downloaded mentor theses and private replay records. These controls limit the contents of the export; they do not establish that every private research record has been anonymized for public release.
+
+The supplied correspondence and telemetry were analyzed with permission. This permission does not constitute institutional approval of the generated reference facts, and no such approval is claimed. Optional human-review fields in the retained workbooks remain unreviewed. Automated checks and AI editorial review are recorded as such. This distinction is necessary for interpreting the empirical chapters honestly.
+
+The result is a traceable but limited foundation for studying effectiveness. Real questions provide relevance to the institutional setting, frozen source material supports repeatable comparisons, and explicit data boundaries make interpretation possible. The remaining uncertainty comes from representativeness, missing history, source applicability and assessment quality. Those issues are examined through the completed sensitivity analyses rather than hidden by a single overall score.

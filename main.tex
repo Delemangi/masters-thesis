@@ -1,72 +1,8 @@
-\documentclass[a4paper]{article}
-
-\input{Source files/setup}
-
-
-\newcommand{\UniversityName}
-    {Ss. Cyril and Methodius University}
-\newcommand{\FacultyName}
-    {Faculty of Computer Science and Engineering}
-\newcommand{\ProjectType}
-    {Master's Thesis}
-
-\newcommand{\ProjectTitle}
-    {A Reference Architecture for Building Domain-Specific Retrieval-Augmented Conversational Assistants}
-\newcommand{\ProjectMentor}
-    {Prof. Dr. Riste Stojanov}
-\newcommand{\ProjectCandidate}
-    {Stefan Milev}
-\newcommand{\ProjectCandidateIndex}
-    {249053}
-\newcommand{\ProjectDate}
-    {July 2026}
-
-
-\begin{document}
-
-    % Насловна страна
-    \input{Source files/00_titlepage}
-
-    \setlength{\parindent}{15pt}
-    \fontsize{12pt}{14pt}\selectfont
-    
-    % Апстракт
-    \input{Source files/01_abstract}
-
-    % Содржина
-    \newpage
-    \renewcommand{\contentsname}{\LARGE Table of Contents}
-    \tableofcontents
-
-    \newpage
-    \input{Source files/publications}
-
-    \newpage
-    \renewcommand{\contentsname}{\LARGE List of Figures}
-    \listoffigures
-
-    \newpage
-    \renewcommand{\contentsname}{\LARGE List of Tables}
-    \listoftables
-
-
-    % Вовед
-    \input{Source files/02_introduction}
-
-    % Сродни истражувања
-    \input{Source files/03_relatedwork}
-
-    % Методологија
-    \input{Source files/04_methodology}
-
-    % Резултати
-    \input{Source files/05_results}
-
-    % Заклучок
-    \input{Source files/06_conclusion}
-
-    % Библиографија
-    \input{Source files/bibliography}
-    
-
-\end{document}
+% Overleaf entry point for the short draft.
+\RequirePackage{import}
+% BibTeX resolves its database from the project root, independently of import.
+\AtBeginDocument{%
+  \let\manuscriptbibliography\bibliography
+  \renewcommand{\bibliography}[1]{\manuscriptbibliography{draft/#1}}%
+}
+\import{draft/}{main.tex}

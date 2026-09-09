@@ -1,0 +1,23 @@
+\section*{Abbreviations and terminology}
+\addcontentsline{toc}{section}{Abbreviations and terminology}
+\begin{tabularx}{\linewidth}{@{}p{0.19\linewidth}p{0.75\linewidth}@{}}
+\toprule
+Term & Meaning in this thesis \\
+\midrule
+API & Application programming interface. \\
+BFF & Backend for frontend; the web application's server-side adapter. \\
+CI & Confidence interval; the reported paired intervals condition on saved AI labels. \\
+FAQ & Frequently asked question and its stored answer. \\
+GPU & Graphics processing unit used for embedding, reranking or local inference. \\
+LLM & Large language model. \\
+MCP & Model Context Protocol, used by the application for structured tool access. \\
+RAG & Retrieval-augmented generation. \\
+G0/G1 & Shared FAQ/document score floors, with fallback off/on. \\
+S0/S1 & Separate FAQ/document score floors, with fallback off/on. \\
+Assistance & The combined retained supported-answer or useful-routing outcome. It is an AI-assessed endpoint, not verified factual accuracy. \\
+Reference & The AI-produced description of required facts, evidence, action and uncertainty used for assessment. \\
+Replay & Re-execution of production retrieval and prompt logic using captured candidates and controlled policy changes. \\
+Material claim & A consequential statement about matters such as eligibility, fees, deadlines, procedure or an institutional action. \\
+Fallback & Retaining the best candidate when neither corpus has a candidate surviving its score floor; distinct from reranker-error recovery. \\
+\bottomrule
+\end{tabularx}

@@ -1,0 +1,221 @@
+\documentclass[a4paper,10pt,twocolumn]{article}
+\usepackage[margin=1.75cm,columnsep=0.65cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,booktabs,array,graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{flushend}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{1em}
+\setlength{\textfloatsep}{9pt}
+\raggedbottom
+\title{A Reference Architecture for Building Domain-Specific Retrieval-Augmented Conversational Assistants}
+\author{Stefan Milev\\\small Faculty of Computer Science and Engineering\\\small Ss. Cyril and Methodius University in Skopje\\\small Supervisor: Prof. Dr. Riste Stojanov}
+\date{7 September 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We evaluate how effectively FINKI Hub answers student questions and provides useful guidance at one university. We use its design to propose a reference architecture. After a 20-case pilot, we test the assistant on 96 historical email questions and 96 questions from chatbot logs, which record only some requests. Assistance means an answer supported by evidence and complete enough to address the question, or a useful clarification or referral. The test reuses deployed retrieval and prompt code, with Luna generating the answers under fixed settings. It excludes conversation history, live agents and tools. With a shared retrieval threshold and no fallback, the AI judge labels 31/96 email responses and 53/96 chatbot responses as supported answers or useful routing. However, twenty of the 25 chatbot supported-answer labels use assessment references with no retained facts. These labels do not establish factual accuracy. Separate FAQ/document thresholds change assistance totals to 30/96 and 52/96: $-1.0$ percentage point in each sample. The 95\% paired confidence intervals are $[-8.3,6.2]$ and $[-7.3,5.2]$. Fallback also shows no clear assistance benefit. More retrieved text therefore does not establish better assistance. Limits in the references and disagreement between judges prevent treating these results as a verified success rate for the full deployed system.
+\end{abstract}
+\par\noindent\textbf{Keywords:} retrieval-augmented generation; reference architecture; university support; Macedonian; automated assessment.
+
+\section{Introduction}
+University support involves FAQs, regulations, changing timetables, and individual requests that require private records or institutional decisions. A chatbot needs suitable evidence to answer these questions. It must also make clear when it is explaining a procedure and when the user still needs to contact staff or complete an official process.
+
+FINKI Hub serves the Faculty of Computer Science and Engineering in Skopje. The questions include Macedonian written in Cyrillic or Latin transliteration, as well as English. The system combines FAQ and document retrieval with tools for structured information. Separating source preparation, retrieval, answer generation, delivery and monitoring makes it possible to trace errors and test changes to individual components.
+
+The central question is whether the assistant gives students a supported and sufficiently complete answer, or useful guidance when a direct answer is inappropriate. We examine these outcomes on questions drawn from university correspondence and chatbot logs. Architecture explains how sources reach the answer; a controlled retrieval comparison tests whether changing that evidence improves assistance. A shared minimum reranker score treats FAQs and document passages alike, although they differ in length and format. We test a lower document threshold and a fallback that keeps the best candidate when none reaches the threshold, separately and together.
+
+We contribute an evaluation on real university questions and a reference architecture based on the implemented system. The architecture separates three tasks: loading content while recording its source, selecting evidence for an answer, and delivering responses through web and Discord interfaces. We propose reusing these interfaces elsewhere, but do not test that reuse. The evaluation asks three questions:
+\begin{description}
+\item[RQ1:] How often does the judge label responses as supported answers or useful routing, and what problems remain?
+\item[RQ2:] How do separate score thresholds and fallback affect these outcomes when generation settings stay fixed?
+\item[RQ3:] How do the question sample and AI judge limit conclusions about effectiveness?
+\end{description}
+The architecture explains the tested path. We do not compare competing system designs.
+
+\section{Background and related work}
+\input{related_work.tex}
+
+ARES evaluates context relevance, faithfulness and answer relevance using human-labeled validation data~\cite{saadfalcon2024ares}. Our bootstrap intervals estimate how results vary across samples of questions, with AI judgments held fixed. Research on self-preference also shows that a model's preference for its own output is difficult to separate from answer quality~\cite{chen2025selfpreference}. A second assessor reveals differences in judgment, but cannot tell us which judgment is correct or whether self-preference caused the difference.
+
+Retrieval relevance, factual support and useful assistance are different outcomes. A model can misinterpret relevant text or give a supported answer that leaves out an important condition. Referring a user to the right office can help even though the request remains unresolved. Historical emails show what students ask, but an old staff reply may no longer be a correct answer. These distinctions guide our measures and their interpretation.
+
+\section{Reference architecture}
+\subsection{System components and chat interfaces}
+Figure~\ref{fig:architecture} shows how these interfaces fit within FINKI Hub. They allow retrieval rules to change without rewriting content loading or each client. We describe the inspected source code and retain its versions in the research files. We have not verified that every feature is deployed.
+
+\input{architecture.tex}
+
+The \texttt{chat-bot} repository contains the Next.js web application, FastAPI backend and GPU service. The web server identifies the user, loads the conversation, sends limited history and model options to FastAPI, and displays the response stream. FastAPI checks access and request limits, assembles evidence, and calls a provider adapter. Application logic and storage run separately from GPU embedding and reranking.
+
+The \texttt{discord-bot} repository connects Discord to the same API. Requests carry recent messages and \texttt{interface=discord} for formatting. The adapter streams answers, splits long messages and links feedback to response IDs. Its limited history stays in memory, while web conversations are saved in the database. It ignores separate source-information events, although URLs in answers remain visible. Web and Discord therefore use the same generation service but handle history and sources differently.
+
+\subsection{Preparing and updating documents}
+The \texttt{documents} repository stores original university PDFs/DOCX and their Markdown conversions. It extracts text where available and can transcribe scans with a vision model. The workflow requires checking conversions against the originals, but we could not confirm that every document had been reviewed. Uploading is a separate step: a client sends Markdown, a stable name, title and source information to the chatbot's document API. Optional R2 storage keeps the originals separate from the PostgreSQL retrieval index and the static feeds used by MCP.
+
+The API hashes submitted content and splits Markdown into overlapping chunks at legal-article or section headings, keeping labels and order. Changed content replaces the document's chunks; separate endpoints accept short FAQ question/answer records. Indexing generates BGE-M3 vectors for PostgreSQL/pgvector. A worker can regenerate missing or outdated vectors after checking document revisions. Its status was not verified for every deployment.
+
+Citation links use a supplied authority or source URL, falling back to the original file in the documents repository. An R2 storage key alone does not provide a citation link. Working copies add fields for source authority and whether a document is current. We have not confirmed that these fields are correctly filled in for the evaluated documents. The document version, extracted text and applicable rules need separate checks.
+
+Email correspondence and PostHog questions are evaluation inputs and are not automatically added to the knowledge base. Request logs and saved conversations serve different purposes; general Discord commands, portal visits and scraper notifications must be distinguished from chatbot use.
+
+\subsection{Selecting evidence and looking up records}
+Retrieval finds candidate FAQs and document chunks, keeping their source types, identifiers and scores. It uses the original query or a rewritten version. Lexical search, which matches words, can add FAQ candidates. A GPU cross-encoder then scores the query with each candidate and ranks the combined pool. Selection applies minimum scores, gives FAQs priority within the final limit, and adds neighboring chunks to selected passages. The context threshold is 0.10 and the source-display threshold is 0.30. A passage can therefore reach the model without a visible source card. Provider adapters receive the context, useful links, history and interface instructions. They return response IDs, generated text, status, sources and completion or error events in a common format.
+
+The Model Context Protocol (MCP) adds structured lookup. The generation agent can call tools discovered from configured servers after retrieval. The local Python server in \texttt{mcp} provides read-only searches for courses, staff, rooms, schedules and theses. It reads public JSON feeds; timetables and thesis catalogs use dedicated API or faculty-page adapters. The catalog UIs and MCP share these feeds and adapters, but we did not establish that scraped data automatically enters the retrieval index. Lexical FAQ expansion is a retrieval rule, separate from tool selection.
+
+A separate Spring-based faculty API/MCP implementation exposes database records. Service authentication does not represent an individual student's permission to access private records. Read-only tools return records or links without submitting student transactions, allowing structured lookup without embedding every record. The inspected components differ in their tools and refresh behavior; the experiment does not test their availability or correctness.
+
+\subsection{Request flow, reuse and evaluation scope}
+For a procedural question, FastAPI retrieves FAQs and document passages, selects evidence and useful links, and builds the interface prompt. The provider agent generates an answer and may call tools. The adapter delivers the response; its ID links feedback and monitoring. A timetable question can use structured lookup, while an individual application may need clarification or referral. These are possible paths, not additional evaluated cases.
+
+Another institution could keep the source, retrieval and response interfaces while replacing its documents, content-loading rules, terminology, tools, access rules and evaluation questions. Models, vector storage and channel adapters could also change. We propose these reuse options; we have not tested them in a second implementation.
+
+The inspected collection contains 74 FAQs and 1,403 chunks from nineteen documents. Matching local and deployed file hashes identify the retrieval and prompt code used in the experiment. We use the original queries without rewriting. We exclude conversation history, checks for access and request limits, conversation storage, browser/Discord display, remote MCP and built-in tools. We save the prompts and send them to Luna under fixed settings instead of using the live provider agent. Thus, the test replays the deployed retrieval and prompt code with controlled generation. It covers only part of Figure~\ref{fig:architecture}.
+
+\section{Controlled evaluation}
+\subsection{Question sources and fixed sample}
+The main sample contains 192 questions: 96 randomly selected representatives from the previously evaluated 320 email groups and 96 from 148 unique chatbot-question groups after normalization. Here, chatbot questions are those recorded in deployment logs. A separate 20-case email development sample is used for the pilot. Sampling uses seed 24905307 and does not use new answer-quality labels. Identifiers and hashes were fixed before generating the evaluated answers. The email cases had already been examined in earlier work, so they are not a previously unseen test set. Equal sample sizes make the two sources easier to compare, but do not reflect their frequency in actual use.
+
+Chatbot questions come from the subset of requests with recorded message text. Of 699 requests in the observation period, 172 contain text; two extracted latest turns have no word tokens. The remaining 170 turns form 148 unique groups after normalization. All requests with recorded text are from July, while logs for newer retrieval policies appear later. We retain only the latest turn, so short follow-ups may be unclear without the preceding conversation. We group exact matches after standardizing the text; similar questions can still remain in separate groups.
+
+The two question sources differ. Chatbot messages have a median length of 31.5 characters, compared with 306 in the earlier selected email material. Their writing scripts also differ, although script alone does not identify a question's language. We report the samples separately: an equal mixture of email and chatbot questions does not represent their frequency in actual use. Questions and captured text remain in private research files. We report totals and examples with personal details removed.
+
+The application rejects four email questions above its 2,000-character limit. We keep their traces and all four policy records as input rejections, without shortening the questions or generating answers. Each sample and policy still counts all 96 questions, although only 92 email and 96 chatbot questions can proceed to generation. The 768 question--policy records therefore include sixteen input rejections and 752 eligible records before any later failures. Pilot cases are excluded from the main estimates.
+
+\subsection{Policy comparison and fixed inputs}
+Table~\ref{tab:factorial} lists the policies fixed before the experiment. G means a shared score threshold, S separate thresholds, and 0/1 fallback disabled/enabled. The main comparison is S0 minus G0; S1 minus G1 measures the threshold change with fallback enabled. G1 minus G0 and S1 minus S0 measure fallback effects. The thresholds were chosen during earlier development, without fitting them to the new answer outcomes.
+
+\begin{table}[t]
+\centering\small
+\caption{Frozen two-factor comparison. Citation visibility remains 0.30 and the final candidate budget remains ten.}\label{tab:factorial}
+\begin{tabular}{lrrc}
+\toprule
+Policy & FAQ min. & Doc. min. & Fallback\\
+\midrule
+G0 & 0.10 & 0.10 & Off\\
+G1 & 0.10 & 0.10 & On\\
+S0 & 0.10 & 0.00 & Off\\
+S1 & 0.10 & 0.00 & On\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Fallback keeps the highest-scoring candidate only when no FAQ or document candidate passes its threshold. A separate recovery rule applies if the reranker fails: the application uses the vector-search order. We count that as an execution failure in this study. If a candidate already passes the lower document threshold, enabling fallback changes nothing. We check which policies produce identical contexts and how often fallback changes the input.
+
+The evaluation program runs the actual retrieval function up to reranking, then saves the dense and lexical results, candidate order, source data and neighboring chunks. Each database transaction uses a consistent snapshot and cannot write data (read-only repeatable read). Separate batches may see different snapshots. The 9,329 saved candidate entries contain 681 unique IDs. Whenever an ID repeats, its text for reranking is identical. This check does not establish a single historical snapshot of the whole database. We import the deployed GPU modules in isolation to compute BGE-M3 query embeddings and BGE-reranker-v2-m3 scores~\cite{chen2024m3,baaiBgeRerankerV2M3}. Every policy reuses these results. Replay changes only the context-threshold comparison and the fallback condition in the production function.
+
+Vector search with the original query keeps 31 candidates from each collection before merging them. Normally, lexical search can add FAQs only if the nearest scored FAQ is at least as close as the nearest scored document, or there is no scored document. If a transliterated query is also available, a scored candidate from either collection is enough. Candidates equal to the threshold are kept. FAQs receive priority within the final ten-candidate limit. Each selected document chunk gains one neighbor on each side. Overlapping groups merge in document order and keep the earliest selected rank. Source visibility stays at 0.30. Useful-link reranking is saved separately and held fixed. Only the two policy settings vary.
+
+\subsection{Generation and execution controls}
+The application's \texttt{handle\_chat} function builds the system and user prompts with \texttt{interface=web}, wording for empty retrieval, useful links and a fixed date of 07.09.2026. We intercept generation and send the exact captured prompts to Luna through Chat Completions. Production uses a Responses/agent path, so the experiment does not test live tools or establish that defaults are equivalent across the two paths.
+
+For the requested \texttt{gpt-5.6-luna} alias, the gateway reports \texttt{gpt-5.6-luna-2026-07-09}. We record this identity without independently verifying the underlying model. Generation uses reasoning effort none, a 1,024-token limit, no automatic retry and the gateway's default sampling settings. The application's temperature and top-$p$ are saved as metadata but are not sent in these requests.
+
+When questions, prompts and settings are identical, including the exact prompt bytes, policies reuse one generated answer. Unique requests are shuffled with a fixed seed. Reusing an answer does not provide another independent observation. Failures, truncation and invalid assessments remain in the results. Usage and timing describe actual provider calls, excluding the rest of the browser interaction.
+
+The capture and replay code blocks HTTP requests from the application and prevents writes to the deployed system. Study files are kept in \path{research/luna_evaluation}. The study plan is in \path{protocol.md}; deployed files are identified in \path{runtime_manifest.json}. Hashes for the reference and assessment files are in \path{reference_freeze.json}. The generation-prompt source hash begins \texttt{05e39f43bdff}; the assessment-code hash begins \texttt{b6d66dafe9bd}. Full hashes and exact prompts are saved for replay.
+
+\section{Assessment and analysis}
+\subsection{Reference construction and answer assessment}
+Before generating the evaluated answers, Luna builds a reference describing what an answer to each question should cover. All policies use the same reference, which is prepared without seeing their answers. The source pool alternates between up to eight FAQs and eight document chunks, each group ordered by score. Each source contributes at most its first 1,400 characters, within a 12,000-character total. This limited pool favors material found by retrieval and may miss evidence needed to answer the question. The references have not been approved as correct answers by the institution.
+
+Each reference records whether the question can be answered, the minimum required facts and supporting quotations, any required action, whether the information is current, and uncertainty. Code checks that quotations occur in the identified sources. Facts that fail this check remain in the raw output but are removed from the checked fact list, and the reference is marked uncertain. When results are combined, an otherwise successful answer or routing judgment becomes uncertain if its reference fails validation. Negative or incomplete outcomes and all raw judgments are retained. This rule prevents failed references from establishing success, but does not validate the remaining labels. Of 212 pilot and main references, 182 pass the quotation check. Passing means that the quoted text is present; it does not establish that the text supports the claimed fact or is current. References with no retained facts can also pass.
+
+The primary judge sees one anonymous answer, its question, the shared reference and the exact generation prompt. It does not see policy labels or earlier judgments. It returns an overall category, an explanation and evidence quotations. Separate fields, called \emph{flags}, report whether material claims lack support, required facts are covered and citations support the answer. A record is \emph{structurally valid} if its format is correct and its fields pass consistency checks. For example, it cannot report success while flagging an unsupported material claim. Passing these checks does not mean that the judge found every claim or interpreted every quotation correctly.
+
+A \emph{material claim} concerns matters such as eligibility, fees, deadlines, procedure or completion of an administrative task. A contradicted or unsupported material claim overrides a success label. A supported answer must include the required facts and their conditions. \emph{Useful safe routing} means asking for necessary clarification, directing the user to verify information or referring them to staff, without claiming to have completed a private transaction. Missing content, unnecessary refusal to answer, uncertain evidence, and execution or assessment failures are separate outcomes. An incorrect displayed citation prevents strict success even if the answer otherwise seems plausible.
+
+\subsection{Calibration, pilot, and sensitivity}
+We check the assessment procedure with 18 AI-authored examples based on source documents. They cover contradictions, omissions, incorrect citations, fabricated transactions, justified refusal and limits on applicability. A documented addendum adds twelve Macedonian examples arranged as six Cyrillic/Latin pairs. These development checks have not been independently validated and do not represent a user study. All eighteen original records are structurally valid; seventeen match the expected category and all eighteen match the material-claim flag. In the remaining case, the judge labels useful routing as a supported answer. All twelve script examples match both expected categories and material flags, although each pair represents the same task. We kept the settings and assessment rules unchanged. These checks cannot remove judge bias from the estimates.
+
+The 20-case pilot completed 39 unique generations, with 38 structurally valid assessments and one retained failure. We then proceeded with the fixed settings and assessment rules. The pilot confirmed that the pipeline ran; it did not establish assessor accuracy.
+
+Luna builds the references, generates the answers and supplies the primary judgments. Errors may carry across these stages, and the judge may favor its own model's answers. We repeat 48 unique answer assessments, selected with a fixed seed: 41 main-study and seven pilot answers. We also assess this subset with a fixed local version of Qwen3-8B Q4\_K\_M~\cite{yang2025qwen3}, temperature zero, a 1,024-token limit, a 90-second timeout and no retry. We report invalid outputs, exact agreement and kappa where defined. A later check uses saved outputs to compare whether the judges label each answer as assistance after reference validation. It keeps main and pilot answers separate. Shared references reveal disagreement, not correctness.
+
+\subsection{Outcome measures and denominators}
+For question $i$ and policy $p$, let $Y_{ip}$ indicate an AI-assessed supported answer or useful safe routing. We also report these two outcomes separately, alongside unsupported material claims. Within each question sample, the primary paired difference is
+\[
+\widehat{\Delta}_{\mathrm{threshold}}=
+\frac{1}{96}\sum_{i=1}^{96}(Y_{i,\mathrm{S0}}-Y_{i,\mathrm{G0}}).
+\]
+Input rejection, generation failure, unusable assessment and uncertainty count as unsuccessful outcomes. Any additional estimate based only on completed answers with usable assessments must state how many answers it includes.
+
+The interaction measures whether fallback has a different effect under the two threshold settings. In percentage points, it is $(\mathrm{S1}-\mathrm{S0})-(\mathrm{G1}-\mathrm{G0})$. We estimate confidence intervals by resampling question groups 20,000 times with seed 24905310, keeping each question's policy results together. These bootstrap intervals show how the estimates vary across question samples while the AI labels stay fixed. They do not account for systematic judge error. Reused answers stay linked to every policy record they represent. Combined summaries describe only the balanced sample; email and chatbot results keep separate denominators.
+
+To explain policy effects, we measure empty contexts, cases where fallback changes the context, the mix and overlap of selected sources, and context length. More text does not by itself mean more relevant evidence. We report provider response times and usage-based cost estimates separately from answer outcomes. Planning rates are not verified gateway charges or total system costs.
+
+\section{Results}
+\subsection{Assistance outcomes and retrieval comparison}
+Table~\ref{tab:luna-outcomes} separates answering from guidance. Under G0, assistance labels cover 31/96 email responses: nine supported answers and 22 useful-routing responses. The 53/96 chatbot responses include 25 supported answers and 28 useful-routing responses. Many positive labels therefore describe a useful next step rather than a complete factual answer. These are AI judgments on the selected questions, not verified success rates for all users.
+
+The reference check has an important limitation: 76 of the 182 passing references contain no retained facts. In the main sample, 75 of 166 passing references are empty: twelve email and 63 chatbot cases. Twenty of the 25 chatbot supported-answer labels under both G0 and S0 use such references. The judge can mark all required facts as covered even when there is no fact to check. Greetings, explanations of the assistant's abilities and clarifications may still be useful, but these labels do not establish factual accuracy.
+
+After the main experiment, we checked a stricter rule: count a supported answer only if its reference passes validation and contains at least one fact. Safe routing still counts as assistance. Email totals become 31/96 under G0 and 29/96 under S0, a $-2.1$-point difference (95\% interval $[-9.4,5.2]$). Chatbot totals become 33/96 and 32/96, a $-1.0$-point difference ($[-7.3,5.2]$). The original primary measure stays unchanged. This is not an accuracy correction: the stricter rule also excludes potentially useful replies that need no factual answer.
+
+All 192 main questions have four replay records. Of 768 outcomes, 752 are eligible for generation and use 354 unique answers; the remaining eligible records reuse those answers. All 354 main generations completed within the output limit. Sixteen policy outcomes are input rejections. Another twelve have invalid assessments, representing six unique judgments. All six flag an unsupported material claim. Since these assessments are invalid, we keep them as failures without accepting or repairing their verdicts. No main references, replay records or primary outcomes are missing. Tables~\ref{tab:luna-outcomes} and~\ref{tab:luna-effects} keep the full sample denominators.
+
+\input{controlled_results.tex}
+
+Under S0, assistance totals change to 30/96 for email and 52/96 for chatbot logs. The paired difference is $-1.0$ percentage points in each sample. The 95\% interval is $[-8.3,6.2]$ for email and $[-7.3,5.2]$ for chatbot logs. Both allow meaningful improvement or decline. We cannot conclude that the lower threshold improves assistance or that the policies are equivalent.
+
+With fallback enabled, lowering the document threshold changes assistance by $-2.1$ points for email and $+1.0$ for chatbot logs. Under the shared threshold, adding fallback (G1 versus G0) changes empty contexts to nonempty ones in 33 email and 27 chatbot cases, with outcome differences of $+1.0$ and $-1.0$ points. Under the lower document threshold, S0 and S1 select identical contexts and source IDs for all 96 email questions; only three chatbot contexts change, with a one-case outcome difference. Fallback therefore changes few contexts in S0 versus S1, but many under the shared threshold. We counted these changes by comparing contexts; we did not record directly which code branch ran. Interaction estimates are $-1.0$ and $+2.1$ points, with intervals spanning zero.
+
+Under G0 and S0, the judge identifies unsupported material claims in twenty and nineteen email outcomes, and twelve and eleven chatbot outcomes. Under G1, the count rises to 25 for email and falls to eleven for chatbot logs. These counts use the full samples, with uncertainty and failure reported separately. The apparent email decline from twenty to nineteen is not clear evidence of safer answers: judgments with a specified material-claim flag fall from 91 to 88, while invalid judgments with a raw unsupported-claim flag rise from one to three. Those invalid flags are retained for inspection, not accepted as verdicts. Incomplete answers remain common under G0 and S0: 31/96 and 30/96 for email, and 22/96 and 24/96 for chatbot logs.
+
+The retrieved context changes much more than the assistance scores. For email, moving from G0 to S0 reduces empty contexts from 36 to three, increases mean context length from 5,110 to 16,481 characters, and raises the mean number of selected document candidates from 0.82 to 6.67. For chatbot logs, empty contexts fall from 76 to 52 and mean length rises from 1,010 to 5,808 characters. These counts exclude the useful-link catalog added separately to the prompt, so an empty retrieval block can still be accompanied by useful links. Differences between the samples cannot be attributed solely to language or script.
+
+One saved answer pair shows an unchanged label despite more context. It was selected in a fixed order based on case hashes from 72 eligible main cases, without using answers or verdicts. The question concerns a tuition exemption; personal details are removed. Both contexts contain the relevant FAQs, while S0 increases context from 6,470 to 17,979 characters. Both answers distinguish the exemption from other charges and advise checking the amount. Both keep a supported-answer label. The reference does not settle whether the exemption applies to this student. This example is neither current fee advice nor evidence that the policies are equivalent.
+
+One G0 answer misses steps needed after an exam-registration deadline. The student asked for help registering late. The answer declined to perform registration, described ordinary iKnow registration and mentioned a penalty. The saved FAQ describes a separate request for each exam, naming the course and session. It then asks the student to notify Student Services after payment. These steps were missing from both the answer and its G0 context, but were present in the broader reference pool. The answer leaves the next step unexplained; the source does not establish whether late registration is currently allowed. The selection list contained 36 incomplete G0 cases whose references passed validation and contained facts. An AI reviewer followed the fixed order and rejected ten cases before selecting this one. The example has personal details removed. It shows an omission against a saved source, not how often this happens or human-validated correctness.
+
+We also check whether validated reference quotations appear in the retrieval context. Among 66 email cases with valid nonempty reference facts, the mean proportion of quotations found per case rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen versus 29 cases. This checks exact text matches. It does not tell us whether all relevant information in the collection was found. Taken with the answer outcomes, it shows that adding potentially useful passages does not necessarily produce more complete or better-supported answers.
+
+In the main sample, 78/96 email and 88/96 chatbot references pass the quotation check. The reference-validation rule changes 47 success labels to uncertain across policies: 32 email and fifteen chatbot records, representing 28 unique judgments. Under G0 versus S0, these counts are seven versus eight for email and four versus four for chatbot logs. The 47 records can count the same failed reference check under several policies because those policies reuse a judgment. The saved raw judgments allow the effect of this rule to be checked.
+
+A later diagnostic searched the saved evidence pools for the 49 rejected main-reference quotations. Of these, 32 occur in a different source block and seventeen are absent from the pool. The matches suggest possible source-ID corrections, but still require checks of meaning and applicability. No references or outcome labels were changed.
+
+Median provider-call latency is 2.144 seconds for email and 1.466 seconds for chatbot logs; the 95th percentiles (p95) are 3.439 and 3.854 seconds. Main generation costs an estimated USD~5.43 at planning rates of USD~2 per million input and USD~12 per million output tokens. This excludes preparation, assessment, diagnostics, GPU computation and hosting, and is not a verified invoice.
+
+\subsection{Assessment sensitivity}
+Across the full 48-answer subset, repeated Luna produces 47 structurally valid judgments. The invalid repeat concerns the same answer as the one invalid primary judgment. Categories agree in 35/47 pairs (74.5\%, $\kappa=0.648$). Material-claim flags agree in 40/46 pairs (87.0\%, $\kappa=0.340$), excluding one unspecified flag. Most judgments report no unsupported material claim. This makes agreement by chance more likely and helps explain why kappa is lower despite high percentage agreement.
+
+All 48 local Qwen assessments were saved: 46 valid records and two consistency failures. These failures and the separate invalid primary judgment leave 45 category pairs. Thirteen agree (28.9\%, $\kappa=0.134$). Material-claim flags agree in twenty of 44 pairs with specified flags (45.5\%, $\kappa=0.104$). Qwen flags an unsupported material claim in 23 pairs where Luna does not; the reverse occurs once. Citation flags agree in fourteen of 32 pairs with specified flags. Matching hashes confirm that the question, reference, answer and prompt were the same. The models and sampling settings differ, and Qwen uses reduced numerical precision (quantization). Qwen's judgments are not known to be correct. The disagreement limits confidence in the quality scores even though the main threshold comparison shows little change.
+
+The later assistance check keeps pilot answers separate and applies the original reference rule to both judges. It has 40 usable main-answer pairs from 38 cases for repeated Luna. Assistance labels agree in 38/40 (95.0\%): one answer loses its assistance label and one gains it. Both runs therefore label fourteen answers as assistance.
+
+Qwen has 38 usable pairs from 37 main cases. Assistance labels agree in 25/38 (65.8\%). Compared with the primary judge, nine answers lose their assistance label and four gain it, reducing the total from thirteen to eight. The shared reference rule can increase agreement by removing positive labels from both judges. It still accepts valid references with no facts. These later comparisons include multiple answers for some questions and do not cover all four policies for every case. They do not establish which judge is correct or recalculate the full four-policy effect. Results are saved in \texttt{assistance\_agreement.json} in the research extension.
+
+We also ran Qwen on the unchanged control prompts to investigate the disagreement. All thirty outputs were structurally valid. Expected categories and material flags matched on fourteen of eighteen original controls and ten of twelve script versions. In all six mismatches, Qwen labeled missing information, a routing response or an unnecessary refusal as unsupported. It therefore applies a broader meaning of unsupported claims on these examples. Its harsher main judgments should not automatically be treated as correct. The controls are AI-authored, and script versions are paired. We changed no primary labels, thresholds or assessment rules. This check does not validate Luna's main judgments or correct the reported outcome rates.
+
+\subsection{Earlier study and deployment observations}
+In the earlier local study, thresholds chosen during development improved ranking within the judged candidate pool: nDCG@10 rose from 0.296 to 0.441 on 306 email test cases with positive AI relevance judgments. Alternative references reduced the gain. An AI audit flagged unsupported material claims in 31/44 completed Qwen3-8B answers, with category agreement of 12/44. That audit changed both the reference and judge. The earlier answer comparison also changed threshold and fallback together. The present experiment separates these changes. The earlier results do not measure Luna performance or establish that retrieving more text improves assistance.
+
+Saved deployment logs cover 28 June 2026 through 5 September 2026, including the first date and excluding the last. Events explicitly marked as basic system tests were removed. The logs record 699 API requests and 684 generation events: 651 labeled completed, seventeen empty and sixteen disconnected. Completed events have a median duration of 12.154 seconds and p95 of 37.225 seconds. Timing starts after the application resolves credentials, so it does not capture the user's full wait. Request and generation records cannot always be linked. An error after partial output can also keep a completed label. These counts therefore cannot provide a verified success rate.
+
+The logs sometimes use response IDs in place of user IDs, so they cannot reliably count unique students. Recorded use is concentrated, and 37 feedback events refer to only sixteen responses. Repeated feedback may reflect changes of opinion, so these events cannot establish satisfaction. Selective message logging supplied real questions for the chatbot sample, but does not make that sample representative. The logs show recorded activity; they do not label answer-quality outcomes for the new experiment.
+
+\section{Discussion and limitations}
+\textbf{RQ1: useful guidance differs from a complete answer.} Routing accounts for more positive outcomes than supported answering under G0 in both samples. Explaining where to seek help may be useful while leaving the question unanswered. Incomplete answers and unsupported claims remain common. The failure example shows why ordinary instructions may not help when a student misses a deadline. Empty references and unverified judgments prevent treating the totals as established accuracy.
+
+\textbf{RQ2: more context did not clearly improve assistance.} Lowering the document threshold adds passages and reference quotations, while assistance and incompleteness change little. Fallback also shows no clear benefit. Adding text alone is therefore not a reason to lower the threshold. Candidate limits, ordering, chunk expansion and citation visibility stay fixed; the study does not identify a threshold that is best in general. Future tests could check for missing procedural conditions and ask for clarification when needed.
+
+\textbf{RQ3: conclusions depend on the questions and judge.} The samples differ in question length, available history, selection and previous use in evaluation. Testing full conversations could help separate missing source evidence from missing earlier messages. Repeating the judgments or changing the model produces different labels without showing which are correct. Using one model for several tasks, limiting references and accepting empty fact lists all weaken quality estimates. A matching quotation and a correctly formatted judgment do not prove that the evidence supports the answer.
+
+Source authority also needs attention. Transfer rules in the faculty (2013) and university (2019, supplemented 2022) rules cover different situations~\cite{finki2013study,ukim2019study,ukim2022supplement}; the institution must determine which rule applies. The fee schedule applies from 2024/25 until it is replaced~\cite{finki2024fees}. A document's upload date is not necessarily the date it took effect. Retrieving its text accurately cannot, by itself, determine an individual's eligibility, fees or completion of an administrative process.
+
+The study tests answers to the latest message without earlier conversation history. A referral does not show that the problem was resolved, and delivery logs cannot validate answer quality. Administrative workload, avoided emails and staff-time savings are outside scope.
+
+Further evaluation should check source authority, improve assessment references, examine full conversations and test live tools. This would show how well the system works beyond the retrieval and prompt code tested here.
+
+\textbf{Data use and reproducibility.} The correspondence and logs were used with permission. Raw questions, answers and review records remain in restricted local files. The saved code and fixed study records allow the results to be recalculated. The exact prompts can be used to generate answers again, but unknown gateway defaults and model availability limit exact reproduction. Rebuilding retrieval from original university documents is only approximate: the saved captures do not contain a complete historical database snapshot. The Overleaf bundle contains only manuscript sources and a build guide. It cannot reproduce the study with private data by itself. No public dataset release is claimed.
+
+\section{Conclusion}
+FINKI Hub aims to provide answers supported by evidence and useful guidance when it cannot answer directly. On 192 real university questions, the controlled test records both forms of assistance, alongside frequent incomplete answers and unsupported claims. The reference architecture links these outcomes to source preparation, retrieval and delivery. Lowering the document threshold adds much more context, but produces one fewer assistance label out of 96 in each sample. The confidence intervals allow benefit or harm. More retrieved text alone does not establish better assistance. Limits in the references and disagreement between judges prevent treating the scores as verified factual accuracy. The next improvements should address missing evidence, incomplete answers and clarification. Full conversations and live tool use still need evaluation.
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
