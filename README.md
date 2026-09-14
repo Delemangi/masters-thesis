@@ -8,6 +8,8 @@ See [Overleaf's main-document guidance](https://docs.overleaf.com/getting-starte
 
 **Start here:** [current draft PDF](draft/build/main.pdf), [Overleaf source ZIP](draft/overleaf-draft.zip), and [resources / next evaluation work](RESOURCES.md).
 
+**9 September update:** the [new evaluation](research/effectiveness_v2/RESULTS.md) uses the expanded document collection, a 32-question diagnostic and a separate 40-email prompt comparison. It also repairs incomplete judge evidence. The draft includes both the initial and post-hoc results; no reliable prompt improvement is established. The local chatbot prompt is an evaluated candidate, not a deployed change. The preceding manuscript was pushed as `f755cdb`; this follow-up remains uncommitted and unpushed. Older review links below describe their dated versions.
+
 The [current effectiveness revision](docs/maintenance/effectiveness-focus-2026-09-08/README.md) centers the draft on answering real student questions and providing useful guidance. The user has excluded staff-time savings and other administrative metrics from the research scope. Architecture and retrieval comparisons support the effectiveness analysis.
 
 The active work is the short thesis draft (maximum ten pages) and its supporting evaluations. The full master's thesis now has a substantial first manuscript in `thesis/`: 78 PDF pages, including 62 pages of main chapters. Historical templates and planning are separated in `archive/`. Everything remains local unless explicitly authorized for publication.
@@ -32,6 +34,7 @@ The latest [argument review](docs/maintenance/draft-argument-review-2026-09-08/R
 
 | Location | Purpose | Status / entry point |
 |---|---|---|
+| `research/effectiveness_v2/` | Updated corpus, prompt experiment, assessment audit and deployment component checks | [Results](research/effectiveness_v2/RESULTS.md), [protocol](research/effectiveness_v2/protocol.md), [file index](research/effectiveness_v2/README.md) |
 | `draft/` | Current short draft, LaTeX tables, bibliography and build scripts | [Build and manuscript guide](draft/README.md); working entry point is `draft/main.tex` |
 | `thesis/` | Separate full-thesis manuscript, title page and nine substantive chapters | [Thesis guide](thesis/README.md); entry point `thesis/main.tex`; first working manuscript, not final submission |
 | `RESOURCES.md` | SSH/GPU access, credential provenance, datasets, budget and next steps | [Current continuation guide](RESOURCES.md); dated observations must be rechecked |
@@ -57,7 +60,8 @@ For code navigation, start with the [research index](research/README.md). The fr
 3. [Completed local study](research/draft_evaluation/EVALUATION_SUMMARY.md), [frozen protocol](research/draft_evaluation/protocol.md) and [verification](research/draft_evaluation/verification.md).
 4. [Production-question extension](research/production_evaluation/README.md) and [historical dataset assessment](research/legacy_dataset_review/README.md).
 5. [Controlled Luna evaluation](research/luna_evaluation/README.md) and [evidence review](research/luna_evaluation/evidence_review.md).
-6. [Current manuscript](draft/main.tex).
+6. [Updated-source follow-up and assessment audit](research/effectiveness_v2/RESULTS.md).
+7. [Current manuscript](draft/main.tex).
 
 The earlier completed local study uses a quantized Qwen generator and simplified component path. The new study uses actual production retrieval and prompts with controlled Luna generation; it excludes the live agent transport and tools. Its AI judgments are not human validation or deployed Luna results. The source/label disagreements and unfavorable answer findings are retained. Neither email counts nor telemetry establish avoided contacts or staff savings.
 

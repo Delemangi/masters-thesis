@@ -2,6 +2,8 @@
 
 This directory contains one standalone, English, two-column draft, currently ten pages including references. The original Overleaf-linked template is preserved separately in `../archive/overleaf-template/`. The [literature audit](../docs/maintenance/literature-audit-2026-09-07/README.md) records publication corrections, claim checks and restored source citations. The preceding [editorial review](../context/architecture-review/shortening-review.md) records the earlier nine-page version; the expanded references now use the tenth page without changing font size or margins.
 
+**Latest revision, 9 September:** Section 6.3 reports the [updated-source evaluation](../research/effectiveness_v2/RESULTS.md): a 32-question diagnostic, 40-question prompt comparison and post-hoc repair of incomplete judge evidence. Neither the original nor the new comparison establishes an improvement in assistance. Original study results and bibliography remain unchanged. The current delivery checks are in `../research/effectiveness_v2/delivery-verification.json`; earlier review hashes below identify earlier versions.
+
 The [8 September language review](../docs/maintenance/language-review-2026-09-08/README.md) replaces dense wording with direct explanations throughout the paper. It preserves the evaluation results, bibliography and study limitations, and records checks for the revised ten-page PDF and source ZIP.
 
 A [second language pass](../docs/maintenance/language-review-2026-09-08/second-pass/README.md) further clarifies the abstract, component descriptions and assessment terminology. Its verification report records that revision's delivery hashes.
@@ -23,11 +25,11 @@ The latest [clarity review](../docs/maintenance/draft-clarity-review-2026-09-08/
 - Use **XeLaTeX** and BibTeX. Tectonic, the local compiler used here, is based on XeTeX. Standard packages are used; no shell escape, API credentials, private datasets, or inference runtime is required to compile the manuscript.
 - The source bundle contains only manuscript sources, bibliography and any referenced figure assets. It does not contain the private validation workbook or email questions.
 
-Nothing has been pushed or synchronized to Overleaf or GitHub. The ZIP is a local deliverable, not an uploaded project.
+The preceding manuscript was pushed to Overleaf as `f755cdb`. This new revision and its ZIP remain local. In the combined repository, select the root `main.tex`; in the standalone ZIP, select its `main.tex`.
 
 ## Local build
 
-`build.ps1` runs the locally retained compiler with a bounded timeout and writes to `build/`. `inspect_pdf.py` checks the page count, renders every page and records text outside page boundaries. Run it using the research environment's Python. The final verification record is `../research/draft_evaluation/verification_results.json`.
+`build.ps1` runs the locally retained compiler with a bounded timeout and writes to `build/`. `inspect_pdf.py` checks the page count, renders every page and records text outside page boundaries. Run it using the research environment's Python. Current verification is in `../research/effectiveness_v2/delivery-verification.json`; older studies retain their historical verification records.
 
 ## Evidence and interpretation
 
