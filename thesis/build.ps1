@@ -30,7 +30,7 @@ $outTask.Result
 $errTask.Result
 if ($compilerProcess.ExitCode -ne 0) { throw "Compiler failed with exit code $($compilerProcess.ExitCode)." }
 $paperSourceHashes = @{}
-foreach ($paperSourceName in @('main.tex', 'setup.tex', 'references.bib', 'sections/titlepage.tex', 'sections/abstract.tex', 'sections/status.tex', 'sections/abbreviations.tex', 'chapters/01_introduction.tex', 'chapters/02_background.tex', 'chapters/03_data.tex', 'chapters/04_architecture.tex', 'chapters/05_implementation.tex', 'chapters/06_methodology.tex', 'chapters/07_results.tex', 'chapters/08_discussion.tex', 'chapters/09_conclusion.tex', 'figures/architecture.tex', 'tables/controlled_results.tex', 'appendices/reproducibility.tex', 'assets/Logo-Ukim.png', 'assets/Logo-Finki.jpg')) {
+foreach ($paperSourceName in @('main.tex', 'setup.tex', 'references.bib', 'sections/titlepage.tex', 'sections/abstract.tex','sections/abbreviations.tex', 'chapters/01_introduction.tex', 'chapters/02_background.tex', 'chapters/03_data.tex', 'chapters/04_architecture.tex', 'chapters/05_implementation.tex', 'chapters/06_methodology.tex', 'chapters/07_results.tex', 'chapters/08_discussion.tex', 'chapters/09_conclusion.tex', 'figures/architecture.tex', 'tables/controlled_results.tex','assets/Logo-Ukim.png', 'assets/Logo-Finki.jpg')) {
     $paperSourceHashes[$paperSourceName] = (Get-FileHash -LiteralPath (Join-Path $paperRoot $paperSourceName) -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 @{

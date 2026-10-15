@@ -1,18 +1,31 @@
 \section*{Abbreviations and terminology}
 \addcontentsline{toc}{section}{Abbreviations and terminology}
-\begin{tabularx}{\linewidth}{@{}p{0.19\linewidth}p{0.75\linewidth}@{}}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.21\linewidth}>{\raggedright\arraybackslash}p{0.73\linewidth}@{}}
 \toprule
 Term & Meaning in this thesis \\
 \midrule
+\endfirsthead
+\toprule
+Term & Meaning in this thesis \\
+\midrule
+\endhead
 API & Application programming interface. \\
 BFF & Backend for frontend; the web application's server-side adapter. \\
+BM25 & A lexical ranking function from the probabilistic relevance framework. \\
+CAS & Central Authentication Service, the faculty's single sign-on service. \\
 CI & Confidence interval; the reported paired intervals condition on saved AI labels. \\
 FCSE & Faculty of Computer Science and Engineering. \\
 FAQ & Frequently asked question and its stored answer. \\
 GPU & Graphics processing unit used for embedding, reranking or local inference. \\
+HNSW & Hierarchical navigable small world graph, an approximate nearest-neighbor index. \\
 LLM & Large language model. \\
+Luna & The hosted model \texttt{gpt-5.6-luna} used for references, generation and primary judgments. \\
 MCP & Model Context Protocol, used by the application for structured tool access. \\
+nDCG@10 & Normalized discounted cumulative gain over the top ten ranked candidates. \\
 RAG & Retrieval-augmented generation. \\
+SSE & Server-sent events, a protocol for streaming responses over HTTP. \\
+Production question & A question recorded by the deployed chatbot, as opposed to a historical email question. \\
+Component study & The earlier evaluation with a local generator (Section~\ref{sec:component-study}). \\
 G0/G1 & Shared FAQ/document score floors, with fallback off/on. \\
 S0/S1 & Separate FAQ/document score floors, with fallback off/on. \\
 Assistance & The combined retained supported-answer or useful-routing outcome. It is an AI-assessed endpoint, not verified factual accuracy. \\
@@ -21,4 +34,4 @@ Replay & Re-execution of production retrieval and prompt logic using captured ca
 Material claim & A consequential statement about matters such as eligibility, fees, deadlines, procedure or an institutional action. \\
 Fallback & Retaining the best candidate when neither corpus has a candidate surviving its score floor; distinct from reranker-error recovery. \\
 \bottomrule
-\end{tabularx}
+\end{longtable}

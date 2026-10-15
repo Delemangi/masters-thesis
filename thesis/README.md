@@ -15,7 +15,7 @@ The thesis focuses on **how effectively FINKI Hub answers student questions and 
 | Location | Contents |
 |---|---|
 | `main.tex`, `setup.tex` | Document entry point, metadata and layout |
-| `sections/` | Title page, abstract, scope and data-use statement and terminology |
+| `sections/` | Title page, abstract and terminology |
 | `chapters/01_introduction.tex` | Problem, effectiveness questions and contribution |
 | `chapters/02_background.tex` | RAG, heterogeneous retrieval, Macedonian and assessment literature |
 | `chapters/03_data.tex` | Requirements, correspondence, production questions and source authority |
@@ -24,7 +24,6 @@ The thesis focuses on **how effectively FINKI Hub answers student questions and 
 | `chapters/06_methodology.tex` | Fixed policies, sampling, replay, judgments, paired analysis and the prompt comparison |
 | `chapters/07_results.tex` | Completed outcomes, diagnostics, assessor sensitivity, prompt comparison and delivery observations |
 | `chapters/08_discussion.tex`, `09_conclusion.tex` | Findings, limitations and proposed effectiveness extensions |
-| `appendices/reproducibility.tex` | Evidence records, executed assessment fields and denominator interpretation |
 | `figures/`, `tables/`, `references.bib` | Native architecture diagram, frozen result-table content and audited literature |
 
 ## Status and boundaries
@@ -45,6 +44,6 @@ From the workspace root in PowerShell:
 & ./research/draft_evaluation/.venv/Scripts/python.exe -X utf8 thesis/package.py
 ```
 
-The build uses the shared local compiler in [`../tools/`](../tools/README.md); the exported manuscript compiles independently of it. `inspect_pdf.py` needs the retained research Python environment with PyMuPDF and Pillow; it renders pages and records page bounds. It does not validate scientific claims. `package.py` checks source/PDF hashes before writing an exact 22-file manuscript allowlist.
+The build uses the shared local compiler in [`../tools/`](../tools/README.md); the exported manuscript compiles independently of it. `inspect_pdf.py` needs the retained research Python environment with PyMuPDF and Pillow; it renders pages and records page bounds. It does not validate scientific claims. `package.py` checks source/PDF hashes before writing an exact 20-file manuscript allowlist.
 
 The ZIP contains only active LaTeX sources, two original logo assets, the bibliography and this guide. It excludes private questions, research workbooks, credentials, downloaded theses, build outputs and local tools.

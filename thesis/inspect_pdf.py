@@ -30,11 +30,10 @@ for start in range(0, len(pdf), 6):
 toc = pdf.get_toc()
 intro = next(row[2] for row in toc if row[1] == 'Introduction')
 references = next(row[2] for row in toc if row[1] == 'References')
-appendix = next(row[2] for row in toc if row[1] == 'Reproducibility and evidence records')
 report = {
     'pages': len(pdf), 'front_matter_pages': intro-1,
     'main_chapter_pages': references-intro,
-    'reference_pages': appendix-references, 'appendix_pages': len(pdf)-appendix+1,
+    'reference_pages': len(pdf)-references+1,
     'pdf_sha256': hashlib.sha256((build / 'main.pdf').read_bytes()).hexdigest(),
     'pages_detail': details, 'table_of_contents': toc,
 }
