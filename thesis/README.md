@@ -1,8 +1,8 @@
-# Full master's thesis — first working manuscript
+# Full master's thesis — submission version
 
-The title page is explicitly marked **TODO — WORK IN PROGRESS**, with “Not ready for submission” underneath.
+This is the full master's thesis prepared for submission and approval.
 
-This is a substantial first manuscript in the original template's single-column format: 12-point body text, 1.5 line spacing, the university/faculty title page and preserved margins. It is independent of the completed ten-page [short draft](../draft/README.md).
+It uses the original template's single-column format: 12-point body text, 1.5 line spacing, the university/faculty title page and preserved margins. It is independent of the ten-page [short draft](../draft/README.md) and reports the same experiments: the retrieval-policy experiment and the prompt comparison.
 
 The thesis focuses on **how effectively FINKI Hub answers student questions and provides useful guidance**. Architecture and retrieval comparisons support that purpose. Administrative workload and staff-time savings are outside scope.
 
@@ -15,25 +15,25 @@ The thesis focuses on **how effectively FINKI Hub answers student questions and 
 | Location | Contents |
 |---|---|
 | `main.tex`, `setup.tex` | Document entry point, metadata and layout |
-| `sections/` | Title page, abstract, working-status statement and terminology |
+| `sections/` | Title page, abstract, scope and data-use statement and terminology |
 | `chapters/01_introduction.tex` | Problem, effectiveness questions and contribution |
 | `chapters/02_background.tex` | RAG, heterogeneous retrieval, Macedonian and assessment literature |
 | `chapters/03_data.tex` | Requirements, correspondence, production questions and source authority |
 | `chapters/04_architecture.tex` | Component responsibilities, contracts and variation points |
 | `chapters/05_implementation.tex` | Chatbot, document, GPU, MCP and Discord implementation |
-| `chapters/06_methodology.tex` | Fixed policies, sampling, replay, judgments and paired analysis |
-| `chapters/07_results.tex` | Completed outcomes, diagnostics, assessor sensitivity and delivery observations |
+| `chapters/06_methodology.tex` | Fixed policies, sampling, replay, judgments, paired analysis and the prompt comparison |
+| `chapters/07_results.tex` | Completed outcomes, diagnostics, assessor sensitivity, prompt comparison and delivery observations |
 | `chapters/08_discussion.tex`, `09_conclusion.tex` | Findings, limitations and proposed effectiveness extensions |
 | `appendices/reproducibility.tex` | Evidence records, executed assessment fields and denominator interpretation |
 | `figures/`, `tables/`, `references.bib` | Native architecture diagram, frozen result-table content and audited literature |
 
 ## Status and boundaries
 
-This is written thesis content, replacing the former outline. It is not a final submission or independent validation of the answers. The completed experiments, their unfavorable findings and AI-assessment limitations remain intact. Source inspection is distinguished from deployment verification; controlled retrieval/prompt replay is distinguished from the full live agent, tools and conversation lifecycle.
+The thesis is not an independent validation of the answers. The completed experiments, their unfavorable findings and AI-assessment limitations remain intact. Source inspection is distinguished from deployment verification; controlled retrieval/prompt replay is distinguished from the full live agent, tools and conversation lifecycle.
 
 The mentor's examples guided organization and depth. Their prose, experiments, publication claims and acknowledgements were not copied. The old scaffold is archived in the dated first-manuscript review; the original template remains separately preserved. The short draft is unchanged by this expansion.
 
-Remaining work includes supervisory/format review, final editorial refinement and any chosen extensions to reference quality, full conversations or live-tool evaluation. No new paid inference was performed to create these chapters. Dataset packaging remains deferred.
+Future work, described in the discussion and conclusion, covers reference quality, full conversations and live-tool evaluation. No new paid inference was performed to write these chapters; the prompt-comparison results come from the retained `research/effectiveness_v2` records. Dataset packaging remains deferred.
 
 ## Local build and export
 

@@ -120,4 +120,15 @@ Provider-call latency and token usage are recorded for actual unique calls. Retr
 
 The inference client reserves costs using conservative planning rates of USD~2 per million input tokens and USD~12 per million output tokens. Its experiment ledger has an USD~80 reservation ceiling and a 2,500-request cap; a separate identity diagnostic has its own small reservation. Failed requests retain reservations. Usage estimates, reservations and verified billing are different quantities. Actual gateway billing and total infrastructure cost were not available for certification.
 
-These controls make the experiment reviewable without expanding it into an unrestricted model search. The aim is a bounded comparison of assistance under fixed retrieval policies. The following chapter presents its outcomes, then examines why source availability and assessor behavior prevent those outcomes from being reduced to a simple claim of system accuracy.
+\subsection{Prompt comparison}
+\label{sec:method-prompt}
+
+A second experiment compares the production prompt with a revised prompt on an expanded collection: a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks. FAQ text matches the retrieval-policy experiment, but the larger document set means outcome differences between the two experiments cannot be attributed to the collection alone.
+
+A 32-question development sample, balanced between email and chatbot sources and spread across the reference states of the retrieval-policy experiment, compares current retrieval, AI-selected reference evidence and no evidence. It motivated a prompt-only revision, frozen before the comparison: check dates and applicability instead of automatically favoring FAQs or higher-ranked text, preserve needed procedural steps, and state material gaps. The revision adds no model calls and leaves retrieval unchanged.
+
+The comparison uses the first forty emails of a shuffled 64-question reserve, excluding exact and near duplicates of evaluated questions; semantic independence from those questions is not proved. Two AI passes prepare and review references before generation, selecting source lines to avoid transcription errors. All forty references pass exact-text checks (34 partial, three insufficient, three nonfactual); they are not institution-approved answers.
+
+Both conditions use production retrieval with fallback, useful links, Luna, gateway sampling defaults and a 1,536-token cap. Strict completion requires every reference fact and behavior, no unsupported claim or citation error, and no reference concern; empty factual or mixed references cannot succeed. This endpoint is stricter than the retrieval-policy experiment's assistance measure and not comparable with it. Paired differences use 20,000 bootstrap resamples.
+
+These controls make the experiment reviewable without expanding it into an unrestricted model search. The aim is a bounded comparison of assistance under fixed retrieval policies and prompts. The following chapter presents its outcomes, then examines why source availability and assessor behavior prevent those outcomes from being reduced to a simple claim of system accuracy.

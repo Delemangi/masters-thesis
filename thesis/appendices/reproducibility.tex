@@ -27,10 +27,11 @@ Review workbook & Restricted case-level workbook & Can a reviewer trace an outco
 Reference extension & Offline audit and initial review queue & Which rejected quotations have possible other-source matches? \\
 Architecture & Dated repository/source review & Which features are observed in source versus deployment? \\
 Telemetry & Saved query definitions and aggregates & Which events, periods and timing boundaries were measured? \\
+Prompt comparison & Protocol, database snapshot, references, generations and both assessments & What did the prompt comparison test, and how did the audit change its assessment? \\
 \bottomrule
 \end{longtable}
 
-The original reference freeze covers 220 files. Hash checks detect subsequent byte changes to those retained inputs; they do not establish the factual correctness of the files. Seven additional protected study outputs include aggregate results, generated tables, reference and generation manifests, budget accounting, local control results and the private review workbook. The preservation checks used while writing this thesis verify that manuscript expansion does not silently change the experiment.
+The original reference freeze covers 220 files. Hash checks detect subsequent byte changes to those retained inputs; they do not establish the factual correctness of the files. Seven additional protected study outputs include aggregate results, generated tables, reference and generation manifests, budget accounting, local control results and the private review workbook. The preservation checks used while writing this thesis verify that manuscript expansion does not silently change the experiment. The retrieval-policy experiment lacks a complete database snapshot; the prompt comparison retains one, together with its references, generations and both the initial and audited judgments.
 
 \subsection{Executed assessment fields}
 
@@ -69,7 +70,7 @@ The paired bootstrap resamples question groups and carries their policies togeth
 
 First verify the manifests and artifact hashes. Next reconstruct the question and policy counts, retaining rejected inputs and invalid assessments. Then inspect the mapping from unique answers to nominal policy records and confirm that reused prompts have identical inputs. Recompute the guarded outcome categories and paired contrasts before examining interpretation. Finally compare the regenerated tables with the manuscript and inspect the PDF for missing references or damaged layout.
 
-This order helps localize a discrepancy. A changed reference hash is an input problem; an incorrect join between answer and policy records is an aggregation problem; an accurate table accompanied by an overbroad claim is an interpretation problem. Each requires a different correction. The research records preserve earlier outputs and explicit later diagnostics so that a correction can be reviewed without pretending the original experiment had different methods.
+This order helps localize a discrepancy. A changed reference hash is an input problem; an incorrect join between answer and policy records is an aggregation problem; an accurate table accompanied by an overbroad claim is an interpretation problem. Each requires a different correction. The research records keep the original outputs separate from diagnostics, so that a correction can be reviewed without pretending the original experiment had different methods.
 
 Case-level review can then examine the substantive evidence: whether the source applies, whether the reference includes the needed conditions, and whether the answer fulfills them. Such review is distinct from mechanical delivery verification. The existing optional human-review fields must remain unreviewed until an actual human reviewer completes them. An AI-generated review must be identified as an AI review even if it uses a second model or a detailed rubric.
 
@@ -77,4 +78,4 @@ Case-level review can then examine the substantive evidence: whether the source 
 
 The short paper and the full thesis are separate LaTeX documents. The short paper presents a focused account within ten pages. This thesis expands the system, data, methods and interpretation, while referring to the same completed experimental records. It does not multiply the evidence by reporting it at greater length. The bibliography and source assets needed for each manuscript are included in its own export.
 
-The original template and supplied example theses are retained separately as local references. They inform organization and formatting but contribute no inherited experiments, publication claims or acknowledgements to this work. The current thesis is a working manuscript whose next revisions should improve clarity, source review and evaluation coverage. Those revisions can build on the retained evidence without concealing the boundaries of what has already been completed.
+The original template and supplied example theses are retained separately as local references. They inform organization and formatting but contribute no inherited experiments, publication claims or acknowledgements to this work. Further work can build on the retained evidence without concealing the boundaries of what has already been completed.

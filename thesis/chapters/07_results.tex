@@ -15,7 +15,7 @@ Table~\ref{tab:luna-outcomes} presents the original guarded outcome categories. 
 
 \input{tables/controlled_results}
 
-The counts are AI-assessed outcomes on selected questions. A source-supported greeting or explanation of the assistant's scope can receive an Answer label even when no substantive institutional fact is at issue. Conversely, a referral may be the appropriate response to an individual request that cannot be resolved from public information. The later reference analysis is essential for interpreting this mixture.
+The counts are AI-assessed outcomes on selected questions. A source-supported greeting or explanation of the assistant's scope can receive an Answer label even when no substantive institutional fact is at issue. Conversely, a referral may be the appropriate response to an individual request that cannot be resolved from public information. The reference analysis in Section~\ref{sec:reference-quality} is essential for interpreting this mixture.
 
 Unsupported material claims and incompleteness remain common. Under G0 and S0, unsupported categories number twenty and nineteen for email, and twelve and eleven for production. The corresponding incomplete-answer counts are 31 and 30 for email, and 22 and 24 for production. The controlled configuration therefore returns many responses that do not satisfy the implemented assistance criterion even though generation itself completes.
 
@@ -73,6 +73,7 @@ Both saved answers explain the exemption, distinguish other semester charges, an
 Eligibility deliberately favors cases with additional context and usable factual references. The pair is not a random estimate of how often extra evidence leaves an outcome unchanged. It is also not proof of policy equivalence. Its value is explanatory: readers can connect changes in selected evidence with a concrete response-level comparison while retaining the original assessment's uncertainty.
 
 \subsection{Reference quality and the success guard}
+\label{sec:reference-quality}
 
 Of 212 pilot and main references, 182 pass the recorded quotation checks and thirty fail. Main passing references number 78 for email and 88 for production. Across policies, the invalid-reference guard changes 47 otherwise successful main outcomes to uncertain: 32 email and fifteen production records, representing 28 unique answers. Under G0 and S0, the email counts are seven and eight, while production has four under each policy.
 
@@ -102,7 +103,7 @@ A labeled sensitivity analysis accepts the direct Answer category only when its 
 
 The primary measure remains unchanged. The stricter rule is not corrected accuracy, because it also excludes potentially appropriate nonfactual responses. It asks how much interpretation changes when direct-answer credit requires an explicit factual reference. The large change in absolute production totals demonstrates why the empty-reference issue must be visible alongside the primary comparison.
 
-A later offline audit searched the saved pools for rejected reference quotations. Among 49 rejected main quotations, 32 occur in a different source block and seventeen are absent from the pool. The email split is eight other-block matches and fifteen absent quotations; production has 24 other-block matches and two absent quotations. These are possible reference-repair leads, not completed semantic or authority corrections.
+An offline audit searched the saved pools for rejected reference quotations. Among 49 rejected main quotations, 32 occur in a different source block and seventeen are absent from the pool. The email split is eight other-block matches and fifteen absent quotations; production has 24 other-block matches and two absent quotations. These are possible reference-repair leads, not completed semantic or authority corrections.
 
 The audit retains an initial review queue for all 212 references, with no entry declared ready for a new substantively reviewed evaluation. It does not change the original reference facts, answer labels or scores. Finding the exact string elsewhere is insufficient to approve the fact: the statement must still be checked against the question and source's applicability. The audit therefore improves traceability of future review work without constituting a new performance benchmark.
 
@@ -132,13 +133,41 @@ Matched prompt hashes establish that these comparisons used the same question, r
 
 The post-hoc local control diagnostic helps explain this point. Qwen produces valid records for all thirty unchanged controls and matches expected categories and material flags on fourteen of eighteen original controls and ten of twelve script versions. All six mismatches classify an omission, useful routing response or unnecessary abstention as unsupported. On these controls, it applies a broader interpretation of unsupported claims. Because the controls are AI-authored, this diagnosis remains limited and cannot validate Luna's main judgments.
 
-\subsection{Earlier component study}
+\subsection{Component study with a local generator}
+\label{sec:component-study}
 
-The earlier local evaluation is retained as a separate study with different generation and assessment conditions. Its frozen corpus contains 74 FAQs and 1,403 chunks from nineteen documents. A 24-case development set and a protected 320-case sample support that experiment, while a 241-case generated regression suite serves a different testing purpose. Those generated cases are not additional observations of real student demand.
+A separate local evaluation uses different generation and assessment conditions. Its frozen corpus contains 74 FAQs and 1,403 chunks from nineteen documents. A 24-case development set and a protected 320-case sample support that experiment, while a 241-case generated regression suite serves a different testing purpose. Those generated cases are not additional observations of real student demand.
 
 On 306 test cases with positive AI relevance judgments, pool-relative nDCG@10 rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a reported group-bootstrap interval of $[0.124,0.166]$. Alternative reference labels attenuate the gain. The metric concerns ranking against its candidate pool and relevance judgments, not final response usefulness.
 
 Its answer comparison changes both threshold and fallback and uses a local quantized Qwen generator. A separate AI audit flags unsupported consequential claims in 31 of 44 completed answers, with category agreement of 12/44 against the primary assessment. That audit also uses different references, so disagreement combines reference and assessor variation. These findings motivated the better-controlled threshold/fallback separation in the present study. They cannot be treated as deployed Luna outcomes or pooled with the current assessment as one experiment.
+
+\subsection{Prompt comparison}
+\label{sec:results-prompt}
+
+In the 32-question development sample of the prompt comparison (Section~\ref{sec:method-prompt}), AI-selected reference evidence raises covered reference facts from 29/73 to 50/73 and strict completion from 4/32 to 6/32 relative to current retrieval. No development reference establishes full factual answerability, so this difficult-case diagnostic is neither representative nor a perfect-evidence upper bound.
+
+In the forty-question comparison, the initial assessment did not receive all of the generation evidence. It flagged fifteen citation errors per condition, whereas a deterministic check found only one answer per condition citing a URL absent from the generator's context and links. An audit of all pairs therefore repeated the assessment with the full generation context, revised scope guidance and a 1,024-token judgment cap. Differences between the two assessments cannot be attributed to the added context alone; both are retained.
+
+\begin{table}[t]
+\centering\small
+\caption{Forty-question prompt comparison. Audit denotes the repeated assessment with the full generation evidence.}\label{tab:prompt}
+\begin{tabular}{lrr}
+\toprule
+Measure & Current prompt & Revised prompt\\
+\midrule
+Completed generations & 37/40 & 37/40\\
+Initial strict completions & 4/40 & 6/40\\
+Audit strict completions & 6/40 & 5/40\\
+Audit unsupported-claim flags & 15/37 & 10/36\\
+Audit citation-error flags & 1/37 & 1/36\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The initial five-point gain does not hold under the audit, where the paired difference is $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$) from two gains and three losses (Table~\ref{tab:prompt}). Three oversized inputs produce no answer in either condition but remain in the denominators. One revised-prompt judgment has an invalid source span and counts as a failure; flag denominators count valid judgments only. Because references are partial, completion can mean guidance with stated gaps, and fewer unsupported-claim flags do not establish overall improvement.
+
+Repeated Luna judgments on twenty randomly selected questions agreed on strict completion in 37/40 answer pairs, but shared the incomplete evidence of the initial assessment. Eight constructed controls matched their expected outcomes without validating the real-case references. Separate component checks confirmed that deployed prompt assembly preserved the available history in six saved user turns and that read-only MCP functions returned staff and course lists and an exact staff lookup. These do not test full conversations or agent tool selection.
 
 \subsection{Recorded delivery, latency and resource use}
 

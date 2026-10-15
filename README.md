@@ -2,7 +2,7 @@
 
 ## Compile this repository in Overleaf
 
-Select **XeLaTeX** and use the top-level **`main.tex`** for the short draft. Select **`full-thesis.tex`** for the working thesis, which remains marked TODO. These entry files use Overleaf's documented `import` approach so sources, figures and bibliographies can stay in `draft/` and `thesis/`. Do not select the nested `main.tex` files for this combined repository. The separate source ZIPs still use their own `main.tex`.
+Select **XeLaTeX** and use the top-level **`main.tex`** for the short draft. Select **`full-thesis.tex`** for the full thesis (submission version, October 2026). These entry files use Overleaf's documented `import` approach so sources, figures and bibliographies can stay in `draft/` and `thesis/`. Do not select the nested `main.tex` files for this combined repository. The separate source ZIPs still use their own `main.tex`.
 
 See [Overleaf's main-document guidance](https://docs.overleaf.com/getting-started/recompiling-your-project/the-main-document#keeping-the-main-document-in-a-folder). Local research links below refer to ignored files available only in the research checkout.
 
@@ -36,7 +36,7 @@ The latest [argument review](docs/maintenance/draft-argument-review-2026-09-08/R
 |---|---|---|
 | `research/effectiveness_v2/` | Updated corpus, prompt experiment, assessment audit and deployment component checks | [Results](research/effectiveness_v2/RESULTS.md), [protocol](research/effectiveness_v2/protocol.md), [file index](research/effectiveness_v2/README.md) |
 | `draft/` | Current short draft, LaTeX tables, bibliography and build scripts | [Build and manuscript guide](draft/README.md); working entry point is `draft/main.tex` |
-| `thesis/` | Separate full-thesis manuscript, title page and nine substantive chapters | [Thesis guide](thesis/README.md); entry point `thesis/main.tex`; first working manuscript, not final submission |
+| `thesis/` | Separate full-thesis manuscript, title page and nine substantive chapters | [Thesis guide](thesis/README.md); entry point `thesis/main.tex`; submission version (October 2026) |
 | `RESOURCES.md` | SSH/GPU access, credential provenance, datasets, budget and next steps | [Current continuation guide](RESOURCES.md); dated observations must be rechecked |
 | `context/` | Registered research scope and private registration documents | [Research context](context/research-context.md) |
 | `context/architecture-review/` | Source-level architecture across chatbot, documents, MCP and Discord | [Evidence index and scope](context/architecture-review/README.md); includes current local repository/worktree revisions |
