@@ -16,9 +16,9 @@
     },
     "fonts.conf": {
       "bytes": 192,
-      "sha256": "40429c466f5da4721762252b46f90a3e2c614d86a2c4e8ac4832aabc7c5a4ded",
+      "sha256": "5d4895c49afdcb837cc31f8acc0ba5b08f9ce52e425cd6642fa5a60d40394b8e",
       "retained": true,
-      "note": "Font cache path updated for draft/ folder rename."
+      "note": "Font cache path updated when the compiler moved to the shared tools/ folder."
     }
   },
   "note": "Existing local artifact hashes; no new downloads or independent supply-chain verification."

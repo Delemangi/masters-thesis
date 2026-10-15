@@ -1,8 +1,8 @@
-% Overleaf entry point for the full thesis.
+% Overleaf entry point for the conference paper (work in progress).
 \RequirePackage{import}
 % BibTeX resolves its database from the project root, independently of import.
 \AtBeginDocument{%
   \let\manuscriptbibliography\bibliography
-  \renewcommand{\bibliography}[1]{\manuscriptbibliography{thesis/#1}}%
+  \renewcommand{\bibliography}[1]{\manuscriptbibliography{paper/#1}}%
 }
-\import{thesis/}{main.tex}
+\import{paper/}{main.tex}

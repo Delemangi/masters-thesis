@@ -16,10 +16,10 @@ def main():
         raise SystemExit('Build manifest does not cover the exact active manuscript inputs.')
     if hashlib.sha256((ROOT / 'build/main.pdf').read_bytes()).hexdigest() != manifest['pdf_sha256']:
         raise SystemExit('PDF differs from the build manifest.')
-    with zipfile.ZipFile(ROOT / 'overleaf-draft.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(ROOT / 'overleaf-paper.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
         for name in FILES:
             archive.write(ROOT / name, name)
-    print(json.dumps({'bundle': 'draft/overleaf-draft.zip', 'files': list(FILES)}))
+    print(json.dumps({'bundle': 'paper/overleaf-paper.zip', 'files': list(FILES)}))
 
 if __name__ == '__main__':
     main()

@@ -1,10 +1,10 @@
 param([int]$TimeoutSeconds = 240)
 $ErrorActionPreference = 'Stop'
 $paperRoot = $PSScriptRoot
-$compiler = Join-Path $paperRoot '..\draft\tools\tectonic.exe'
+$compiler = Join-Path $paperRoot '..\tools\tectonic.exe'
 if (-not (Test-Path -LiteralPath $compiler)) { throw 'Portable compiler missing.' }
-$env:TECTONIC_CACHE_DIR = Join-Path $paperRoot '..\draft\cache'
-$env:FONTCONFIG_FILE = Join-Path $paperRoot '..\draft\tools\fonts.conf'
+$env:TECTONIC_CACHE_DIR = Join-Path $paperRoot '..\tools\cache'
+$env:FONTCONFIG_FILE = Join-Path $paperRoot '..\tools\fonts.conf'
 $buildRoot = Join-Path $paperRoot 'build'
 New-Item -ItemType Directory -Force -Path $buildRoot | Out-Null
 $compilerInfo = [System.Diagnostics.ProcessStartInfo]::new()

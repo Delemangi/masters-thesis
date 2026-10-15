@@ -1,16 +1,16 @@
-# Full master's thesis — submission version
+# Master's thesis
 
-This is the full master's thesis prepared for submission and approval.
+This folder is the master's thesis prepared for submission and approval (October 2026). It is the primary document in this repository. The conference paper in [`../paper/`](../paper/README.md) is a separate, shorter derivative planned for later.
 
-It uses the original template's single-column format: 12-point body text, 1.5 line spacing, the university/faculty title page and preserved margins. It is independent of the ten-page [short draft](../draft/README.md) and reports the same experiments: the retrieval-policy experiment and the prompt comparison.
+It uses the original template's single-column format: 12-point body text, 1.5 line spacing, the university/faculty title page and preserved margins. It reports two experiments: the retrieval-policy experiment and the prompt comparison.
 
 The thesis focuses on **how effectively FINKI Hub answers student questions and provides useful guidance**. Architecture and retrieval comparisons support that purpose. Administrative workload and staff-time savings are outside scope.
 
 ## Read and edit
 
-- [Current PDF](build/main.pdf).
+- [Current PDF](build/main.pdf) (local build output).
+- In the combined Overleaf project, compile the root `main.tex` with XeLaTeX and BibTeX.
 - [Standalone Overleaf source ZIP](overleaf-thesis.zip): import into a separate project, choose `main.tex`, and use XeLaTeX with BibTeX.
-- [First-manuscript review and verification](../docs/maintenance/thesis-first-manuscript-2026-09-08/README.md): measured page counts, scientific review, preservation and delivery checks.
 
 | Location | Contents |
 |---|---|
@@ -31,9 +31,9 @@ The thesis focuses on **how effectively FINKI Hub answers student questions and 
 
 The thesis is not an independent validation of the answers. The completed experiments, their unfavorable findings and AI-assessment limitations remain intact. Source inspection is distinguished from deployment verification; controlled retrieval/prompt replay is distinguished from the full live agent, tools and conversation lifecycle.
 
-The mentor's examples guided organization and depth. Their prose, experiments, publication claims and acknowledgements were not copied. The old scaffold is archived in the dated first-manuscript review; the original template remains separately preserved. The short draft is unchanged by this expansion.
+The mentor's examples guided organization and depth. Their prose, experiments, publication claims and acknowledgements were not copied.
 
-Future work, described in the discussion and conclusion, covers reference quality, full conversations and live-tool evaluation. No new paid inference was performed to write these chapters; the prompt-comparison results come from the retained `research/effectiveness_v2` records. Dataset packaging remains deferred.
+Future work, described in the discussion and conclusion, covers reference quality, full conversations and live-tool evaluation. The prompt-comparison results come from the retained `research/effectiveness_v2` records.
 
 ## Local build and export
 
@@ -45,6 +45,6 @@ From the workspace root in PowerShell:
 & ./research/draft_evaluation/.venv/Scripts/python.exe -X utf8 thesis/package.py
 ```
 
-The build uses the existing local compiler in `draft/tools/`; the exported manuscript compiles independently of those local directories. `inspect_pdf.py` needs the retained research Python environment with PyMuPDF and Pillow; it renders pages and records page bounds. It does not independently validate scientific claims. `package.py` checks source/PDF hashes before writing an exact 22-file manuscript allowlist.
+The build uses the shared local compiler in [`../tools/`](../tools/README.md); the exported manuscript compiles independently of it. `inspect_pdf.py` needs the retained research Python environment with PyMuPDF and Pillow; it renders pages and records page bounds. It does not validate scientific claims. `package.py` checks source/PDF hashes before writing an exact 22-file manuscript allowlist.
 
-The ZIP contains only active LaTeX sources, two original logo assets, the bibliography and this guide. It excludes private questions, research workbooks, credentials, downloaded theses, unused outline text, build outputs and local tools. Nothing has been uploaded, committed or pushed.
+The ZIP contains only active LaTeX sources, two original logo assets, the bibliography and this guide. It excludes private questions, research workbooks, credentials, downloaded theses, build outputs and local tools.

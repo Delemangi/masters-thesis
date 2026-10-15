@@ -1,8 +1,8 @@
-% Overleaf entry point for the short draft.
+% Overleaf entry point for the master's thesis.
 \RequirePackage{import}
 % BibTeX resolves its database from the project root, independently of import.
 \AtBeginDocument{%
   \let\manuscriptbibliography\bibliography
-  \renewcommand{\bibliography}[1]{\manuscriptbibliography{draft/#1}}%
+  \renewcommand{\bibliography}[1]{\manuscriptbibliography{thesis/#1}}%
 }
 \import{thesis/}{main.tex}

@@ -1,4 +1,4 @@
-# This repository is for the two Overleaf manuscripts. Keep the complete local
+# This repository holds the thesis and the conference paper for Overleaf. Keep the complete local
 # research workspace excluded in clones too, without relying on .git/info/exclude.
 /RESOURCES.md
 /research/
@@ -7,7 +7,7 @@
 /docs/
 /scripts/
 
-# Private case-level evidence at any depth (keep locally, never in paper ZIPs).
+# Private case-level evidence at any depth (keep locally, never in manuscript ZIPs).
 private/
 
 # Credentials and newly copied private spreadsheet inputs.
@@ -69,17 +69,18 @@ Desktop.ini
 /%SystemDrive%/
 
 # The manuscript source is maintained; compiler/build products remain local.
-/draft/build/
-/draft/cache/
-/draft/overleaf-draft.zip
-# Historical tables retained for local verification; not active manuscript inputs.
-/draft/answer_results.tex
-/draft/results.tex
-/draft/retrieval_results.tex
 /thesis/build/
 /thesis/cache/
 /thesis/*.zip
-/draft/tools/*
-!/draft/tools/fonts.conf
-!/draft/tools/README.md
-!/draft/tools/runtime-manifest.json
+/paper/build/
+/paper/cache/
+/paper/*.zip
+# Historical tables retained for local verification; not active manuscript inputs.
+/paper/answer_results.tex
+/paper/results.tex
+/paper/retrieval_results.tex
+# Shared local compiler: keep the configuration, ignore the binary and cache.
+/tools/*
+!/tools/fonts.conf
+!/tools/README.md
+!/tools/runtime-manifest.json
