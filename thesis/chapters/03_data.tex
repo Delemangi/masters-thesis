@@ -26,7 +26,7 @@ Source & Content & Role and limit \\
 \midrule
 Email archive & 1,693 anonymized question and reply pairs, provided by the faculty & Shows what students asked in the past and gives the gold standard for questions. Replies can be stale or partial. \\
 Chatbot logs & 172 logged conversations, from one month & Real use of the chatbot. Small and not representative. \\
-Corpus snapshot A & 74 FAQs, 19 documents, 1,403 chunks (1,477 embeddings) & Controlled retrieval experiment. \\
+Corpus snapshot A & 74 FAQs, 19 documents, 1,403 chunks (1,477 embeddings) & Controlled experiment. \\
 Corpus snapshot B & 74 FAQs, 60 documents, 2,391 chunks & Prompt comparison (read-only snapshot). \\
 Deployed corpus & 104 FAQs, 65 documents (37 official documents, 28 faculty web pages), 2,524 chunks & The live system. Not used in the controlled experiments. \\
 \bottomrule
@@ -37,11 +37,11 @@ Deployed corpus & 104 FAQs, 65 documents (37 official documents, 28 faculty web 
 
 All knowledge-base content is public or written by the author. The documents are official faculty and university documents and laws, published on the faculty and university websites or in the Official Gazette. They include regulations, decisions, procedures, the fee schedule, guides and reports. The web pages are public pages of the faculty website. The author wrote the FAQs from this public information.
 
-The retrieval-policy experiment used snapshot A, a corpus of 74 FAQ records and 19 documents whose contents and counts were checked before the experiment. The documents are split into 1,403 chunks, and together with the FAQs they give 1,477 embeddings in the index. The prompt comparison used snapshot B, a read-only snapshot with the same FAQs but 60 documents and 2,391 chunks.
+The controlled experiment used snapshot A, a corpus of 74 FAQ records and 19 documents whose contents and counts were checked before the experiment. The documents are split into 1,403 chunks, and together with the FAQs they give 1,477 embeddings in the index. The prompt comparison used snapshot B, a read-only snapshot with the same FAQs but 60 documents and 2,391 chunks.
 
 The deployed knowledge base is a third, larger state. It holds 104 FAQ records. The author added, merged and rewrote FAQs, partly in response to gaps found by the live evaluation (Chapter~\ref{ch:live}). It has 65 documents (37 official documents from the documents repository and 28 faculty web pages), compared with 19 in snapshot A, and 2,524 chunks. The controlled results describe only the snapshots.
 
-FAQ records and document chunks have different roles. An FAQ connects a recognizable question to a short, carefully written answer. A document passage often states a rule without repeating the student's wording, and several passages may be needed to find its conditions. One threshold for both source types may therefore affect them differently. This is the reason for the threshold experiment.
+FAQ records and document chunks have different roles. An FAQ connects a recognizable question to a short, carefully written answer. A document passage often states a rule without repeating the student's wording, and several passages may be needed to find its conditions. One threshold for both source types may therefore affect them differently. This is why the controlled experiment compares thresholds.
 
 The documents repository keeps the original files and Markdown conversions. The conversions were made by extracting embedded text or transcribing scanned pages. The author checks each conversion by reading it side by side with its original, because an error made before indexing is copied into retrieval and generation. Source metadata (name, URL, hash) helps with updates and with finding the original source. It does not show that a rule applies to a given student.
 
@@ -57,13 +57,13 @@ The email archive contains 1,693 pairs of a student email and the staff reply. T
 
 The archive was sampled for several purposes, and the collections are not merged. Emails with the same text after normalization form one email group, so a question sent several times is counted once. A review pool of 240 emails was hand-picked, ten from each of 24 topic groups of the archive. Within each topic it favored hard cases, such as romanized or English text, questions about dates and requests that need staff. Its human labels were never completed, but 158 of its emails later became part of the tuned set of the live evaluation (Chapter~\ref{ch:live}). The component study, an evaluation with a local generator (Section~\ref{sec:component-study}), instead used a simple random sample of 320 of the 1,693 emails, drawn with a fixed seed so that every email had the same chance. No two of the 320 share an email group. A development set of 24 further emails, all from outside the groups of the 320, was kept for testing the pipeline. Macedonian Cyrillic appears in 71.94\% of the archive but 39.17\% of the 240-case pool. Romanized Macedonian rises from 7.15\% to 37.08\%. The hand-picked pool therefore does not show typical questions.
 
-For the controlled Luna experiment, 96 emails were randomly selected from the 320 email groups of the component study. A pilot of 20 emails from the development set only checked that the pipeline ran. The 96 emails had been examined in the component study, so they are not an untouched held-out set.
+For the controlled experiment, 96 emails were randomly selected from the 320 email groups of the component study. A pilot of 20 emails from the development set only checked that the pipeline ran. The 96 emails had been examined in the component study, so they are not an untouched held-out set.
 
 The 344 component-study email cases (320 test and 24 development) have a median question length of 306 characters. Long questions can contain several conditions and requested actions, so an answer can cite relevant evidence and still be incomplete.
 
 \subsection{Questions recorded by the chatbot}
 
-The chatbot's usage logs stored the conversation text of 172 requests, all from one month during which message logging was turned on. Each request holds the conversation so far, and the evaluation uses only its latest user message. Two of these messages contain no words. Merging exact duplicates of the remaining 170 gives 148 distinct questions, and the main experiment samples 96 of them. These are called production questions. They come from one month of real use and do not represent use in general.
+The chatbot's usage logs stored the conversation text of 172 requests, all from one month during which message logging was turned on. Each request holds the conversation so far, and the evaluation uses only its latest user message. Two of these messages contain no words. Merging exact duplicates of the remaining 170 gives 148 distinct questions, and the controlled experiment samples 96 of them. These are called production questions. They come from one month of real use and do not represent use in general.
 
 The controlled experiments keep only the latest user message and leave out the conversation history. A follow-up that refers to an earlier answer can therefore lack the needed context when replayed. The production turns have a median length of 31.5 characters, much shorter than the email cases, and include conversational messages. Email and production results can differ because of length, task type, missing context, how the cases were chosen, language or script, so the two sets are reported separately.
 

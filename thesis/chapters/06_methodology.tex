@@ -127,7 +127,7 @@ The retrieval diagnostics are the number of empty contexts, the mean context len
 \subsection{Prompt comparison}
 \label{sec:method-prompt}
 
-A second experiment compares a baseline prompt with a revised one. Neither is the deployed prompt. It runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks, with forty further emails that were not in the main sample, and with strict completion as its main measure. The FAQ text matches the retrieval-policy experiment, but the document set is larger.
+A second, smaller experiment, the prompt comparison, compares a baseline prompt with a revised one. Where both are meant, the thesis calls them the controlled experiments. Neither is the deployed prompt. It runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks, with forty further emails that were not in the main sample, and with strict completion as its main measure. The FAQ text matches the controlled experiment, but the document set is larger.
 
 A 32-question development sample, balanced between email and production questions, compared current retrieval, AI-selected reference evidence and no evidence. It led to a revision of the prompt only, fixed before the comparison. The revised prompt checks dates and whether a rule applies to the student, instead of automatically favoring FAQs or higher-ranked text. It also keeps needed steps of a procedure and states important gaps.
 
@@ -136,11 +136,11 @@ The forty emails are the first forty of a shuffled reserve of 64 archive emails 
 \subsection{Changes to the plan}
 \label{sec:method-deviations}
 
-The retrieval-policy plan was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the primary contrast S0 minus G0, the reference and judgment procedures, the outcome categories and the analysis, and content hashes of the frozen inputs were recorded. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
+The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the primary contrast S0 minus G0, the reference and judgment procedures, the outcome categories and the analysis, and content hashes of the frozen inputs were recorded. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
 
 The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Some steps were added after outcomes had been observed. They are reported as such and replace no primary result. They are the refined wording of the research questions (with the same hypotheses, policies, outcomes and labels), the empty-reference sensitivity analysis, the Qwen run on the thirty control prompts, the check of rejected reference quotations, and the second grading of the prompt comparison. That grading used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
 
-The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The retrieval-policy experiment lacks a complete database snapshot, while the prompt comparison keeps one.
+The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The controlled experiment lacks a complete database snapshot, while the prompt comparison keeps one.
 
 \paragraph{Summary.}
 \begin{itemize}
