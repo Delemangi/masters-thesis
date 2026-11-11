@@ -9,7 +9,7 @@
   \node[st] (r) {\textbf{Reference}\\one per question, shared by all policies, quotations checked};
   \node[st,right=0.4cm of r] (a) {\textbf{Answer}\\generated per policy, identical prompts reused};
   \node[st,right=0.4cm of a] (j) {\textbf{Judge}\\sees one anonymous answer, the reference and the prompt};
-  \node[st,right=0.4cm of j] (l) {\textbf{Labels}\\seven categories and a material-claim flag};
+  \node[st,right=0.4cm of j] (l) {\textbf{Labels}\\six categories and three flags};
   \node[res,right=0.4cm of l] (g) {\textbf{Guard}\\success becomes uncertain if the reference fails its checks};
   \foreach \p/\q in {r/a,a/j,j/l,l/g} {
     \draw[arr] (\p) -- (\q);

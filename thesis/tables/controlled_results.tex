@@ -4,11 +4,11 @@
 \begin{table}[!htbp]
 \centering\small
 \setlength{\tabcolsep}{5pt}
-\caption[AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy]{AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy. Answer is the judge's supported-answer category, which can include conversational replies, and is not independently validated factual accuracy. Route is useful routing, Unsup. is unsupported material claim, Incomp. is incomplete, Abstain is unnecessary refusal, Uncert. is uncertain, and Fail is failure.}
+\caption[AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy]{AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy. Answer is the judge's supported-answer category, which can include conversational replies, and is not independently validated factual accuracy. Route is useful routing, Unsup. is unsupported material claim, Incomp. is incomplete, Refusal is an unnecessary refusal, Uncert. is uncertain, and Fail is failure.}
 \label{tab:luna-outcomes}
 \begin{tabular}{llrrrrrrrr}
 \toprule
-Frame & Policy & $N$ & Answer & Route & Unsup. & Incomp. & Abstain & Uncert. & Fail \\
+Frame & Policy & $N$ & Answer & Route & Unsup. & Incomp. & Refusal & Uncert. & Fail \\
 \midrule
 Email & G0 & 96 & 9 & 22 & 20 & 31 & 0 & 9 & 5 \\
 Email & G1 & 96 & 9 & 23 & 25 & 23 & 0 & 12 & 4 \\
@@ -20,7 +20,7 @@ Production & S0 & 96 & 25 & 27 & 11 & 24 & 4 & 4 & 1 \\
 Production & S1 & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
 \bottomrule
 \end{tabular}
-\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The primary assistance endpoint combines Answer and Route. Invalid-reference successes are retained as Uncert. Figure~\ref{fig:outcome-bars} plots G0 and S0.\end{minipage}
+\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The main measure, assistance, combines Answer and Route. Invalid-reference successes are retained as Uncert. Figure~\ref{fig:outcome-bars} plots G0 and S0.\end{minipage}
 \end{table}
 \begin{table}[!htbp]
 \centering\footnotesize

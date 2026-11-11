@@ -93,7 +93,7 @@
 
   \node[note,text width=16.35cm,anchor=north west] at (0,-6.55)
     {\textbf{Deployed path:} the agent calls knowledge-base search and MCP tools itself (solid and dashed two-way arrows).
-     \enspace \textbf{Bold border:} the controlled replay that was tested, in which retrieval and prompt construction run first and controlled Luna answers; the agent and MCP tools are skipped.\\
+     \enspace \textbf{Bold border:} the controlled replay that was tested, in which retrieval and prompt construction run first and controlled Luna answers. The agent and MCP tools are skipped.\\
      Dashed arrows: optional MCP tools, not evaluated in the replay. Stream resumption and monitoring are omitted.};
 \end{tikzpicture}}
 \caption[Chatbot architecture and the components tested]{Chatbot architecture and the components tested. In the deployed system the provider agent calls knowledge-base search as a tool alongside MCP tools. In the controlled configuration retrieval runs as a fixed step before generation, and the controlled replay exercises that path.

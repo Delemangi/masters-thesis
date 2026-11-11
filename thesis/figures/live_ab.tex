@@ -23,7 +23,7 @@
     \fill[black] ({0.085*\a},\y) circle (2.2pt);
   }
   \draw[black!40] (-5.4,-5.1) -- (8.9,-5.1);
-  \node[anchor=west] at (-5.4,-5.4) {\textbf{Not deployed}};
+  \node[anchor=west] at (-5.4,-5.4) {\textbf{No clear gain}};
   \foreach \y/\lab/\b/\a in {
       -6.1/{Hedge suppression (holdout 2)}/79.0/81.7,
       -6.8/{FAQ pointers (99)}/84.5/83.5,
@@ -39,6 +39,6 @@
   \fill[black] (6.8,0.5) circle (2.2pt);
   \node[right] at (6.95,0.5) {after};
 \end{tikzpicture}
-\caption[Correct rate before and after each change of the live system, for the comparisons that report one (set size in brackets)]{Correct rate before and after each change of the live system, for the comparisons that report one (set size in brackets). Table~\ref{tab:live-ab} explains each change in one line. Open circles show the baseline and filled circles the changed configuration. ``Hard'' sets contain emails that earlier runs answered wrongly, so their baseline is low and their gains are inflated. The first row is derived from counts (7 and 20 of 49). Rejected or not deployed changes are in grey. Comparisons that report other measures (refusals, empty lookups, broken links, hedge phrases) appear only in Table~\ref{tab:live-ab}.}
+\caption[Correct rate before and after each change of the live system, for the comparisons that report one (set size in brackets)]{Correct rate before and after each change of the live system, for the comparisons that report one (set size in brackets). Table~\ref{tab:live-ab} explains each change in one line. Open circles show the baseline and filled circles the changed configuration. ``Hard'' sets contain emails that earlier runs answered wrongly, so their baseline is low and their gains are inflated. The floor-and-rerank row is derived from counts (7 and 20 of 49). Changes without a clear gain are in grey: the hedge rule was rejected, the FAQ pointers were not deployed, and the rewritten FAQs were kept only because they are clearer. Comparisons that report other measures (refusals, empty lookups, broken links, hedge phrases) appear only in Table~\ref{tab:live-ab}.}
 \label{fig:live-ab}
 \end{figure}
