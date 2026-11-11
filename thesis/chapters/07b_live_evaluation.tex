@@ -28,7 +28,7 @@ All email questions come from the anonymized archive of 1,693 email and reply pa
 Set & $N$ & Origin and status \\
 \midrule
 Tuned emails & 334 & 158 emails from the hand-picked 240-email review pool (Chapter~\ref{ch:data}), after leaving out personal-record requests, spam and duplicates, and 176 from a second selection of about nine emails per topic group outside that pool. Reviewed during development, and every early fix and confirmed fact came from them, so the set is contaminated. \\
-Holdout 1 & 271 & Drawn at random by topic group from the remaining emails (Appendix~\ref{app:live-sampling}). Measured before any fix was aimed at it, but later fixes used its failures. Contaminated after its first measurement. \\
+Holdout 1 & 271 & Drawn at random by topic group from the remaining emails. Measured before any fix was aimed at it, but later fixes used its failures. Contaminated after its first measurement. \\
 Holdout 2 & 275 & Drawn after holdout 1 in the same way, and asked twice before fixes. Contaminated after the fixes aimed at it. \\
 Holdout 3 & 298 & The last unused archive emails. No fix was tuned on them. Final clean set. \\
 Real traffic & 109 & First question of each real conversation in a 30-day window before the first monitoring measurement. Used to find faults, so not held out. \\
@@ -37,7 +37,7 @@ Recent chats & 38 & New first questions arriving after the real-traffic window. 
 \end{tabularx}
 \end{table}
 
-The held-out sets were drawn with a fixed seed, and spread over 24 topic groups of the archive so that every topic is covered. The archive was already anonymized, and an extra pass by two language-model agents removed any names and signatures that were left (Appendix~\ref{app:live-sampling}). Rows that were not student questions were dropped, so the third set has 298 of the 303 eligible emails.
+A sampling script drew the held-out sets with the fixed seed 249053, stratified over the 24 topic groups of the archive so that every topic is covered. The topic groups play no part in the results. The script left out every email already used, rows with privacy signals, duplicates, rows marked unusable, and questions shorter than 40 or longer than 1,500 characters. It drew 304 and 289 emails for the first two sets, and the third set is the 303 eligible emails that remained. The archive was already anonymized, and an extra pass by two language-model agents removed any names and signatures that were left. Rows that were not student questions were then dropped (33, 14 and five), which gives 271, 275 and 298 emails.
 
 \subsection{Grading}
 
@@ -69,9 +69,11 @@ Two rules separate neighboring grades. An answer that gives part of an available
 
 For agreement between judges, the grades are compared in two ways: all five grades, and correct versus not correct, where \textsc{Partial}, \textsc{Wrong} and \textsc{Gap} are all not correct.
 
-\textbf{Evidence and reliability.} Before Stage~9, judges saw no tool output, which turned most tool-based answers into \textsc{Gap}. From Stage~9 on they see each answer's tool output (at most 4,000 characters per output and 12,000 per answer). Two independent sets of judges on the same 109 traffic answers agreed exactly on 98 rows (89.9 percent, Cohen's $\kappa=0.76$) and on 102 rows for correct versus not correct. Judges were unreliable at judging whether a detail was invented. At Stage~10, nine of 22 email rows called wrong for an invented date or URL were supported by the answer's own tool output. A script therefore checks every date, amount, URL and email address against the question and the full tool output (Appendix~\ref{app:live-check}). After one data fix for a guessed announcement URL, it flagged seven and six rows on the two runs of holdout 3 (plus four and three with only relative dates). All of them were derived details and none was invented. It also found a real defect. The bot sometimes rewrote long announcement URLs and broke them (Section~\ref{sec:live-ab}). The second measurement of holdout 2 and the hedge experiment were not checked this way.
+\textbf{Evidence and reliability.} Before Stage~9, judges saw no tool output, which turned most tool-based answers into \textsc{Gap}. From Stage~9 on they see each answer's tool output (at most 4,000 characters per output and 12,000 per answer). Two independent sets of judges on the same 109 traffic answers agreed exactly on 98 rows (89.9 percent, Cohen's $\kappa=0.76$) and on 102 rows for correct versus not correct. Judges were unreliable at judging whether a detail was invented. At Stage~10, nine of 22 email rows called wrong for an invented date or URL were supported by the answer's own tool output. A script therefore checks every date, amount, URL and email address against the question, the full tool output and the files of confirmed facts. It matches dates across formats (ISO, day-month, Macedonian and English month names, ranges) and amounts across number formats. After one data fix for a guessed announcement URL, it flagged seven and six rows on the two runs of holdout 3 (plus four and three with only relative dates). All of them were worked out from the sources and none was invented, for example fee totals added up from FAQ parts and the run date itself. It also found a real defect. The bot sometimes rewrote long announcement URLs and broke them (Section~\ref{sec:live-ab}). The second measurement of holdout 2 and the hedge experiment were not checked this way.
 
-\textbf{Run-to-run variation.} The same configuration run twice (runs $a$ and $b$) on holdout 2 differs in grade on 32 of 275 rows (12 percent, Opus grading), mostly between \textsc{Correct} and \textsc{Partial}. Between the two runs of a set, the correct rate differs by 0.3 to 1.9 points (Table~\ref{tab:live-holdout} and Appendix~\ref{app:live-grader}). Differences below about three points between single runs are treated as noise.
+\textbf{Run-to-run variation.} The same configuration run twice (runs $a$ and $b$) on holdout 2 differs in grade on 32 of 275 rows (12 percent, Opus grading), mostly between \textsc{Correct} and \textsc{Partial}. Between the two runs of a set, the correct rate differs by 0.3 to 1.9 points (Table~\ref{tab:live-holdout}). Differences below about three points between single runs are treated as noise.
+
+\textbf{Judge model.} The earlier Opus gradings of the same answers gave higher correct rates than Sonnet: 76.3 against 70.5 percent on holdout 1, and 78.6 and 80.5 against 77.0 and 77.3 percent on the two runs of holdout 2. The holdout 1 difference partly reflects the older rubric that Opus used there. On holdout 2 the two judges agreed exactly on 449 of 550 answers (81.6 percent) and on correct versus not correct for 484 of 550 (88.0 percent). On holdout 1 the figures are 203 of 271 (74.9 percent, including the effect of the rubric change) and 228 of 271 (84.1 percent). The same answers can also be graded differently in different batches. The Stage~10 run scored 84.0 percent when graded side by side with Stage~11, against 81.7 percent when graded alone.
 
 \subsection{Results on clean held-out sets}
 
@@ -104,7 +106,7 @@ Table~\ref{tab:live-holdout} and Figure~\ref{fig:live-holdout} give the central 
 
 The tuned set was measured at Stage~11 alongside the first holdout with Opus judges. It scored 87.8 percent correct (95 percent interval 83.7 to 91.0) and 1.3 percent wrong, against 76.3 and 2.3 percent on the first holdout under the same Opus grading. The tuned set therefore overstates how well the system does on new emails by 11.5 points. Most of the difference is in \textsc{Gap}. \textsc{Gap} was 7 percent of graded rows on the tuned set (21 of 312) and 13 percent on the first holdout.
 
-The judge model changes the correct rate by a few points. The Opus gradings of the same answers were higher than the Sonnet gradings by 1.6 to 5.8 points, and the two agreed exactly on 81.6 percent of holdout 2 answers (Appendix~\ref{app:live-grader}). The clean runs are therefore compared only with each other.
+The judge model changes the correct rate by a few points (Opus graded 1.6 to 5.8 points higher than Sonnet, see the grading section), so the clean runs are compared only with each other.
 
 The fixes aimed at the second holdout's failures raised it to 84.6 and 83.0 percent. Those runs were graded against the updated knowledge-base snapshot. The answers from before the fixes, graded in the same blind batch against the same snapshot, scored 72.7 percent correct and 10.7 percent wrong. The 11-point gain therefore comes partly from the fixes and partly from the changed reference, and it is not an estimate for new emails. The final set, untouched by any fix, returned 76.5 and 76.0 percent. This compares different sets and judges and does not measure transfer. Between 27 and 37 rows per clean run are N/A.
 
@@ -112,16 +114,70 @@ The fixes aimed at the second holdout's failures raised it to 84.6 and 83.0 perc
 
 \input{figures/live_stages}
 
-Figure~\ref{fig:live-stages} plots the full-set results of the development period on the tuned emails (the state of the system at each stage is in Table~\ref{tab:live-history}, Appendix~\ref{app:live-history}). The rubric and the evidence available to judges changed along the way, so stages can only be compared by whether the rate went up or down. Early improvement came mostly from turning gaps into answers through newly confirmed facts (\textsc{Gap} fell from 22.1 to 10.7 percent between Stages 1 and 2). The 18.9 percent wrong rate at Stage 2 was traced to two retrieval faults (Section~\ref{sec:live-ab}). Repairing them, together with further FAQ edits, reduced \textsc{Wrong} to 11.7 percent at Stage 3. The rise at Stage 10 was partly a grading mistake. Nine of the 22 wrong rows had no invented detail, and after correcting them the wrong rate was 4.1 percent, against 1.6 percent at Stage 9. The Stage 11 figure of 87.8 percent is on the set that supplied the fixes.
+Figure~\ref{fig:live-stages} plots the full-set results of the development period on the tuned emails, and Table~\ref{tab:live-history} gives the state of the system at each stage. The rubric and the evidence available to judges changed along the way, so stages can only be compared by whether the rate went up or down. Stages 1 to 8 were graded without tool evidence, so \textsc{Wrong} then means a missed or contradicted confirmed fact. Early improvement came mostly from turning gaps into answers through newly confirmed facts (\textsc{Gap} fell from 22.1 to 10.7 percent between Stages 1 and 2). The 18.9 percent wrong rate at Stage 2 was traced to two retrieval faults (Section~\ref{sec:live-ab}). Repairing them, together with further FAQ edits, reduced \textsc{Wrong} to 11.7 percent at Stage 3. The rise at Stage 10 was partly a grading mistake. Nine of the 22 wrong rows had no invented detail, and after correcting them the wrong rate was 4.1 percent, against 1.6 percent at Stage 9. The Stage 11 figure of 87.8 percent is on the set that supplied the fixes.
 
-The 109 real first questions and the 38 recent questions served as monitoring sets (Table~\ref{tab:live-traffic}, Appendix~\ref{app:live-traffic}). The first measurement compared the answers students had received with the build current at that time. The received answers were 40.0 percent correct and 27.0 percent wrong, against 57.7 and 4.1 percent for the build. From the first run with tool evidence on, both sets stay between about 82 and 90 percent correct, with mostly zero to three percent wrong. These questions guided fixes, so they say little about new emails.
+\begin{table}[htbp]
+\centering
+\caption[Development history on the 334 tuned emails (grading at the time, not clean)]{Development history on the 334 tuned emails (grading at the time, not clean). \textsc{Gap} is the share of graded rows where reported.}
+\label{tab:live-history}
+\small
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xrrr@{}}
+\toprule
+Stage & State of the system & Correct \% & Wrong \% & \textsc{Gap} \% \\
+\midrule
+1 & After first FAQ fixes, fixed retrieve-then-generate pipeline & 59.0 & 19.0 & 22.1 \\
+2 & After a review of all FAQs by the author and document titles that name the study cycle & 70.4 & 18.9 & 10.7 \\
+3 & Context floor lowered to 0.03, reranking on the original question, FAQ edits (the retrieval repairs) & 78.0 & 11.7 & 10.3 \\
+4 & Fixed pipeline, graded pairwise with Stage 5 & 75.9 & 8.9 & 12.0 \\
+5 & Agent searches the knowledge base itself (experimental version, graded side by side with Stage 4) & 83.8 & 1.4 & 12.0 \\
+6 & Agent search as deployed (graded alone) & 78.9 & 3.1 & n/a \\
+7 & Step limit and announcement scope fixes & 80.6 & 2.4 & n/a \\
+8 & Hedging and query-planning prompt rules, FAQ edits & 80.5 & 1.4 & 12.3 \\
+9 & First run with tool evidence available to judges & 81.9 & 1.6 & n/a \\
+10 & After further FAQ edits (104 FAQs) & 81.7 & 6.9 & n/a \\
+11 & After link fix and FAQ edits (graded side by side with Stage 10) & 87.8 & 1.3 & n/a \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The 109 real first questions and the 38 recent questions served as monitoring sets. The first measurement compared the answers students had received with the build current at that time. The received answers were 40.0 percent correct and 27.0 percent wrong, against 57.7 and 4.1 percent for the build. From the first run with tool evidence on, both sets stay between about 82 and 90 percent correct, with mostly zero to three percent wrong. These questions guided fixes, so they say little about new emails.
+
+\textbf{Latency.} Sequential runs at Stages~9 and 10 gave a median time to first token of 5.0 to 5.4 seconds (90th percentile 10.7 to 13.6 seconds). Concurrent runs make this figure larger, so they are not used for latency.
 
 \subsection{A/B comparisons on the live system}
 \label{sec:live-ab}
 
-Individual changes were compared in A/B runs on test containers with the same questions, two configurations and blind grading. Some comparisons use hard sets, which are emails that earlier runs answered wrongly. Figure~\ref{fig:live-ab} shows the correct rate before and after each change that reports one. The full list is Table~\ref{tab:live-ab} in Appendix~\ref{app:live-ab}.
+Individual changes were compared in A/B runs on test containers with the same questions, two configurations and blind grading. Some comparisons use hard sets, which are emails that earlier runs answered wrongly. Figure~\ref{fig:live-ab} shows the correct rate before and after each change that reports one. Table~\ref{tab:live-ab} lists every comparison with its questions and counts.
 
 \input{figures/live_ab}
+
+\begin{table}[htbp]
+\centering
+\caption[A/B comparisons on the live system]{A/B comparisons on the live system. ``Hard'' sets contain emails that earlier runs answered wrongly, which exaggerates gains compared with a random sample. Each comparison was graded in its own batch, so a baseline can differ from Table~ef{tab:live-history}.}
+\label{tab:live-ab}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.11\linewidth}@{}}
+\toprule
+Change & Questions & Result & Outcome \\
+\midrule
+Floor 0.10 to 0.03 and rerank on the original question & 49 wrongly answered emails, 21 short control questions with known answers & Correct emails 7, then 15 to 17, then 20. Wrong 27, then 20 to 22, then 18. Controls stayed correct (20 of 21). Both arms reranking on the original question gained on the same 12 rows. & Deployed \\
+Agent searches the knowledge base itself & Same 70, then 334 emails & Hard emails correct 25 to 39 (wrong 13 to 2). 334 emails 75.9 to 83.8 percent correct, 8.9 to 1.4 percent wrong (better on 32 rows, worse on 8). & Deployed \\
+Step limit and announcement scope & 334 emails & Empty answers 3 to 0. 78.1 to 80.6 percent correct, 5.7 to 2.4 percent wrong. & Deployed \\
+Second round of prompt rules: query planning, explain procedures, both meanings & 97 hard questions (96 graded rows) & Correct 72.9 to 84.4 percent, wrong 9.4 to 4.2. Better on 17 rows, worse on 4 (sign test $p\approx0.007$). & Deployed \\
+Scope and language rule & 109 traffic questions & Wrong 6.1 to 0.0 percent (six wrong answers became refusals or correct answers). Correct 53.1 to 57.1. & Deployed \\
+Narrower scope & Two borderline questions about the faculty, 15 repeats each & Wrongly refused 10 of 30 to 0 of 30. & Deployed \\
+Course syllabus tool & 24 course-content questions, 109 traffic & Correct 20.8 to 100 percent, wrong 62.5 to 0 on the course questions. Traffic within noise. & Deployed \\
+Exact program codes for curriculum tools & 63 course and curriculum questions & Lookups returning nothing 34 to 2. & Deployed \\
+No naming of sources & 109 traffic questions & Answers naming a source 31 to 1 of 109. Correct 77.1 to 80.2 percent. & Deployed \\
+URLs: prompt rule to copy characters exactly vs.\ short links & 334 + 109 + 38 questions & Broken announcement links 8 of 82 (baseline), 7 of 85 (rule), 0 of 78 (short links). & Short links deployed \\
+\midrule
+Hedge-suppression rule & 14 hedged rows $\times4$, holdout 2 and traffic & Hedge phrases 30 to 16 of 56 answers, but holdout 2 79.0 to 81.7 percent correct (wrong 1.2 to 2.4) and traffic 85.6 to 82.5. Seven rows had unsupported dates, fees or procedures (no baseline count). & Rejected \\
+Following FAQ pointers in retrieval (links from a large FAQ to smaller FAQs that hold the facts) & 99 questions & Correct 84.5 to 83.5, wrong 2.1 to 5.2 percent. Extra FAQ blocks distracted as often as they helped. & Not deployed \\
+Rewriting 38 pointer FAQs to state the key fact & 334 emails & 83.6 to 81.3 percent correct, within noise. & Kept for clearer FAQs \\
+Rule against naming sources in English answers & 32 questions $\times2$ & 15 to 11 of 64 answers, within noise. The remaining phrase is a hedge. & Not deployed \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 Changes to evidence selection, tools and prompts each helped on some sets. The changes were measured on different sets. The floor, agent-search and second-round prompt comparisons (rules for query planning, explaining procedures and treating both meanings of a term) used hard sets, so their gains are inflated and cannot be ranked against each other. The author found the two causes of the Stage 2 wrong rate by reading the wrong answers together with the sources the bot had retrieved. One was the reranker context floor of 0.10 (passages scoring below it are dropped), which all four policies of the controlled experiment kept for FAQs. The other was reranking against the model's rewrite instead of the student's wording. In that run 106 of 334 answers had no visible sources, and these were wrong in 38 percent of graded cases (30 of 80) against 12 percent for the others (25 of 211). Lowering the floor to 0.03 and reranking against the original question gave large gains on the hard set (Table~\ref{tab:live-ab}). The reranker gives long, multi-topic emails low absolute scores even when its ranking is right. In 30 of the 49 wrongly answered emails the expected FAQ was among the candidates, but 29 of these 30 scored below 0.10. The value 0.03 was chosen by comparing three floors on the same 49 emails. The expected FAQ reached the top ten in 28.6 percent of them at 0.10, 42.9 percent at 0.03 and 44.9 percent at 0.01. The floor of 0.03 was chosen because it came close to 0.01 while still dropping the lowest-scoring passages. Only 0.10 and 0.03 were then compared end to end. These values are specific to BGE-reranker-v2-m3. Another reranker spreads its scores differently and would need its own floor. The decision model of Section~\ref{sec:live-decisions} shows this. Its scores are probabilities on a different scale, and with the same 0.03 floor it dropped loosely related passages that the cross-encoder kept. The controlled finding that selection changes do not help therefore applies only to the document threshold. Moving retrieval into the agent replaced the fixed pipeline and, on the hard set, removed most wrong answers.
 

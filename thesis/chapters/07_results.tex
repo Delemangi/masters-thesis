@@ -1,7 +1,7 @@
 \section{Results and diagnostic analysis}
 \label{ch:results}
 
-Lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but the share of good answers does not clearly rise. Secondary analyses are in Appendix~\ref{app:secondary}.
+Lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but the share of good answers does not clearly rise.
 
 \subsection{Completion of the runs}
 
@@ -56,7 +56,7 @@ Production & Mean context characters & 1,010 & 5,808 \\
 
 Empty contexts have two causes. Under G0, candidates were retrieved but none reached the 0.10 floor in 33 of the 36 empty email contexts and 27 of the 76 empty production contexts. Under S0 the document floor is 0.00, so these candidates are kept. For most S0 contexts that stay empty, the saved replay holds no candidate at all (all three email and 49 of the 52 production contexts). Examples include greetings and very short or off-topic messages. In the other three production cases, only FAQ candidates were found and they fell below the FAQ floor of 0.10.
 
-Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. Two cases chosen afterwards show the pattern and say nothing about how often it occurs (Appendix~\ref{sec:illustrations}).
+Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. It was chosen afterwards by a rule that ignores outcomes: among 72 cases with a valid, non-empty reference, completed answers under both policies and a strictly longer S0 context, it has the smallest fixed hash of its identifier. The question asks whether admission under a special category drops the tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters), and S0 selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
 
 \subsection{Reference quality and the guard}
 \label{sec:reference-quality}
@@ -79,7 +79,7 @@ Production & 25 & 63 & 8 & 96 \\
 
 The 182 passing references include 76 with no retained facts, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no fact to miss.
 
-A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the G0 and S0 totals become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. An offline audit of the rejected quotations suggests how references could be repaired and changes no labels (Appendix~\ref{sec:quote-audit}).
+A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the G0 and S0 totals become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. A check made afterwards found 32 of the 49 rejected main quotations in a different source block of the same pool and seventeen nowhere in it. This can guide repairs to the references, and it changes no labels.
 
 \subsection{Judge consistency and disagreement between models}
 
@@ -106,15 +106,16 @@ The models differ in size, in quantization (a smaller numeric format for the mod
 For the assistance labels, with the original guard and without pilot answers, repeated Luna agrees in 38 of 40 usable pairs (95.0\%), with fourteen assistance labels in each run. Qwen agrees in 25 of 38 pairs (65.8\%). Nine losses and four gains reduce its assistance count from thirteen to eight. The shared guard can inflate agreement. The check does not show which judge is correct and does not recompute the policy effect.
 
 \subsection{Component study with a local generator}
+\label{sec:component-study}
 
-A separate component study used a simplified retrieval path and a local Qwen3-8B generator (Appendix~\ref{sec:component-study}). It has 306 test cases with positive AI relevance judgments. For each case, nDCG@10 measures how high the relevant passages rank among the candidates in the pool (higher is better). It rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a group-bootstrap interval of $[0.124,0.166]$, and independently built reference labels make the gain smaller (0.050 instead of 0.201 on a 24-case audit, Appendix~\ref{sec:component-study}). Together with the controlled experiment, this is a main finding. The separate-threshold policy ranks the relevant passages higher within the pool, yet no gain appears in the assessed answers. The AI audit of this study cannot be combined with the Luna assessment.
+The component study came before the controlled experiment. It used a simplified retrieval path, a locally served Qwen3-8B generator and a fixed corpus of 74 FAQs and 1,403 chunks from nineteen documents, with the 24-email development set and the 320-email random sample (Chapter~\ref{ch:data}). Ranking was measured against AI relevance judgments of each candidate pool and answers by an AI judge. It has 306 test cases with positive AI relevance judgments. For each case, nDCG@10 measures how high the relevant passages rank among the candidates in the pool (higher is better). It rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a group-bootstrap interval of $[0.124,0.166]$, and independently built reference labels make the gain smaller (0.050 instead of 0.201 on a 24-case audit). That separate AI audit covered 24 random test cases with their own references and 48 answers, of which 44 were completed. It flagged unsupported important claims in 31 of the 44 and matched the primary category in only 12. These findings led to testing threshold and fallback separately in the controlled experiment. Together with the controlled experiment, this is a main finding. The separate-threshold policy ranks the relevant passages higher within the pool, yet no gain appears in the assessed answers. The AI audit of this study cannot be combined with the Luna assessment.
 
 \subsection{Prompt comparison}
 \label{sec:results-prompt}
 
-The prompt comparison (Section~\ref{sec:method-prompt}) asks whether a revised prompt improves strict completion on forty emails. In a 32-question development sample used to write the revised prompt, giving the model AI-selected evidence instead of normal retrieval raises the share of reference facts covered by the answers from 29/73 to 50/73 and strict completion from 4/32 to 6/32 (Appendix~\ref{sec:prompt-development}).
+The prompt comparison (Section~\ref{sec:method-prompt}) asks whether a revised prompt improves strict completion on forty emails. In a 32-question development sample used to write the revised prompt, giving the model AI-selected evidence instead of normal retrieval raises the share of reference facts covered by the answers from 29/73 to 50/73 and strict completion from 4/32 to 6/32. With no evidence at all, the answers reach 4/32 strict completions and 14/73 facts.
 
-In the forty-question comparison the first judge did not see part of the evidence given to the generator. It flagged fifteen citation errors per condition, while a rule-based check found one per condition. All pairs were therefore graded again with the full generation context, new scope guidance and a 1,024-token limit on the judgment (Appendix~\ref{sec:method-deviations}). This audit is the reported result (Table~\ref{tab:prompt}).
+In the forty-question comparison the first judge did not see part of the evidence given to the generator. It flagged fifteen citation errors per condition, while a rule-based check found one per condition. All pairs were therefore graded again with the full generation context, new scope guidance and a 1,024-token limit on the judgment (Section~\ref{sec:method-deviations}). This audit is the reported result (Table~\ref{tab:prompt}).
 
 \begin{table}[t]
 \centering\small
@@ -136,7 +137,7 @@ Under the audit the revised prompt changes strict completion from 6/40 to 5/40. 
 
 \subsection{Delivery, latency and cost}
 
-Production telemetry, generation latency and estimated cost are reported in Appendix~\ref{sec:delivery}. The telemetry comes from the deployed system. It records 699 request events over 69 days, with a median generation time of 12.2 seconds and a 95th percentile of 37.2 seconds. The latency and cost figures describe the fixed path only, with median hosted-call times of 2.1 seconds for email and 1.5 for production. Chapter~\ref{ch:live} measures the deployed agent.
+The production telemetry comes from the deployed system, with the author's own test requests removed. It records 699 request events over 69 days, with a median generation time of 12.2 seconds and a 95th percentile of 37.2 seconds. The latency and cost figures describe the fixed path only, with median hosted-call times of 2.1 seconds for email and 1.5 for production. Chapter~\ref{ch:live} measures the deployed agent.
 
 \paragraph{Summary.}
 \begin{itemize}
