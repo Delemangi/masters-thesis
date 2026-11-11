@@ -4,7 +4,7 @@
 \begin{table}[!htbp]
 \centering\small
 \setlength{\tabcolsep}{5pt}
-\caption{AI-assessed outcome categories with all 96 selected cases retained per frame and policy. Answer denotes the judge category, which can include conversational replies; it is not independently validated factual accuracy.}
+\caption[AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy]{AI-assessed outcome categories (controlled configuration, not the deployed settings) with all 96 selected cases retained per frame and policy. Answer is the judge's supported-answer category, which can include conversational replies, and is not independently validated factual accuracy. Route is useful routing, Unsup. is unsupported material claim, Incomp. is incomplete, Abstain is unnecessary abstention, Uncert. is uncertain, and Fail is failure.}
 \label{tab:luna-outcomes}
 \begin{tabular}{llrrrrrrrr}
 \toprule
@@ -20,12 +20,12 @@ Production & S0 & 96 & 25 & 27 & 11 & 24 & 4 & 4 & 1 \\
 Production & S1 & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
 \bottomrule
 \end{tabular}
-\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The primary assistance endpoint combines Answer and Route. Invalid-reference successes are retained as Uncert.\end{minipage}
+\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The primary assistance endpoint combines Answer and Route. Invalid-reference successes are retained as Uncert. Figure~\ref{fig:outcome-bars} plots G0 and S0.\end{minipage}
 \end{table}
 \begin{table}[!htbp]
 \centering\footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Paired assistance differences in percentage points, with 95\% question-group bootstrap intervals (20,000 resamples). Intervals condition on AI labels and do not correct judge error.}
+\caption[Paired assistance differences in percentage points for the controlled configuration, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples)]{Paired assistance differences in percentage points for the controlled configuration, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples). Intervals are conditional on the AI labels and do not correct judge error. G0, G1, S0 and S1 are the retrieval policies defined in Table~\ref{tab:thesis-policies}. Figure~\ref{fig:policy-effects} plots the same estimates.}
 \label{tab:luna-effects}
 \begin{tabular}{lrr}
 \toprule

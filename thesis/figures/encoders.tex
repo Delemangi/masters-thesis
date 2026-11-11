@@ -1,0 +1,35 @@
+% Dual encoder (dense retrieval) against cross-encoder (reranking). Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  b/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,execute at begin node={\hyphenpenalty 10000 },minimum height=.8cm,inner sep=3pt},
+  s/.style={b,fill=black!6},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  head/.style={font=\small\bfseries,align=center,text width=6.4cm}
+]
+  % Panel A: dual encoder
+  \node[head] at (3.0,6.6) {Dual encoder (dense retrieval)};
+  \node[b,text width=2.5cm] (qa) at (1.4,5.4) {Question $q$};
+  \node[b,text width=2.5cm] (pa) at (4.6,5.4) {Passage $d$};
+  \node[s,text width=2.5cm] (fq) at (1.4,3.8) {Query encoder $f_q$};
+  \node[s,text width=2.5cm] (fd) at (4.6,3.8) {Passage encoder $f_d$};
+  \node[b,text width=2.5cm] (eq) at (1.4,2.1) {Embedding of $q$};
+  \node[b,text width=2.5cm] (ed) at (4.6,2.1) {Embedding of $d$, stored in advance};
+  \node[b,text width=4.8cm] (sa) at (3.0,0.3) {Score: inner product $f_q(q)^{\mathsf{T}}f_d(d)$};
+  \draw[flow] (qa) -- (fq); \draw[flow] (fq) -- (eq);
+  \draw[flow] (pa) -- (fd); \draw[flow] (fd) -- (ed);
+  \draw[flow] (eq) -- (eq |- sa.north); \draw[flow] (ed) -- (ed |- sa.north);
+
+  % Panel B: cross-encoder
+  \node[head] at (10.4,6.6) {Cross-encoder (reranking)};
+  \node[b,text width=4.4cm] (in) at (10.4,5.4) {Question $q$ and passage $d$ together};
+  \node[s,text width=4.4cm] (ce) at (10.4,3.8) {One model reads both texts at once};
+  \node[b,text width=4.4cm] (sb) at (10.4,2.1) {Score: relevance $r(q,d)$};
+  \node[b,text width=4.4cm] (rk) at (10.4,0.3) {Reorder the candidates and drop those below the floor};
+  \draw[flow] (in) -- (ce); \draw[flow] (ce) -- (sb); \draw[flow] (sb) -- (rk);
+
+  \draw[dashed,black!40] (7.0,7.0) -- (7.0,-0.4);
+\end{tikzpicture}
+\caption[Dual encoder and cross-encoder]{Dual encoder and cross-encoder, drawn after the setups of Karpukhin et al.~\cite{karpukhin2020dpr} and Nogueira and Cho~\cite{nogueira2019bertrerank}. A dual encoder turns the question and each passage into embeddings separately, so passage embeddings can be computed once and searched quickly. A cross-encoder reads the question and one passage together, which is slower but usually ranks better, so it is used only to rescore a short list of candidates. The chatbot uses BGE-M3 as the dual encoder and BGE-reranker-v2-m3 as the cross-encoder, and its score floors apply to the cross-encoder score $r(q,d)$.}
+\label{fig:encoders}
+\end{figure}

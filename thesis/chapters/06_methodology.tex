@@ -1,17 +1,21 @@
 \section{Evaluation methodology}
 \label{ch:methodology}
 
+This chapter describes the controlled experiment, a fixed retrieve-then-generate setup in which four retrieval policies are compared on the same questions. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from. Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Appendix~\ref{app:protocol} gives protocol and accounting details.
+
+\input{figures/eval_dataflow}
+
 \subsection{Purpose and comparison design}
 
-The controlled experiment asks whether two evidence-selection choices change responses to institutional questions. Production retrieval and prompt construction are reused, while generation runs through a controlled hosted client, so the conclusions apply to this narrower execution path.
+The experiment asks whether two choices about selecting evidence change the responses to institutional questions. It reduces the deployed system to the controlled configuration, which replaces the agent with one retrieval call and one generation call. Production retrieval and prompt construction are reused. The conclusions apply only to this narrower path.
 
-The main sample contains 192 questions, divided equally between email and production frames, preceded by a separate 20-question email pilot. Sampling uses seed 24905307 and retained manifests. The email questions had already been examined in the component study, and the production sample consists of selectively recorded latest turns. Chapter~\ref{ch:data} explains why neither frame is a complete population of student needs.
+The main sample contains 192 questions, divided equally between anonymized email questions and production questions (the two frames). A separate pilot of 20 emails from the development set (Chapter~\ref{ch:data}) came before it. Sampling uses seed 24905307 (a fixed number that makes a random draw repeatable) and saved manifests. The email questions had already been examined in the component study (Appendix~\ref{sec:component-study}). The production sample takes the latest message of each recorded conversation, and the chatbot recorded the text of only some requests. Chapter~\ref{ch:data} explains why neither frame shows everything students need.
 
-The policies cross two factors: the document score floor and whether an all-below-floor fallback is enabled. The FAQ floor stays at 0.10. The document floor is 0.10 in the shared-threshold policies and 0.00 in the separate-threshold policies. G0 and S0 disable fallback; G1 and S1 enable it. 
+The four policies cross two factors. The first is the document score floor, the minimum reranker score for a document chunk to enter the prompt. The second is a fallback that keeps the best candidate when every candidate falls below the floor. The FAQ floor stays at 0.10. The document floor is 0.10 in the shared-threshold policies (G0 and G1) and 0.00 in the separate-threshold policies (S0 and S1). G0 and S0 turn the fallback off, and G1 and S1 turn it on.
 
 \begin{table}[htbp]
 \centering
-\caption{Frozen retrieval policies. The source-display threshold remains 0.30 and the final candidate budget remains ten in every policy.}
+\caption[Retrieval policies of the controlled configuration, not the deployed settings]{Retrieval policies of the controlled configuration, not the deployed settings. The source-display threshold remains 0.30 and the final candidate budget remains ten in every policy.}
 \label{tab:thesis-policies}
 \begin{tabular}{lrrc}
 \toprule
@@ -25,117 +29,109 @@ S1 & 0.10 & 0.00 & On \\
 \end{tabular}
 \end{table}
 
-The primary contrast is S0 minus G0, which changes the document floor with fallback disabled. S1 minus G1 examines the same change with fallback enabled. G1 minus G0 and S1 minus S0 examine fallback under each threshold, and the interaction asks whether the fallback effect differs between them.
+The primary contrast is S0 minus G0. The other contrasts repeat it with the fallback on, examine the fallback under each threshold, and test whether the fallback effect differs between thresholds (the interaction). The fallback applies only when no candidate from either corpus is above the floor, so under S0 it may change nothing.
 
-The fallback retains the single highest-scoring candidate only when no candidate from either corpus survives the floor; it is not applied per corpus. If a document already survives under S0, enabling fallback may change nothing. A separate application recovery path for reranker failure, which uses dense ordering, is not the policy treatment: an occurrence is counted as an execution error.
+The deployed system uses a single shared context floor of 0.03 and reranks against the original question. This matches none of the four policies, so the results do not evaluate the deployed system.
 
-\subsection{Production retrieval capture and replay}
+\subsection{Retrieval capture and replay}
 
-The inspected API source files match local files by SHA-256. The evaluation imports the production retrieval function and captures candidate order, source content, dense and lexical retrieval results, and neighboring document chunks. Each policy thus sees the same captured evidence.
+The evaluation imports the production retrieval function and saves the candidate order, the source text, the dense and lexical results and the neighboring document chunks, so each policy sees the same evidence. The saved candidates contain 9,329 rows, one for each time a passage was a candidate for a question, covering 681 unique identifiers. The text used for reranking is identical whenever an identifier repeats, so the saved batches agree with each other. They are not a snapshot of the whole database.
 
-Database capture uses server-enforced read-only repeatable-read transactions. Each gives a consistent view within its batch, but separate batches may observe different moments, so the study checks repeated source content across batches instead of claiming one snapshot. The retained candidates contain 9,329 occurrences covering 681 unique identifiers, and no repeated identifier has conflicting text for reranking. This supports consistency of the captured material, not of uncaptured records or future live queries.
+BGE-M3 embeddings and BGE-reranker-v2-m3 scores are computed by importing the deployed GPU modules separately~\cite{chen2024m3,baaiBgeRerankerV2M3} and saved for reuse. Replay changes only the comparison with the score floor and the fallback condition. The limit on candidates, the ordering and the source display stay fixed, and scores equal to the floor remain eligible. Raw retrieval allows up to 31 dense candidates per corpus before merging. A passage may enter the context without reaching the 0.30 source-display floor.
 
-BGE-M3 query embeddings and BGE-reranker-v2-m3 scores are computed through isolated imports of the deployed GPU modules~\cite{chen2024m3,baaiBgeRerankerV2M3} and saved for reuse. Link reranking is captured separately, so the threshold experiment cannot change link selection.
+\subsection{The controlled generation boundary}
 
-Replay applies two controlled changes to the production function's abstract syntax tree: the score-floor comparison and the fallback condition. Candidate budgets, ordering, FAQ priority, neighboring-chunk expansion and source-display behavior remain fixed. Raw retrieval allows up to 31 dense candidates per corpus before merging and any permitted lexical expansion; the final budget is ten. Scores equal to the floor remain eligible.
+The main query mode is raw. It uses neither query rewriting nor generation of hypothetical documents (HyDE)~\cite{gao2023hyde}, both of which cost extra model calls. The experiment also excludes conversation history and remote MCP tools. Chapter~\ref{ch:live} evaluates the agent that calls search itself.
 
-The context floor for documents can be 0.10 or 0.00, but the source-display floor remains 0.30. A passage may therefore enter the generation context without becoming a visible source card; more model context need not mean more evidence shown to the student.
+The application's own code builds the prompts, and the evaluation run sends each saved prompt to the model through the Chat Completions API with set limits. Production uses the Responses API and an agent instead, and the two routes were not given identical settings. The prompt date is fixed, and the elements listed in Chapter~\ref{ch:architecture} are left out. The measured generation latency does not include channel delivery, admission or live tool execution.
 
-\subsection{The evaluated generation boundary}
+The chat schema still applies and rejects questions longer than 2,000 characters. Four main email questions exceed this limit. The experiment keeps each of them in all four policy denominators. It records the resulting sixteen rejections of the input and does not shorten the questions or write substitute answers. Each set and policy therefore contains 96 selected cases, and 92 email and 96 production cases reach generation. Failed judgments are kept as well.
 
-The primary query mode is raw, without paid query rewriting or hypothetical-document generation. The experiment also excludes conversation history, remote MCP tools, individual committee transactions, HTTP authorization, quota accounting, reverse-proxy behavior and browser interaction. The run is therefore not a test of the complete deployed agent.
+Luna is the GPT-5.6 Luna model, accessed through an OpenAI-compatible gateway. The gateway reports a versioned identifier. The manifests record it. The gateway is an outside service, so what model stands behind the identifier cannot be checked. Generation uses reasoning effort none (the model does not spend extra thinking steps before it answers), a 1,024-token limit (the maximum answer length, where a token is a small piece of a word), no retry and the gateway's default sampling. Identical question, prompt bytes and settings share one generated answer (Appendix~\ref{sec:method-accounting}).
 
-The application's \texttt{handle\_chat} function constructs the system and user prompts, retaining interface instructions, empty-context wording, useful links and a fixed date of 07.09.2026. The evaluator intercepts the call before production provider dispatch and sends the captured prompt through a bounded Chat Completions client, whereas production uses a Responses/agent path; the two transports are not shown to have identical defaults or tool behavior.
+\subsection{References and answer assessment}
 
-Luna is the requested model alias \texttt{gpt-5.6-luna}, accessed through an OpenAI-compatible gateway that reports \texttt{gpt-5.6-luna-}\allowbreak\texttt{2026-07-09}; this identity is recorded but not independently certified. Generation uses reasoning effort none, a 1,024-token output limit, no automatic retry and the gateway's default sampling settings. The application's temperature and top-$p$ values are retained as metadata but not sent.
+Luna builds one reference per question, shared by all policies. It uses the question and a limited pool of evidence and does not see the answers to be judged. The same model family builds the references, generates the answers and judges them, so errors specific to this model can remain.
 
-\subsection{Prompt identity, reuse and execution accounting}
+\input{figures/assessment_pipeline}
 
-When question, prompt bytes and generation settings are identical across policies, the evaluator reuses one generated answer. Unique requests are shuffled with a fixed seed. Reuse prevents artificial policy differences caused only by independent samples.
+The pool takes FAQ records and document chunks in turn, up to eight of each. Each contributes at most its first 1,400 characters, within a total of 12,000. The pool can miss a needed provision and favors evidence that retrieval already found. So the reference is not fully independent of the system studied.
 
-The four policies produce 768 nominal main question--policy records. Sixteen input rejections leave 752 eligible records, which map to 354 unique main generation calls (195 email, 159 production); reuse accounts for the remaining 398. The pilot adds 39 unique calls, kept separate from the main estimates.
+The reference records whether the question can be answered, the required facts with source identifiers and quotations, the required action, whether the information is up to date, and the uncertainty. Code checks that each quotation occurs in its named source (the reference check). Facts that fail leave the checked list, and the reference is marked uncertain. A supported-answer or useful-routing label then becomes uncertain. This downgrade rule is called the guard. Negative judgments stay as recorded. This catches invented quotations and quotations credited to the wrong source, but it does not check whether a quotation really supports the fact. References with no retained facts can pass. For a real question, an empty list of facts means completeness is not checked. The results therefore report empty references in a separate analysis made after the main one, which does not replace the main measure.
 
-Execution outcomes are preserved: a rejected input, incomplete output, transport problem or invalid assessment cannot become a success by leaving the denominator. Reused answers remain linked to every policy they represent, so one assessment problem can appear in several policy records; the results distinguish unique failed judgments from the nominal outcomes they map to.
+The primary judge sees one anonymous candidate answer, its question, the common reference and the exact generation prompt. It does not see the policy label or earlier judgments. Its output is short, and the per-claim lists proposed at first were not implemented (Appendix~\ref{sec:method-deviations}). The judge returns one overall category for each answer, together with flags and evidence quotations. Table~\ref{tab:categories} defines the six categories and shows how each one enters the main measure. A seventh outcome, failure, is not chosen by the judge. The analysis assigns it when the application rejects the input, generation fails or the judgment cannot be used.
 
-Capture and replay block the application's HTTP dispatch and do not run migrations, save conversations, change quotas or initialize production analytics, so no synthetic questions enter the historical usage observations reported later.
+\begin{table}[htbp]
+\centering
+\caption[Outcome categories of the controlled experiment and how they are counted]{Outcome categories of the controlled experiment and how they are counted. Assistance, the main measure, is one for supported answer and useful routing and zero for everything else.}
+\label{tab:categories}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.17\linewidth}@{}}
+\toprule
+Category & Meaning & Counted as \\
+\midrule
+Supported answer & A direct answer that contains the reference's facts and conditions, with no unsupported material claim and no wrong citation. & Assistance \\
+Useful routing & A needed clarification, advice to check information that is still unclear, or a referral to the right service, with the required facts and no material error. It must not claim a private transaction (such as a submitted request) that never happened. & Assistance \\
+Unsupported material claim & The answer contains a material claim that the evidence contradicts or does not support. & No assistance \\
+Incomplete answer & No material error, but a required fact, condition or step is missing, or a citation is wrong. & No assistance \\
+Unnecessary refusal & The answer refuses, although the evidence was enough to answer. & No assistance \\
+Uncertain & Essential evidence is unresolved or the reference failed its check, so the answer cannot be judged. & No assistance \\
+Failure & Assigned by the analysis, not the judge: rejected input, failed generation or an unusable judgment. & No assistance \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\subsection{Reference construction before answer assessment}
+When more than one category could apply, the judge follows a fixed order: unsupported material claim first, then uncertain, unnecessary refusal, supported answer and useful routing. An answer that fits none of these is an incomplete answer. A material claim is one about important information such as eligibility, fees, deadlines, binding procedures or whether a transaction was completed. Besides the category, the judge sets flags for an unsupported material claim, for whether all required facts are covered and for whether citations are supported. Each flag can be true, false or unspecified, which changes the denominator when flag agreement is computed. A format check rejects records that contradict themselves, for example a supported answer with an unsupported material claim, but a record that passes may still be wrong.
 
-Before candidate answers are evaluated, Luna builds one reference per question, shared by all policies. The reference prompt sees the question and a bounded evidence pool but not the answers to be judged. Because the same model family builds references, generates answers and judges them, model-specific errors are not eliminated.
+For example, an AI-authored control about credit recognition gives only the 50-denar fee (the denar is the Macedonian currency) and omits the certificates and submission steps. The fee is supported, but the answer is incomplete. The control illustrates the grading rubric and is not fee advice.
 
-The source pool alternates between up to eight FAQ records and eight document chunks, ordered by score within each type. Each source contributes at most its first 1,400 characters, within a total of 12,000. The pool can omit a necessary provision or truncate a condition, and it favors evidence already found by retrieval, which limits the reference's independence from the system being studied.
+\subsection{Tuning and assessment sensitivity}
 
-The reference records answerability, required facts with source identifiers and quotations, required action, currentness and uncertainty. Code checks whether each quotation occurs in its named source; facts failing the check remain in the raw output but are removed from the checked list, and the reference is marked uncertain. This detects fabricated or misattributed quotations but does not test whether a quotation entails the fact. When references and judgments are combined, an otherwise successful supported-answer or safe-routing label becomes uncertain if the reference fails validation; negative and incomplete judgments remain as recorded.
+The evaluation includes 18 controls written by AI from the sources, for example answers with contradictions, omissions and invented transactions. An addition to the evaluation plan, written down before any answer was generated, adds twelve Macedonian versions as six Cyrillic/Latin pairs. These are development checks, not validated gold-standard examples. The primary judge reproduces the expected category for seventeen of the eighteen original controls and the expected flag for all eighteen. In the remaining case it labels useful routing as a supported answer. The 20-case pilot only checks that the pipeline runs. No threshold is selected by searching pilot or main outcomes.
 
-References with no retained facts can pass these checks. For a greeting or clarification an empty target may be reasonable, but for a substantive question it leaves factual completeness unchecked. The results therefore report empty references explicitly, with a separate post-hoc sensitivity analysis that does not replace the frozen primary measure.
+Assessment is repeated with identical prompts for 48 unique answers drawn with seed 24905309 (41 main-study and seven pilot). The same prompts also go to a fixed local Qwen3-8B model in a compressed 4-bit form~\cite{yang2025qwen3} (Qwen from here on) with temperature zero, a 1,024-token limit and no retry. Repeated Luna judgments show how consistent one judge is with itself. Qwen judgments show how much two different judges differ. Neither is human validation. The models disagreed substantially (Chapter~\ref{ch:results}), so Qwen was also run on the thirty control prompts. This extra check, added afterwards, changes no main label and does not mean that the stricter model is correct.
 
-\subsection{Answer assessment and outcome categories}
+\subsection{Measures and uncertainty}
 
-The primary judge receives one anonymous candidate answer, its question, the common reference and the exact captured generation prompt, but not the policy label or earlier judgments. The executed output schema is compact: \texttt{overall}, \texttt{unsupported\_material\_claim}, \texttt{all\_required\_facts\_covered}, \texttt{citation\_supported}, \texttt{rationale} and \texttt{evidence\_quotes}. The initial design proposed per-claim arrays, which were not implemented (Section~\ref{sec:method-deviations}).
-
-The overall category distinguishes supported answering, useful safe routing, unsupported material claims, incompleteness, unnecessary abstention, uncertainty and failure. A material claim concerns consequential information such as eligibility, fees, deadlines, procedure or the claimed completion of an institutional action. A true unsupported-material-claim flag requires the unsupported category. The flag can also be unspecified, which affects the denominator for flag-level agreement. Structural validation checks required fields, permitted categories and internal consistency, rejecting, for example, a successful label combined with an unsupported material claim. Passing it means the record is interpretable, not that its judgment is correct.
-
-Supported answering requires the reference's facts and conditions. Useful routing includes necessary clarification, advice to verify unresolved information, or referral to the appropriate service without inventing a completed private transaction. The separate categories remain reported because they show what the student actually receives.
-
-For example, an AI-authored control asks what to submit for HPC credit recognition, where, and the paper application fee according to a frozen FAQ. The candidate gives only the 50-denar fee, omitting the printed certificates, the recognition application and submission to the archive or Student Services. The fee is supported but the answer is incomplete. The control illustrates the rubric and is not a user response or current fee advice.
-
-\subsection{Calibration and assessment sensitivity}
-
-The evaluation includes 18 source-based AI-authored controls covering contradictions, omissions, incorrect citations, fabricated transactions, justified refusal and applicability limits. A protocol addendum, recorded before answer generation, adds twelve Macedonian renditions arranged as six Cyrillic/Latin pairs. These are development checks, not validated gold-standard examples or a study of student language preferences.
-
-The 20-case pilot checks that references, generation, judging and analysis execute under the planned settings; it does not contribute to the main estimates and is evidence about the pipeline, not judge accuracy. No threshold is selected by searching pilot or main answer outcomes.
-
-Assessment is repeated with identical prompts for a fixed subset of 48 unique answers. The same prompts and references are also sent to a pinned local Qwen3-8B Q4\_K\_M model~\cite{yang2025qwen3}, with temperature zero, a 1,024-token limit, a 90-second timeout and no retry. Repeated Luna judgments examine within-assessor consistency; Qwen judgments examine variation across assessors under matched evidence. Neither is human validation.
-
-After substantial cross-model disagreement was observed, Qwen was also run on the unchanged thirty control prompts to test whether the two models read the rubric similarly. This post-hoc diagnostic does not change the primary labels or imply that the harsher model is correct.
-
-\subsection{Paired outcome estimates and uncertainty}
-
-Let $Y_{i,p}$ equal one when question $i$ under policy $p$ retains either a supported-answer or useful-routing label, and zero otherwise. For each frame, the main estimate is
+Let $Y_{i,p}$ equal one when question $i$ under policy $p$ retains a supported-answer or useful-routing label, and zero otherwise. For each frame, the main estimate is
 \begin{equation}
 \widehat{\Delta}_{\mathrm{floor}}=\frac{1}{96}\sum_{i=1}^{96}\left(Y_{i,S0}-Y_{i,G0}\right).
 \label{eq:thesis-primary}
 \end{equation}
-The reported percentage-point difference is $100\widehat{\Delta}_{\mathrm{floor}}$. Input rejections, invalid judgments and uncertainty contribute zero to this endpoint while remaining visible in their own categories. A conditional analysis of only assessable records would answer a different question and needs a separately stated denominator.
+The reported percentage-point difference is $100\widehat{\Delta}_{\mathrm{floor}}$. A percentage point is the difference between two percentages, so a change from 53 to 52 percent is one point. Table~\ref{tab:metrics} defines this and the other measures used in Chapters~\ref{ch:results} and~\ref{ch:live}.
 
-The interaction is the average of $(Y_{i,S1}-Y_{i,S0})-(Y_{i,G1}-Y_{i,G0})$. Question groups are resampled 20,000 times with seed 24905310, keeping each question's four policy outcomes together, and percentile intervals are reported~\cite{efron1993bootstrap}. This preserves the paired structure and the dependence created by reuse. Email and production estimates are reported separately; any combined summary describes the balanced sample, not deployed usage.
+\begin{table}[htbp]
+\centering\small
+\caption[Measures of the controlled experiment]{Measures of the controlled experiment. Differences in the assistance measure are given in percentage points.}
+\label{tab:metrics}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\toprule
+Measure & Definition & Denominator and caveat \\
+\midrule
+Assistance $Y_{i,p}$ & One if the answer is labeled supported answer or useful routing after the reference check (the guard). & All 96 questions per frame and policy. Rejections, invalid judgments and uncertainty count as zero. \\
+Floor effect & Mean of $Y_{i,S0}-Y_{i,G0}$ (Equation~\ref{eq:thesis-primary}). & Per frame. The primary contrast. \\
+Interval & Bootstrap interval, taken from the percentiles of 20,000 repeated resamples of question groups (identical questions merged into one group) with seed 24905310, keeping each question's four outcomes together~\cite{efron1993bootstrap}. & Keeps pairing and answer reuse. Based on the AI labels. \\
+Flag rate & Questions flagged for an unsupported material claim, over assessable records. & Invalid and unspecified flags are not false flags. \\
+Agreement & Counts, percentages and Cohen's kappa~\cite{cohen1960kappa}, which is agreement corrected for chance (0 is chance level and 1 is perfect agreement). & Raw agreement can be high while kappa is lower when one label is very common~\cite{feinstein1990kappa}. \\
+Empty context & No retrieved text in the prompt. & If a context changes from empty to not empty, the fallback was triggered. This is worked out by comparing the paired contexts. \\
+Quotation presence & Share of retained reference quotations found in the context. & Counts matching quotation strings and does not measure meaning. \\
+Strict completion & Answer covers every reference fact and behavior, with no unsupported claim, citation error or reference concern. & Prompt comparison only. Not comparable with assistance. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-The intervals quantify variation across sampled questions conditional on the saved AI labels. They do not correct a consistently wrong judge, a missing reference condition or a biased question frame, and an interval spanning zero does not establish equivalence.
+Email and production are reported separately. Intervals show how much results vary across the sampled questions, given the saved AI labels. They do not correct a judge that is always wrong, a missing condition in a reference or a biased set of questions. An interval that includes zero does not show that the policies are equal.
 
-Agreement is reported as counts, percentages and Cohen's kappa~\cite{cohen1960kappa}, which compares observed agreement with that expected from the assessors' marginal frequencies. High raw agreement can coexist with lower kappa when one label is common~\cite{feinstein1990kappa}. Missing or unspecified flags require separate paired denominators. Reporting category and material-claim agreement together shows whether assessors disagree about the overall response or about a consequential factual issue.
-
-\subsection{Retrieval diagnostics, timing and cost}
-
-To interpret policy effects, the analysis reports empty contexts, source mix, context length and identical context/source identifiers across policies. Empty-to-nonempty changes indicate observed fallback exposure, not an instrumented count of every fallback branch. Occurrence of reference quotations in context measures availability of the retained quote strings, not semantic recall.
-
-Latency and token usage are recorded for unique calls; replay timing, hosted generation time and historical deployment duration cover different intervals and are not interchangeable. Historical events from PostHog, the deployment's product-analytics service, are a separate dated observational source, not outcome labels.
-
-The inference client reserves costs at conservative planning rates of USD~2 per million input tokens and USD~12 per million output tokens. Its experiment ledger has an USD~80 reservation ceiling and a 2,500-request cap; a separate identity diagnostic has its own small reservation. Failed requests retain reservations. Actual gateway billing and total infrastructure cost were not available.
+The retrieval diagnostics are the number of empty contexts, the mean context length, the mean number of document candidates and the share of reference quotations found in the context (Chapter~\ref{ch:results}). Timing has two parts. The first is the request counts and the median and 95th percentile duration from the deployment's PostHog usage analytics, which are observations and not outcome labels. The second is the latency of each hosted generation call. Cost is estimated at planning rates (Appendix~\ref{sec:method-cost}).
 
 \subsection{Prompt comparison}
 \label{sec:method-prompt}
 
-A second experiment compares the production prompt with a revised prompt on an expanded collection: a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks. FAQ text matches the retrieval-policy experiment, but the document set is larger.
+A second experiment compares a baseline prompt with a revised one. Neither is the deployed prompt. It runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks, with forty further emails that were not in the main sample, and with strict completion as its main measure (Appendix~\ref{sec:prompt-method-details}).
 
-A 32-question development sample, balanced between email and production sources and spread across the reference states of the retrieval-policy experiment, compares current retrieval, AI-selected reference evidence and no evidence. It motivated a prompt-only revision, frozen before the comparison: check dates and applicability instead of automatically favoring FAQs or higher-ranked text, preserve needed procedural steps, and state material gaps. The revision adds no model calls and leaves retrieval unchanged.
-
-The comparison uses the first forty emails of a shuffled 64-question reserve, excluding exact and near duplicates of evaluated questions; semantic independence from those questions is not proved. Two AI passes prepare and review references before generation, selecting source lines to avoid transcription errors. All forty references pass exact-text checks (34 partial, three insufficient, three nonfactual); they are not institution-approved answers.
-
-Both conditions use production retrieval with fallback, useful links, Luna, gateway sampling defaults and a 1,536-token cap. Strict completion requires every reference fact and behavior, no unsupported claim or citation error, and no reference concern; empty factual or mixed references cannot succeed. This endpoint is stricter than, and not comparable with, the retrieval-policy assistance measure. Paired differences use 20,000 bootstrap resamples, complemented by an exact paired test on the discordant cases.
-
-\subsection{Protocol and deviations}
-\label{sec:method-deviations}
-
-The retrieval-policy experiment was frozen on 7 September 2026, before any evaluated answer was generated. The frozen protocol fixed the sample and its seed, the four policies, the primary contrast S0 minus G0, the reference and judgment procedures, the outcome categories and the analysis. Sample, reference and generation manifests record content hashes of the frozen inputs; the reference freeze alone covers 220 files. A protocol addendum, also recorded before answer generation, added the twelve Macedonian script controls and the input-rejection outcome for the four overlong questions; it changed no threshold or rubric. The prompt comparison had its own protocol, written before its answers were generated, and the revised prompt was frozen before the comparison ran.
-
-The following analyses and changes were made after outcomes had been observed. They are reported as such, and none replaces a primary result:
+\paragraph{Summary.}
 \begin{itemize}
-  \item the wording of the research questions was refined to clarify the effectiveness focus, without changing the frozen hypotheses, policies, outcomes or labels;
-  \item the empty-reference sensitivity analysis, prompted by the number of references without retained facts;
-  \item the Qwen run on the thirty control prompts, prompted by the observed cross-model disagreement;
-  \item the offline diagnostic of rejected reference quotations;
-  \item in the prompt comparison, the reassessment of all answer pairs with the full generation evidence, revised scope guidance and a 1,024-token judgment cap, prompted by a deterministic check showing that the initial judge lacked part of the generator's evidence.
+  \item Four policies cross a document score floor with a fallback rule on one fixed configuration, which does not evaluate the deployed system.
+  \item One shared AI reference and one anonymous AI judge produce the labels. The reference check (guard) lowers the grade of successes whose reference fails its quotation checks.
+  \item The primary endpoint is the paired S0 minus G0 difference in assistance, with intervals based on the AI labels. No check is human validation.
 \end{itemize}
-The executed assessment also differs from the initial design: it uses the compact judgment schema rather than per-claim arrays, repeats 48 rather than 24 assessments, and omits a proposed fifth, tuned-threshold policy.
-
-The retained records (sampling manifest, captured retrieval candidates, exact prompts, raw answers, all judgments and the analysis code) allow every reported count and interval to be recomputed offline without new inference. The private questions and answers are not released, and calling the hosted model again would not necessarily reproduce the same answer text. The retrieval-policy experiment lacks a complete database snapshot; the prompt comparison retains one.

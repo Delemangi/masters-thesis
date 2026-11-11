@@ -1,14 +1,29 @@
 \section{Conclusion}
 \label{ch:conclusion}
 
-This thesis examines how effectively the chatbot answers real institutional questions and provides useful guidance. Its reference architecture describes the path from heterogeneous sources through retrieval and generation to delivery, while the empirical study tests a bounded part of that path. The contribution is an inspectable account of the system together with a controlled evaluation of assistance and retrieval policy.
+This thesis examines how well the chatbot answers real institutional questions and gives useful guidance. A controlled evaluation tests one part of the reference architecture. The deployed agent is then evaluated on new held-out emails (Chapter~\ref{ch:live}).
 
-The main evaluation covers 96 historical email questions and 96 questions from selectively recorded production logs, following a separate 20-case pilot. Under a shared retrieval threshold without fallback, the retained AI labels identify supported answering or useful routing in 31/96 email outcomes and 53/96 production outcomes, with useful routing contributing substantially to both. Incomplete responses and unsupported material claims remain visible weaknesses.
+\paragraph{Answers to the research questions.}
+\begin{itemize}
+  \item \textbf{RQ1, observed assistance.} With a shared retrieval threshold and no fallback, the AI labels show supported answering or useful routing in 31/96 email outcomes and 53/96 production outcomes. These come from 96 historical email questions and 96 production questions from one month of chatbot logs, after a separate 20-case pilot. Incomplete responses and unsupported claims remain weaknesses.
+  \item \textbf{RQ2, retrieval policy.} Lowering the document threshold changes the totals to 30/96 and 52/96. The paired difference is $-1.04$ percentage points in each sample, with intervals that include zero, although the lower threshold adds much more document context. A prompt that checks whether a source applies to the student was tested on forty questions and changed strict completion by $-2.5$ points.
+  \item \textbf{RQ3, dependence on sample and judge.} The results rest on AI judgments from one model family. Repeated and cross-model judgments disagree, and some labels rest on references with no facts, which cannot show that the answer is accurate. The intervals do not include these uncertainties.
+\end{itemize}
 
-Lowering the document threshold changes the combined totals to 30/96 and 52/96, a paired difference of $-1.04$ percentage points in each sample with intervals spanning zero. The intervention substantially increases document context, and improves ranked retrieval in the component study, without a detectable assistance benefit. The fallback comparisons also show no clear benefit, although limited exposure constrains their interpretation. A second, forty-question comparison on an expanded document collection tested a prompt that checks source applicability and preserves procedural steps; with the full generation evidence available to the assessor, it changed strict completion by $-2.5$ points.
+\paragraph{The deployed agent.}
+\begin{itemize}
+  \item No fix had targeted some held-out email sets. On these, 70 to 77 percent of graded answers were correct and 1 to 3 percent were wrong, under one judge and rubric. The tuned set, on which the fixes were made, overstated quality by about 11 points.
+  \item The largest single loss was \textsc{Gap} rows, which mostly mean missing knowledge. The first fix to try is therefore data confirmed by the institution. The next problems were hedging and unsupported details.
+  \item The controlled finding concerns the document threshold only. In the live system, the shared context floor (lowered to 0.03) and reranking against the original question gave large gains on the hard set that tested them.
+  \item Prompt gains on hard sets are inflated by construction, and a rule that suppressed hedges gave no gain beyond noise.
+  \item A decision-model reranker improved ranking against AI labels but not the answers: 74.5 percent were correct with the cross-encoder and 69.1 percent with the decision model, a difference within chance. A memory test found earlier context used in 42 of 42 genuine items and the answer correct in 41.
+\end{itemize}
 
-These results rest on AI assessments whose limits the audit makes explicit. Empty fact sets can support conversational labels without establishing factual accuracy, references, generation and primary judgments share a model family, and repeated and cross-model assessments disagree. The confidence intervals describe sampling variation conditional on the retained labels and cannot absorb these systematic uncertainties.
+\paragraph{Overall.} On selected institutional questions, the AI labels rate the chatbot's help as positive. On fresh emails the deployed agent was graded correct on roughly three quarters of graded rows, with few wrong answers. Its effectiveness is still limited by missing knowledge, incomplete answers, unsupported claims and uncertain judging. None of the three controlled changes (a lower document threshold, fallback and the revised prompt) produced better assistance. The live gains came from other changes, such as the lower context floor, reranking against the original question, tools and data fixes, and the live rule against hedging gave no gain.
 
-The reference architecture made these results interpretable. By separating source preparation, evidence selection, answer construction and delivery, it allowed the observed failures to be attributed to stages: the threshold change largely repaired evidence selection, while incomplete answers and unsupported claims, which belong to answer construction, persisted. For the studied system, completeness checks, explicit clarification and source authority metadata are therefore more promising than admitting more retrieved text. The next step is task-specific reference review with explicit authority checks, human assessment of label reliability and a newly frozen held-out sample.
-
-The supported conclusion is that the chatbot can receive positive assistance labels on selected institutional questions, yet its effectiveness remains limited by incomplete answers, unsupported claims and uncertainty in assessment. Neither more retrieved text nor the tested prompt change establishes better assistance. A stronger evaluation must make the expected task, supporting evidence and appropriate response behavior explicit, so that a complete factual answer, a useful clarification and a necessary referral can each be assessed on their own terms.
+\paragraph{Future work.} Each item needs a new sample, chosen before the run.
+\begin{itemize}
+  \item Human validation of a subset of answers against the AI labels, with a review of the references for each task.
+  \item A graph-based RAG comparison such as LightRAG, and a live baseline with retrieval turned off.
+  \item Tuned decision-model reranking, and evaluation of complete conversations.
+\end{itemize}

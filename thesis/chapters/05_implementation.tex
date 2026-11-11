@@ -1,75 +1,96 @@
 \section{Reference implementation}
 \label{ch:implementation}
 
-The chatbot realizes the architecture through a shared conversational backend, document preparation tools, structured-data services and two client interfaces. This chapter explains the request and data paths needed to interpret the evaluation. It describes inspected source revisions; source-defined topology and behavior are not evidence of what any deployed instance ran.
+This chapter describes how the chatbot implements the architecture. It marks where the controlled configuration (the fixed retrieve-then-generate setup of the controlled experiment) differs from the deployed system. Figure~\ref{fig:agent-flow} gives the request flow of the deployed agent, and Section~\ref{sec:post-evaluation-changes} summarizes its behavior.
+
+\input{figures/agent_flow}
 
 \subsection{Repository and service organization}
 
-The central \texttt{chat-bot} repository contains the Next.js web application, FastAPI service and GPU service. Its container configuration also declares an embedding worker that shares the API image, PostgreSQL storage and Valkey, an open-source Redis-compatible key-value store. Separating application processing from GPU inference allows their placement and resource allocation to differ; throughput and availability were not measured.
+The main chatbot repository contains the Next.js web application, the FastAPI service and the GPU (graphics processing unit) service for embedding and reranking. An embedding worker shares the API image, the PostgreSQL storage and Valkey, an open-source Redis-compatible key-value store.
+A documents repository holds the original files and their Markdown versions. A Discord bot repository connects Discord to the shared API. A third repository contains a local MCP server and a copy of a faculty data service.
 
-The \texttt{documents} repository holds original files and their Markdown representations. The \texttt{discord-bot} repository adapts Discord interactions to the shared API. The \texttt{mcp} repository contains a local Python MCP server and a pinned faculty-service submodule, and dedicated timetable and thesis-listing repositories supply further adapters. The project spans seventeen repositories; only inspected call sites, not repository names, are treated as evidence of a connection between them.
-
-The account describes the chatbot at revision \texttt{859e7dc}, the documents repository at \texttt{16aa8c1}, the MCP repository at \texttt{8444c8a} and the Discord adapter at \texttt{3ca32b3}.
+The controlled experiment ran a fixed version of each of these repositories. The exact versions are recorded with the evaluation records.
 
 \subsection{Document preparation and ingestion}
 
-Original institutional PDF and DOCX files are kept alongside their Markdown conversions. PDF conversion extracts embedded text, removes repeated edge text and page numbers, recognizes Macedonian legal-article headings and reflows wrapped lines. DOCX conversion extracts paragraphs. For scanned or unusable PDFs, an optional vision transcription route requests verbatim Macedonian text with lists, tables, article headings and explicit unreadable markers. The repository requires reviewing conversions against their originals; the thesis treats this as an editorial requirement and does not assume every file passed it. A missing exception or misextracted table can survive ingestion and later support a plausible but incomplete answer.
+Original PDF and DOCX files are kept next to their Markdown conversions. PDF conversion extracts embedded text, removes repeated header and footer text and page numbers, recognizes Macedonian legal-article headings and joins wrapped lines again. Scanned PDFs can instead be transcribed by a vision model. The author reads each conversion side by side with its original.
 
-An upload client submits each processed Markdown file to the API with a stable name derived from its filename, a title and original-file metadata, and a subsequent request computes embeddings for eligible chunks. A separate, explicitly invoked synchronization can remove database documents that no longer exist locally. Revised content replaces the whole document and its chunks; unchanged chunks are not retained individually.
+An upload client submits each Markdown file to the API with a stable name, a title and original-file metadata. A second request computes embeddings. Chunking at runtime splits the text on legal-article headings where they exist and otherwise on Markdown headings. The target chunk size is 1,300 characters, a unit under 1,650 characters stays whole, and chunks overlap by 150 characters.
 
-Runtime chunking belongs to the chatbot API. It strips HTML comments, splits on legal-article headings where available and otherwise on Markdown headings, and preserves section labels and chunk order. It uses a 1,300-character split target, a 1,650-character threshold below which a unit stays unsplit, and 150-character overlap, so short articles can remain intact. A tokenizer-aware helper in the document tooling uses different values and is not the active algorithm.
-
-Citation resolution prefers an explicit authority URL, then a source URL, then a link to the original file in the documents repository. Optional Cloudflare R2 uploads mirror original files as an archive, but answers do not cite or retrieve from them. The schema can hold date, validity, verification and authority fields, but their population in the evaluated corpus is not established.
+The schema has fields for date, validity, verification and authority. These fields do not affect ranking. When they are filled in, they are passed to the model as labeled text next to the passage.
 
 \subsection{Embedding storage and retrieval execution}
 
-Embedding text combines a document title, section label and chunk body in a canonical Macedonian format. The default model is locally served BGE-M3, whose model family supports multilingual retrieval~\cite{chen2024m3}. The GPU service produces normalized embeddings, and PostgreSQL with pgvector stores the 1,024-dimensional vectors under a cosine-distance index based on hierarchical navigable small world (HNSW) graphs~\cite{malkov2020hnsw}. Database triggers mark vectors outdated when titles or chunks change, the worker recomputes them asynchronously, revision-guarded writes prevent stale embeddings from overwriting newer ones, and search uses only current embeddings.
+The default model is the locally served BGE-M3, whose model family supports multilingual retrieval~\cite{chen2024m3}. PostgreSQL with pgvector stores the 1,024-dimensional normalized embeddings under a cosine-distance index based on hierarchical navigable small world (HNSW) graphs~\cite{malkov2020hnsw}. Database triggers mark embeddings as outdated when titles or chunks change. The worker then recomputes them in the background, and each write checks the revision so that an old result cannot overwrite a newer one.
 
-The evaluated corpus audit recorded 74 FAQs and 1,403 chunks from nineteen documents. Retrieval searches the FAQ and document corpora separately before merging candidates. In the raw-query path used by the experiment, the dense limit is 31 candidates per corpus before merging and any permitted lexical FAQ expansion. The GPU cross-encoder reranks candidates using BGE-reranker-v2-m3~\cite{baaiBgeRerankerV2M3}. Final selection applies the ten-candidate budget, FAQ priority and neighboring-chunk expansion.
+Snapshot A, the corpus of the controlled experiment, has 74 FAQs and 1,403 chunks from nineteen documents. Retrieval searches the FAQ and document corpora separately before merging candidates. In the raw-query path used by the controlled configuration, the dense limit is 31 candidates per corpus. The GPU cross-encoder BGE-reranker-v2-m3 then reranks the candidates~\cite{baaiBgeRerankerV2M3}. The final selection keeps at most ten candidates, gives FAQs priority and adds neighboring chunks.
 
-Context floors and the source-display threshold serve different purposes. The controlled comparison keeps the FAQ floor at 0.10, varies the document floor and whether one highest-scoring candidate is retained when all candidates fail it, and leaves source visibility at 0.30. The application separately falls back to dense ordering when the reranker fails. That operational recovery is distinct from the experimental empty-selection fallback; the study treats reranker failure as an execution failure rather than substituting another retrieval procedure.
+The controlled comparison keeps the FAQ context floor (the minimum reranker score to enter the prompt) at 0.10 and the source-display threshold (the minimum score to show a source) at 0.30. It varies the document floor. It also varies whether the single highest-scoring candidate is kept when all candidates fail the floor (the experimental fallback). The deployed context floor is instead a single shared 0.03, with the same 0.30 display threshold. All these values are scores of BGE-reranker-v2-m3 and hold only for that model. Section~\ref{sec:live-ab} explains how 0.03 was chosen, and Section~\ref{sec:live-decisions} shows what happens when another ranker keeps the same floor. The study counts a reranker failure as an execution failure and does not use a substitute method.
 
 \subsection{Web request and generation flow}
 
-The Next.js server acts as a backend-for-frontend. It resolves a signed-in Google or Microsoft session to a backend user, loads the persisted conversation, assembles upstream messages and converts the stream. Its request to FastAPI \texttt{/chat/} carries server authentication, user identity, a response identifier and optional telemetry identifiers. This user identity is separate from the server-side credentials for the faculty's Central Authentication Service (CAS) used by some catalog adapters.
+The Next.js server acts as a backend-for-frontend, a thin server layer between the browser and the API. It maps a signed-in Google or Microsoft session to a backend user, loads the saved conversation and converts the stream. The user's identity is kept separate from the server-side credentials for the faculty's Central Authentication Service (CAS), which some catalog adapters use.
 
-FastAPI first performs admission checks that resolve provider credentials and model access and apply sponsored quota rules. Evidence retrieval and useful-link selection then run as distinct steps, and the prompt combines their outputs with the question, date, available history and interface instructions. The provider layer supports hosted and local model families; the OpenAI route uses the Responses API and supplies combined tools to a LangChain agent. Support for multiple providers does not imply identical behavior across them.
+FastAPI first runs admission checks. These find the provider credentials and model access and apply the quota rules for sponsored users. These are signed-in users who may use the model the project pays for without their own API key. In the controlled configuration, evidence retrieval and useful-link selection run as separate steps. The prompt combines their outputs with the question, the date, any history and the instructions for the interface. In the deployed system the agent does this selection itself through a built-in knowledge-base search tool. The tool runs the same retrieval and adds the matching useful links. The prompt tells the agent to search before answering in-scope questions, with one concept per search. For each answer, the agent may make at most four searches and fifteen tool calls in total.
 
-The API emits a common stream of token, thinking, status, error, metadata, source and completion events, which the web adapter converts to the client's representation. Valkey supports resumable web streams, cancellation controllers are local to the web process, and conversations and messages are user-scoped PostgreSQL state.
+The provider layer supports hosted and local model families (Anthropic Claude, OpenAI GPT-6 and GPT-5.6, Gemini 3, OpenRouter and OpenCode Go models, and local Qwen3 models). Claude Sonnet 5.5 is the app's default model for signed-in users. The OpenAI route uses the Responses API and passes the combined tools to a LangChain agent. Responses and Chat Completions are two OpenAI API formats, and Chat Completions is the older one. One other model in the catalog uses it instead. GPT-6 Luna is the default model for rewriting queries and the sponsored model, and it answered all live-evaluation runs, with reasoning disabled. The controlled experiments used the earlier GPT-5.6 Luna (Luna in Chapters~\ref{ch:methodology} and~\ref{ch:results}).
 
-One built-in tool recommends thesis committee candidates from database records and is combined with remotely discovered tools for the agent; its output is advisory. Tool availability establishes a possible request path, not that a suitable tool is chosen or its result correctly used, and the controlled study does not observe such agent runs.
+The API emits a common stream of token, thinking, status, reset, error, metadata, source and completion events. It also emits tool-call and tool-result events, which both clients use to show progress. An optional setting, off in production, adds each tool's full output to the result event so that benchmarks can grade it. Usage events go to the hosted analytics service PostHog. They contain request metadata and no question text.
 
-\subsection{Structured records through MCP}
+\subsection{Agent tools and structured records through MCP}
 
-The chatbot's MCP client loads configured servers over streamable HTTP or server-sent events (SSE), can attach a service API key, filters tool names, and caches tool definitions for one hour; a server that fails to load does not disable the others. The local Python MCP service exposes read-only lookups over courses, staff, rooms, timetables and thesis listings, with Macedonian normalization, transliteration, fuzzy matching and ambiguity reporting. Timetable data comes through a Worker adapter over EduPage, the faculty's timetabling platform, and thesis listings through adapters that fetch faculty pages, authenticating through CAS where required. Because several layers cache records and may serve stale snapshots after a refresh failure, currentness claims require checking a deployed instance. A thesis link returned by a lookup is also not evidence that the thesis PDF was ingested into document RAG. A separate Spring-based faculty API exposes database-backed read-only MCP tools behind configurable service-level API-key filtering.
+Table~\ref{tab:agent-tools} lists the tools the agent can call. Two are built in, and the others are discovered through the Model Context Protocol (MCP).
+
+\begin{table}[htbp]
+\centering
+\caption{Tools available to the deployed agent.}
+\label{tab:agent-tools}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.2\linewidth}X@{}}
+\toprule
+Tool & Source & What it does \\
+\midrule
+Knowledge-base search & Built in & FAQ and document retrieval with reranking, plus matching useful links. \\
+Committee recommender & Built in & Recommends thesis committee candidates from database records. Advisory only. \\
+Courses, staff, rooms, exam sessions & Local MCP server & Read-only lookups. \\
+Timetables & EduPage adapter & Timetable records. \\
+Thesis defenses, master's theses, diplomas & Thesis-listing adapters & Listings from faculty pages or public listing APIs, using CAS where required. \\
+Announcements & Local MCP server & Search with WordPress short links. \\
+Study programs, curricula, syllabi, course abbreviations & Local MCP server and the faculty's public API & Program, curriculum and syllabus lookups and abbreviation resolution. \\
+Further faculty data & The faculty's public API and a second faculty API & Read-only database-backed tools. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The MCP client loads configured servers over streamable HTTP or server-sent events (SSE). It can attach a service API key, filters tool names, and caches tool definitions for one hour. A server that fails to load does not disable the others. The production configuration blocks a configured list of tools of the faculty's public API but keeps the academic calendar. Some records are cached and may be served as old copies after a refresh fails. A record can therefore be out of date until the next refresh succeeds.
 
 \subsection{Discord delivery and conversation continuity}
 
-Discord requests start through slash commands such as \texttt{/ask}, \texttt{/prompt} and \texttt{/chat query}, or a message context action. Continuations arrive as replies to tracked answers or inside tracked private threads; there is no general mention trigger, so an arbitrary message is not an assistant request. The adapter resolves the Discord identity to a chatbot user, validates the model selection, and posts recent messages with \texttt{interface=discord} to the shared API, consuming SSE rather than calling a provider directly.
+A Discord user starts a request with a bot command for asking a question or starting a chat, or from the menu of a message. Follow-ups arrive as replies to earlier answers or inside private threads that the bot follows. The bot does not react to a plain mention of its name. The adapter sends recent messages to the shared API, marked as coming from Discord, and reads the streamed answer.
 
-Rendering edits or splits messages at the 2,000-character platform limit. The adapter handles token, thinking, status, reset, error and completion events; thinking is display-only and excluded from saved history. Interface instructions favor simple Markdown, lists and plain URLs. The backend's structured-source event is not part of the adapter's event union and is ignored, although links embedded in answer text remain visible. This is a concrete source-presentation difference from the web client, which renders source cards.
+Messages are edited or split at the 2,000-character platform limit. The model's thinking is shown only on screen and is not saved in the history. The adapter ignores the backend's source event, although links in the answer text remain visible. So Discord has no source cards like the web client.
 
-Discord continuity is bounded and process-local: the adapter tracks at most 1,000 message or thread keys and sends nine prior turns plus the current turn, each limited to 2,000 characters. Split messages share one history entry, and conversations are not persisted through the web chat-state endpoints. Like/dislike buttons record feedback keyed to the response, client and user, linking feedback to an answer without restoring a lost conversation or validating its content.
+The backend stores Discord conversations on the server with no retention limit, and a bot command lets users delete their stored history. Feedback requires a stored answer and may be given only by the user who asked. Like and dislike buttons record feedback linked to the response, client and user.
 
-\subsection{The implementation boundary used by the study}
-
-The controlled study retains the actual retrieval function and prompt builder while intercepting generation. Captured prompts are submitted to controlled Luna through Chat Completions, whereas the production provider route uses Responses and an agent. The study fixes the prompt date and omits history and query rewriting. It excludes MCP discovery and execution, built-in tools, request-admission side effects, conversation saving, production analytics initialization and real client rendering. Schema validation remains observable, including overlong input rejection.
-
-This design compares components without exercising the full live request lifecycle. Matching retrieval and prompt hashes support the provenance of those components, but controlled Luna defaults are not equated with every production provider setting, and measured generation latency omits channel delivery, admission and live tool execution. The implementation is therefore the source of the tested retrieval and prompt behavior, while the remaining paths supply architectural context and identified subjects for future evaluation.
-
-\subsection{Changes after the evaluated revision}
+\subsection{The deployed agent}
 \label{sec:post-evaluation-changes}
 
-Between 8 September and 15 October 2026, after the evaluated revision \texttt{859e7dc}, several changes were merged into the chatbot. None of them is evaluated in this thesis. The reported results describe the evaluated revision with raw queries, and the changes are listed here only because they target stages that the evaluation identifies as weak.
+The deployed agent has the following elements, grouped by the failure stage each one addresses. Chapter~\ref{ch:live} evaluates the deployed system as a whole.
 
 \begin{itemize}
-  \item \textbf{Query transformation.} History contextualization, rewriting and hypothetical-document generation previously ran only when the user had a credential for the transform model; otherwise retrieval silently used the raw query, so short follow-ups such as ``yes'' or ``and at the other faculty?'' retrieved nothing. Transforms now run on a sponsored hosted model when the user has no key for the transform model, transform output budgets were raised so that reasoning models do not return empty transforms, and the model that actually ran is logged. This addresses history-dependent follow-ups.
-  \item \textbf{Romanized Macedonian.} Queries written in Latin script additionally receive an embedded Cyrillic transliteration as a query variant, and unchanged variants are no longer reported as partial fallbacks.
-  \item \textbf{Short FAQ queries.} A bounded recovery targets short Macedonian FAQ queries about locations, hours and contacts while preserving the thresholds and source visibility.
-  \item \textbf{Source authority and applicability.} FAQ evidence is constrained by institution scope and explicit exclusions: evidence for a different or unknown institution is filtered, and strict abstention applies only when a constraint can actually remove evidence. Document provenance is exposed in the model context, reranker relevance order is preserved, and the prompt clarifies source applicability.
-  \item \textbf{Unsupported claims.} Recommendations about system functions must be grounded in a source or an authorized tool result.
-  \item \textbf{Fallback diagnostics.} Empty or entirely invalid reranker results are recovered through the existing dense fallback, and diagnostic reasons are recorded for query-transform and reranker fallbacks.
-  \item \textbf{Corpus synchronization.} A guarded synchronization loads the RAG corpus from the documents repository using a versioned bundle schema.
+  \item \textbf{Agentic knowledge-base search.} The agent calls the knowledge-base search tool itself, mixed in with MCP tools, instead of receiving pre-retrieved context. Per-answer limits cap searches, tool calls and model calls.
+  \item \textbf{Query transformation and input handling.} Query transforms rewrite follow-up questions that depend on the history into queries that stand alone. Romanized Macedonian queries also get a Cyrillic version as an extra query. For short queries about where an office is, its opening hours or its contacts, a small extra step matches the named office or institution to an FAQ by its title or alias.
+  \item \textbf{Retrieval and selection.} The context floor is a single shared 0.03, and the reranker scores against the original question instead of the rewrite. Context that passes only the floor is flagged as a weak match, so the bot asks instead of guessing. FAQ candidates about a different institution than the one asked about are dropped, and so is an FAQ about an office that the student says they are not asking about.
+  \item \textbf{Prompt rules.} The agent assumes the first study cycle when none is named and answers in the language of the question. It treats people who signed documents as past office holders. It points to announcements for current deadlines without letting them override standing FAQ rules. It follows an FAQ over a general provision of a regulation when they differ, because FAQs describe current practice, unless a document gives a more specific fact for the exact case. It applies general rules to the student's case before adding caveats. It refuses off-topic requests that merely mention the faculty, and it does not name its sources. These rules were added in response to failures seen in the live evaluation (Tables~\ref{tab:live-history} and~\ref{tab:live-ab} in Appendix~\ref{app:live}).
+  \item \textbf{Tools, clients and corpus.} The tools of Table~\ref{tab:agent-tools} are available, with the academic calendar unblocked in production. Both clients show tool-call steps.
 \end{itemize}
 
-Together these changes address the failure stages discussed in this thesis: lost context in follow-ups, romanized Macedonian input, source authority and applicability, and unsupported claims. Whether they change answer quality is an empirical question, and evaluating them with the same protocol is left for future work.
+The controlled configuration lacks these elements, and the live evaluation tests the system as a whole. Neither can show which single element caused a change in answer quality. The small extra step for short queries, the FAQ constraints and the FAQ-over-regulation rule are design choices that were not tested on their own.
+
+\paragraph{Summary.}
+\begin{itemize}
+  \item One shared FastAPI backend serves the web and Discord clients, with a GPU service for embeddings (BGE-M3) and reranking (BGE-reranker-v2-m3).
+  \item The deployed agent searches the knowledge base and calls MCP tools itself. The controlled configuration replaces this with fixed retrieval and generation by Luna.
+  \item Controlled and deployed settings differ in context floor (0.10 for FAQs against a shared 0.03), history, query rewriting and tools.
+\end{itemize}

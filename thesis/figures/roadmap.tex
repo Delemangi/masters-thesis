@@ -1,0 +1,47 @@
+% Thesis roadmap: questions, experiments, chapters. Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,
+  q/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=4.0cm,minimum height=1.1cm,inner sep=3pt},
+  e/.style={draw=black!75,rounded corners=1.5pt,fill=black!6,align=center,text width=4.6cm,minimum height=1.1cm,inner sep=3pt},
+  c/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=3.0cm,minimum height=1.1cm,inner sep=3pt},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  head/.style={font=\small\bfseries,align=center}
+]
+  \node[head] at (2.1,7.4) {Questions};
+  \node[head] at (7.5,7.4) {Experiments};
+  \node[head] at (12.2,7.4) {Chapters};
+
+  \node[q] (rq1) at (2.1,6.0) {RQ1: how often is a response supported or useful routing?};
+  \node[q] (rq2) at (2.1,4.5) {RQ2: thresholds and fallback};
+  \node[q] (rq3) at (2.1,3.0) {RQ3: limits of AI assessment};
+  \node[q] (lq1) at (2.1,1.5) {LQ1: the deployed agent on real emails};
+  \node[q] (lq2) at (2.1,0) {LQ2: retrieval, reranking and memory};
+
+  \node[e] (e1) at (7.5,5.25) {Controlled comparison of four retrieval policies, 192 questions};
+  \node[e] (e2) at (7.5,3.0) {Reference checks, repeated judgments, second judge, prompt comparison};
+  \node[e] (e3) at (7.5,1.5) {Live evaluation on three held-out email sets};
+  \node[e] (e4) at (7.5,0) {Recall analysis, decision-model reranker, memory test};
+
+  \node[c] (c1) at (12.2,5.25) {Chapters~\ref{ch:methodology} and~\ref{ch:results}};
+  \node[c] (c2) at (12.2,3.0) {Chapters~\ref{ch:methodology} and~\ref{ch:results}};
+  \node[c] (c3) at (12.2,1.5) {Chapter~\ref{ch:live}};
+  \node[c] (c4) at (12.2,0) {Chapter~\ref{ch:live}};
+
+  \draw[flow] (rq1.east) -- (e1.west);
+  \draw[flow] (rq2.east) -- (e1.west);
+  \draw[flow] (rq3.east) -- (e2.west);
+  \draw[flow] (lq1.east) -- (e3.west);
+  \draw[flow] (lq2.east) -- (e4.west);
+  \draw[flow] (e1.east) -- (c1.west);
+  \draw[flow] (e2.east) -- (c2.west);
+  \draw[flow] (e3.east) -- (c3.west);
+  \draw[flow] (e4.east) -- (c4.west);
+
+  \node[draw=black!75,rounded corners=1.5pt,fill=black!6,align=center,minimum width=14.1cm,minimum height=.8cm] (disc) at (7.15,-1.7)
+    {Answers to all questions: Chapters~\ref{ch:discussion} and~\ref{ch:conclusion}};
+  \draw[flow] (c4.south) -- (c4.south |- disc.north);
+\end{tikzpicture}
+\caption[Roadmap of the thesis]{Roadmap of the thesis. Each question is answered by one experiment, and the chapter that reports it is shown on the right.}
+\label{fig:roadmap}
+\end{figure}

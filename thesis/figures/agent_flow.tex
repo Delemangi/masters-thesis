@@ -1,0 +1,39 @@
+% Request flow of the deployed agent. Grayscale TikZ; libraries: arrows.meta, positioning, fit, calc, backgrounds.
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw=black!75,line width=.45pt,rounded corners=1.5pt,fill=white,
+    align=center,inner xsep=4pt,inner ysep=4pt,minimum height=.9cm},
+  tool/.style={box,fill=black!6},
+  flow/.style={-{Stealth[length=1.8mm,width=1.2mm]},line width=.5pt},
+  back/.style={-{Stealth[length=1.8mm,width=1.2mm]},line width=.5pt,dashed},
+  lab/.style={font=\footnotesize,fill=white,inner sep=1.5pt,align=center}
+]
+  \node[box] (user) at (0,0) {User};
+  \node[box] (client) at (3.8,0) {Web or\\Discord client};
+  \node[box] (api) at (8.4,0) {FastAPI\\chat API};
+  \node[box,text width=3.7cm,minimum height=1.5cm] (agent) at (13.6,0)
+    {Agent loop\\(LLM, at most 4 searches, 15 tool calls)};
+
+  \node[tool,text width=4.6cm] (kb) at (13.6,-3.0)
+    {Knowledge-base search\\FAQ + document retrieval, rerank, useful links};
+  \node[tool,text width=3.9cm] (mcp) at (8.4,-3.0)
+    {MCP tools\\courses, rooms, timetables, announcements, programs};
+  \node[tool,text width=2.4cm] (rec) at (18.2,-3.0)
+    {Committee\\recommender\\(advisory)};
+
+  \draw[flow] (user) -- node[lab,above=2pt] {question} (client);
+  \draw[flow] (client) -- node[lab,above=2pt] {request} (api);
+  \draw[flow] (api) -- node[lab,above=2pt] {prompt,\\history} (agent);
+  \draw[flow] ([xshift=-.7cm]agent.south) |- ++(0,-.7) -| (mcp.north);
+  \draw[flow] (agent.south) -- (kb.north);
+  \draw[flow] ([xshift=.7cm]agent.south) |- ++(0,-.7) -| (rec.north);
+
+  \draw[back] (agent.north) -- ++(0,.9) -| (user.north);
+  \node[lab] at (6.8,1.65) {streamed answer: tokens, tool-call steps, status, done};
+\end{tikzpicture}}
+\caption[Request flow of the deployed agent]{Request flow of the deployed agent. The question reaches the API through a client, the agent decides which tools to call, and the answer returns as a stream of events. Shaded boxes are tools. In the controlled configuration the agent and its tools are replaced by one fixed retrieval step.}
+\label{fig:agent-flow}
+\end{figure}

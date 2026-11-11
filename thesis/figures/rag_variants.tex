@@ -1,0 +1,49 @@
+% Three RAG variants side by side. Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  b/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=3.4cm,minimum height=.8cm,inner sep=3pt},
+  s/.style={b,fill=black!6,minimum height=1.5cm},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  two/.style={{Stealth[length=1.6mm,width=1.15mm]}-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  head/.style={font=\small\bfseries,align=center,text width=4.2cm},
+  use/.style={align=center,text width=4.2cm,font=\small\itshape}
+]
+  % Panel A: fixed pipeline
+  \node[head] at (2.1,7.7) {Fixed pipeline};
+  \node[b] (a1) at (2.1,6.5) {Question};
+  \node[s] (a2) at (2.1,4.5) {Retrieve passages (fixed rule)};
+  \node[b] (a3) at (2.1,2.2) {Generate answer};
+  \node[b] (a4) at (2.1,0.8) {Answer};
+  \draw[flow] (a1) -- (a2);
+  \draw[flow] (a2) -- (a3);
+  \draw[flow] (a3) -- (a4);
+  \node[use] at (2.1,-0.5) {controlled configuration};
+
+  % Panel B: agentic
+  \node[head] at (7.1,7.7) {Agentic RAG};
+  \node[b] (b1) at (7.1,6.5) {Question};
+  \node[s] (b2) at (7.1,4.5) {Agent decides whether, what and how often to search};
+  \node[b] (b3) at (7.1,2.2) {Tools: knowledge-base search, other tools};
+  \node[b] (b4) at (7.1,0.8) {Answer};
+  \draw[flow] (b1) -- (b2);
+  \draw[two] (b2) -- (b3);
+  \draw[flow] (b2.east) -- ++(.5,0) |- (b4.east);
+  \node[use] at (7.1,-0.5) {deployed agent};
+
+  % Panel C: graph-based
+  \node[head] at (12.1,7.7) {Graph-based RAG};
+  \node[b] (c0) at (12.1,6.5) {Question};
+  \node[s] (c2) at (12.1,4.5) {Retrieve entities, relations and summaries from a graph built in advance};
+  \node[b] (c3) at (12.1,2.2) {Generate answer};
+  \node[b] (c4) at (12.1,0.8) {Answer};
+  \draw[flow] (c0) -- (c2);
+  \draw[flow] (c2) -- (c3);
+  \draw[flow] (c3) -- (c4);
+  \node[use] at (12.1,-0.5) {future comparison};
+  \draw[dashed,black!40] (4.6,8.0) -- (4.6,-0.9);
+  \draw[dashed,black!40] (9.6,8.0) -- (9.6,-0.9);
+\end{tikzpicture}
+\caption[Three ways to organize retrieval-augmented generation]{Three ways to organize retrieval-augmented generation. The shaded box marks where the variants differ. They use a fixed retrieval rule, retrieval that the model controls, and retrieval over a graph built in advance. The text under each panel names its role in this thesis.}
+\label{fig:rag-variants}
+\end{figure}

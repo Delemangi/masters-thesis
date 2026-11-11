@@ -1,79 +1,83 @@
 \section{Reference architecture}
 \label{ch:architecture}
 
-The reference architecture describes how an institutional question becomes an answer that a student can inspect and act on. Its central concern is the connection between evidence and assistance: which source supports a statement, how that source reaches the model, and what happens when the available information is insufficient. It is derived from the chatbot implementation and expressed as responsibilities and contracts that another implementation could retain; its reuse points are proposals grounded in one system.
+This chapter describes how an institutional question becomes an answer that a student can check and act on. The architecture comes from the chatbot implementation. It is written as responsibilities and contracts that another implementation could follow. What can be reused elsewhere is a proposal based on one system.
 
-The description is based on a source review of identified repository revisions. Separate checks matched deployed retrieval and prompt files to the code used for replay. Figure~\ref{fig:architecture} shows the larger application and the smaller evaluated path.
+Figure~\ref{fig:architecture} shows the application as deployed, where the answering agent calls knowledge-base search and structured tools itself. It also shows the smaller path that the controlled experiment replays. There, retrieval runs first and the agent is skipped (the controlled configuration, a fixed retrieve-then-generate setup).
 
 \input{figures/architecture}
 
 \subsection{Responsibilities and architectural contracts}
 
-The system has six connected responsibilities: preparing sources, retaining knowledge, selecting evidence, constructing and generating answers, delivering conversations, and recording state and observations. Structured tools provide an additional evidence path for records that are better queried through an API than represented as document passages. These responsibilities need not map one-to-one to machines or repositories. Separating them makes individual decisions inspectable: a poor answer can originate in an incorrect conversion, missed evidence, an unsupported inference, or information lost during delivery.
+The system has six connected responsibilities: preparing sources, storing knowledge, selecting evidence, building and generating answers, delivering conversations, and recording state and observations. In the deployed system, knowledge-base search is one of the agent's tools (Section~\ref{sec:arch-answer}). In the controlled configuration, selection and construction are sequential stages.
 
-Table~\ref{tab:architecture-contracts} describes the principal boundaries. A contract here means the information and obligations crossing a boundary, not a claim that every obligation is enforced automatically. For example, an ingestion endpoint can require a document name while the accuracy of the contents still depends on editorial review, so a successful database write is not validated knowledge.
+Table~\ref{tab:architecture-contracts} lists the main boundaries. A contract here means the information that crosses a boundary and what each side must do with it. The system does not enforce every obligation automatically.
 
 \begin{table}[htbp]
 \centering
-\caption{Principal contracts in the reference architecture.}
+\caption{Main contracts in the reference architecture.}
 \label{tab:architecture-contracts}
 \small
-\begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}XX@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.20\linewidth}XX@{}}
 \toprule
-Boundary & Information transferred & Architectural obligation \\
+Boundary & Information passed & Obligation \\
 \midrule
-Source to ingestion & Stable name, title, text and provenance & Preserve a connection to the original and distinguish conversion from authority. \\
-Knowledge to retrieval & FAQ records or ordered document chunks and current vectors & Keep source type and parent identity available during selection. \\
-Retrieval to answering & Selected text, source identifiers, links and context status & Expose the actual evidence supplied to generation. \\
-Tools to answering & Structured records, ambiguity or lookup failure & Distinguish a returned record from permission to take an institutional action. \\
-Answering to channel & Response identity and streamed events & Preserve answer meaning and communicate completion or failure. \\
-Request to observation & Request/response identifiers and stage outcomes & Separate operational traces, mutable state and evaluation evidence. \\
+Source to ingestion & Stable name, title, text and source details & Keep a link to the original file and mark which text is a conversion and which is the official text. \\
+Knowledge to retrieval & FAQ records or ordered document chunks and current embeddings & Keep the source type and the parent document available during selection. \\
+Retrieval to answering & Selected text, source identifiers, links and context status & Show the actual evidence given to generation. \\
+Tools to answering & Structured records, ambiguity or lookup failure & Treat a returned record as information, not as permission to take an institutional action. \\
+Answering to channel & Response identity and streamed events & Keep the meaning of the answer and report completion or failure. \\
+Request to observation & Request and response identifiers and stage outcomes & Keep logs, changing state and evaluation data in separate places. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-A successful component does not guarantee a good answer. Retrieval can return a regulation that has been superseded; a provider can finish generating text without covering all conditions of a procedure; a channel can display the answer without a separate source event. End-to-end effectiveness therefore requires judging whether the final assistance is supported and sufficiently complete, or provides an appropriate next step.
+\subsection{Source tracking and the stages of knowledge}
 
-\subsection{Source provenance and the knowledge lifecycle}
+The life of a document begins with an original file and a text version made from it. Keeping both makes it possible to compare a conversion with its source. Ingestion gives each document a stable identity and divides the text into chunks that stay linked to their parent and position. This matters when a retrieved sentence depends on a heading or an earlier condition.
 
-FAQs, regulations, course and timetable records, and historical correspondence play the different roles described in Chapter~\ref{ch:data}, and the architecture keeps these roles explicit instead of treating every available text as interchangeable knowledge.
+A source has four separate properties: which original file it is, how good the conversion is, how official it is, and whether it is still in force. Whether a rule is still in force must be stored as metadata. A recent ingestion date does not show it.
 
-The document lifecycle begins with an original file and a derived textual representation. Retaining both lets an editor compare a conversion with its source and correct it later. Ingestion assigns the document a stable identity, stores its title and provenance, and divides its text into chunks that remain connected to their parent and position. This matters when a retrieved sentence depends on a heading or a preceding condition, and it lets an answer refer to an identifiable document rather than an anonymous fragment.
+\subsection{Retrieval as an evidence-selection stage that can be checked}
 
-Provenance has several independent dimensions: original-file identity, conversion quality, source authority, and currentness. A hash can detect changed bytes but establishes none of the latter three, and an authority URL supports inspection without proving applicability to the student's situation. Currentness metadata must therefore be supplied and interpreted, not inferred from recent ingestion. The inspected application can expose status, date and verification fields when they exist; reuse at another institution would require explicit ownership of those decisions.
+Retrieval over the main knowledge base uses two corpora: short FAQ records and passages from longer documents. Dense (embedding) search finds candidates in each corpus. Optional lexical expansion adds FAQ matches found by shared words instead of embedding similarity, and a cross-encoder reranker (a model that reads the question and a passage together and scores the pair) scores the combined candidates. Selected candidates keep their source type, identity and score. This way the selection rule can change while the evidence stays easy to inspect.
 
-Vector freshness is a separate technical concern. If indexed text changes while its vector does not, retrieval can reflect an earlier version. The implementation addresses this through invalidation and revision-aware embedding updates, which keep stored content and its derived representation consistent without determining whether the rule is correct. Optional object storage serves archival access to originals, while PostgreSQL stores retrieval records.
+A third path, for the thesis-committee recommender (a tool that suggests committee members for a diploma thesis, Chapter~\ref{ch:implementation}), reranks similar diploma theses with the same cross-encoder and has its own 0.10 minimum score. It is not evaluated here.
 
-\subsection{Retrieval as an inspectable evidence-selection stage}
+A FAQ may repeat the user's question, while a regulation may state the relevant condition in formal language. The same reranker score therefore may not mean the same for the two source types, so the architecture makes the thresholds variation points. FAQ candidates get priority within the final limit on candidates. Neighboring passages can be added around selected document chunks, so a limit on candidates does not limit the amount of text the model sees. Comparisons must report these choices. Otherwise an apparent threshold effect may also include changes in ordering or context.
 
-Retrieval operates over two corpora: short FAQ records and passages from longer documents. Dense search finds candidates in each corpus, optional lexical expansion contributes FAQ matches under the application's conditions, and a cross-encoder reranks the combined candidates. The selected candidates retain their source type, identity and score, so selection policy can be varied while inspecting exactly which evidence enters the answer prompt.
+Letting evidence into the prompt is not the same as showing it as a source. In the controlled configuration the FAQ context floor (the minimum reranker score for a candidate to enter the prompt) is 0.10, and the source-display threshold is 0.30. A passage may therefore influence generation without producing a visible source card, the link to a source that the web client shows under an answer. The deployed system uses a single shared context floor of 0.03 and the same display threshold. The 0.03 floor is not one of the four policies tested in the controlled experiment.
 
-The shared candidate pool creates a substantive design choice. A FAQ may restate the user's question, while a regulation may contain the relevant condition in formal language, so equal reranker scores need not have equal implications for the two source types. A common threshold is simple, but lowering only the document threshold can admit weakly related passages. The architecture therefore exposes thresholds as variation points.
-
-Selection also includes allocation and expansion. The inspected path gives FAQ candidates priority within the final candidate budget and can add neighboring passages around selected document chunks. A limit on selected candidates is therefore not a fixed limit on characters presented to the model; one long document section can change the context more than one short FAQ. Comparisons must preserve or report these decisions, or an apparent threshold effect may include changes in ordering or context construction.
-
-Evidence admission is distinct from source presentation. The inspected default context threshold is 0.10, while the source-display threshold is 0.30, so a passage may influence generation without producing a visible source card. Retrieval and a useful-link catalog are also assembled separately: empty retrieved text may still be accompanied by links that help the model suggest a relevant destination. Recording text and links separately allows useful routing to be distinguished from a supported substantive answer.
+Two more properties of the deployed system change what the model receives. The reranker scores candidates against the original question, not the rewritten query. A context that only just passes the score floor is flagged as a weak match, so the model can ask for clarification instead of guessing. Useful links are collected separately from retrieval. This keeps useful routing (pointing the student to the right place) apart from a supported answer.
 
 \subsection{Answer construction and structured lookup}
+\label{sec:arch-answer}
 
-Answer construction combines the question, selected evidence, useful links, date, available history and interface instructions. Provider adapters translate this input into the appropriate generation route and emit a common response stream. The generated answer may summarize or explain the retrieved material, but remains an interpretation that must be assessed for support and completeness.
+Answer construction puts together the question, the selected evidence, useful links, the date, any history and the instructions for the interface.
+This description matches the controlled configuration. The deployed agent instead calls knowledge-base search as one of its tools, with a short Macedonian query that it writes itself. It may search several times within a limit per answer, and its prompt contains no pre-retrieved sources. The replay reproduces only the fixed path, so the controlled findings say nothing about when and what the agent decides to search.
 
-Structured tools extend this process. The inspected agent can discover configured MCP tools and call them during generation, for example to look up named courses, rooms, schedules or catalog records. This access pattern differs from semantic search over a regulation, and its failures differ: the corpus may lack a procedural rule, whereas a structured service may be unavailable or return an ambiguous entity match.
+The agent can also find tools offered through the Model Context Protocol (MCP), a standard way to connect a model to outside services, and call them, for example to look up courses, rooms, schedules or announcements. Their failures differ from retrieval failures. A structured service may be unavailable or return an ambiguous entity match.
 
-Read-only lookup does not resolve an individual case. A thesis listing or professor record may inform guidance, but does not appoint a committee, approve a request or register a student. Service authentication allows one system to contact another; it does not establish the student's authorization to inspect protected records. The architecture therefore separates explaining a procedure, locating public or service-accessible information, and exercising institutional authority.
-
-Clarification and referral are valid outcomes when the evidence cannot support a direct answer. A general procedure may depend on the academic period or the type of request, and asking for that distinction may be more useful than presenting one branch as universal. A referral can identify the appropriate office while leaving the decision to that authority.
+A read-only lookup cannot settle an individual case. It may inform the guidance, but it does not appoint a committee, approve a request or register a student. The architecture therefore keeps three things apart: explaining a procedure, finding information and acting with the institution's authority. Clarification and referral are valid outcomes when the evidence cannot support a direct answer.
 
 \subsection{Channels, state and failure boundaries}
 
-Web and Discord adapters send requests to the same backend but maintain different conversation and delivery behavior. The web path has persisted conversations and resumable streams. Discord retains bounded process-local history and edits or splits messages to fit its presentation limits. Shared generation reduces duplicated backend logic, but histories, source displays and interruption behavior can differ between the two.
+Web and Discord adapters send requests to the same backend but differ in conversation handling and delivery. The web path has saved conversations and streams that can be restarted. Discord splits messages to fit its length limits. Its conversations are stored on the server and can be deleted with a bot command. Both channels show tool-call steps while the agent works, but source displays can differ.
 
-State is separated by purpose. Knowledge records represent evidence; conversations represent mutable user interaction; lookup caches represent previously fetched data; telemetry represents observations; frozen research artifacts represent the inputs and outputs of a particular study. Merging them would obscure retention, authority and reproducibility. Response identifiers can connect events and feedback without making either a substitute for content assessment.
+Stored data is kept apart by purpose (knowledge, conversations, caches, telemetry, research files).
 
-Failure boundaries make the system easier to interpret. A request may fail admission before retrieval. Retrieval may fail to obtain reranker scores. A tool refresh may fail while an older inventory remains available. Generation may produce partial text before an error, and a client may lose continuity although the backend completed. These outcomes require different evidence and remedies; in particular, serving old cached information preserves availability but cannot be reported as a successful refresh.
+The stages fail in different ways. A request may be rejected at the start, and reranker scoring may fail. A tool refresh may fail while an older tool list is still available, and generation may produce partial text before an error.
 
-\subsection{Variation points and empirical coverage}
+\subsection{Variation points and measured coverage}
 
-An institution adopting this architecture would replace its corpus, source-review process, terminology, structured adapters and identity policy, while retaining the separation of source preparation, evidence selection, answer construction and channel delivery. Embedding models, rerankers, candidate budgets, selection thresholds, generation providers and presentation rules are additional variation points whose value depends on local questions and evidence.
+An institution adopting this architecture would replace its corpus, its source-review process, its adapters for structured data and its identity policy. It would keep the separation of source preparation, evidence selection, answer construction and channel delivery. Models, limits on candidates and thresholds are further variation points.
 
-The experiment covers a deliberately smaller boundary. It reuses production retrieval and prompt construction with the original queries, then sends captured prompts to controlled Luna generation. It excludes query rewriting, conversation history, live provider agents, MCP and built-in tool execution, request-admission checks, conversation persistence, and actual web or Discord rendering. The input schema still affects eligibility, as documented in the methodology. Evidence selection thus changes while other captured inputs remain controlled, which makes the retrieval comparison interpretable; the remaining responsibilities require their own validation.
+The experiment covers a smaller part. It reuses production retrieval and prompt construction with the original queries, then sends the saved prompts to Luna, the generation model of the controlled configuration. It leaves out query rewriting, conversation history, live provider agents, tool execution, request checks at admission, saving of conversations, and real web or Discord display. The input schema still decides which questions are eligible. Only evidence selection changes, so the retrieval comparison is easy to interpret. Chapter~\ref{ch:live} evaluates the deployed system, including its agent and tools, but does not follow the controlled protocol.
+
+\paragraph{Summary.}
+\begin{itemize}
+  \item The architecture has six responsibilities joined by the contracts of Table~\ref{tab:architecture-contracts}.
+  \item Evidence selection is a stage that can be inspected, with explicit variation points.
+  \item The deployed agent calls knowledge-base search and structured tools itself. The controlled configuration fixes retrieval before generation.
+  \item The controlled experiment covers only evidence selection and answer construction. The live evaluation covers the rest.
+\end{itemize}

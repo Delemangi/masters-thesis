@@ -9,6 +9,7 @@
 \usepackage{setspace}
 \renewcommand{\baselinestretch}{1.5}
 \usepackage{fancyhdr}
+\usepackage{cite}
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
 \pagestyle{fancy}
@@ -23,3 +24,7 @@
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\textfraction}{0.1}
 \newcommand{\thesischapter}[1]{\clearpage\input{#1}}
+
+% Ragged-right table cells avoid stretched gaps in narrow columns; space between a table caption and its top rule.
+\renewcommand{\tabularxcolumn}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setlength{\belowcaptionskip}{4pt}

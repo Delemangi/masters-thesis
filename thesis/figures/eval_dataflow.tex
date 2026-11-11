@@ -1,0 +1,39 @@
+% Data flow of the evaluation: sources, sanitization, and the two evaluation branches.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small,
+  box/.style={draw,rounded corners=2pt,align=center,text width=6.4cm,inner sep=4pt,fill=white},
+  src/.style={draw,rounded corners=2pt,align=center,text width=5.6cm,inner sep=4pt,fill=black!8},
+  wide/.style={draw,rounded corners=2pt,align=center,text width=8cm,inner sep=4pt,fill=black!8},
+  res/.style={draw,rounded corners=2pt,align=center,text width=6.4cm,inner sep=4pt,fill=black!20,thick},
+  head/.style={draw,rounded corners=2pt,align=center,text width=6.4cm,inner sep=4pt,fill=black!8,font=\small\bfseries},
+  arr/.style={-{Stealth[length=2.2mm]},thick}]
+  \node[src] (mail) at (-3.4,0) {Email archive (anonymized)\\1,693 student emails with staff replies};
+  \node[src] (logs) at (3.4,0) {Chatbot logs\\172 logged conversations};
+  \node[wide] (san) at (0,-1.7) {Removing leftover personal details};
+  \draw[arr] (mail.south) -- (mail.south |- san.north);
+  \draw[arr] (logs.south) -- (logs.south |- san.north);
+
+  \node[head] (c0) at (-3.5,-3.4) {Controlled experiment};
+  \node[head] (l0) at (3.5,-3.4) {Live evaluation};
+  \draw[arr] (san.south) -- ++(0,-0.35) -| (c0.north);
+  \draw[arr] (san.south) -- ++(0,-0.35) -| (l0.north);
+
+  \node[box,below=0.45cm of c0] (c1) {96 emails and 96 chatbot questions};
+  \node[box,below=0.45cm of c1] (c2) {Four retrieval policies on one fixed configuration};
+  \node[box,below=0.45cm of c2] (c3) {AI references and AI judgments};
+  \node[res,below=0.45cm of c3] (c4) {Assistance rates};
+
+  \node[box,below=0.45cm of l0] (l1) {Tuned set (334), holdouts 1 to 3 (271, 275, 298), monitoring sets (109 traffic, 38 recent)};
+  \node[box,below=0.45cm of l1] (l2) {Deployed agent run on test accounts};
+  \node[box,below=0.45cm of l2] (l3) {Blind AI grading against the FAQ snapshot, confirmed facts and the staff reply};
+  \node[box,below=0.45cm of l3] (l4) {Deterministic check of stated details};
+  \node[res,below=0.45cm of l4] (l5) {Correct, wrong and \textsc{Gap} rates, and retrieval recall};
+
+  \foreach \a/\b in {c0/c1,c1/c2,c2/c3,c3/c4,l0/l1,l1/l2,l2/l3,l3/l4,l4/l5} {
+    \draw[arr] (\a) -- (\b);
+  }
+\end{tikzpicture}
+\caption[Data flow of the evaluation]{Data flow of the evaluation. The faculty provided the email archive already anonymized. Leftover personal details are removed once from both sources, which then feed two branches. The controlled experiment uses 96 email and 96 chatbot questions. The live evaluation uses sets of archive emails and two monitoring sets of real questions. The tuned set is the set that the fixes were made on. Holdouts 1 to 3 are the held-out email sets, which were unseen when first measured. The monitoring sets are real chatbot questions, used to look for faults. Assistance is a supported answer or useful routing. In the live grades, Correct means the answer gives the main confirmed fact, Wrong means it misses, contradicts or invents a fact, and Gap means no confirmed fact covers the question, so the loss is missing knowledge. The test accounts are accounts used only for the evaluation runs.}
+\label{fig:eval-dataflow}
+\end{figure}

@@ -1,86 +1,113 @@
 \section{Discussion}
 \label{ch:discussion}
 
-The controlled study provides evidence about assistance on selected institutional questions, not a validated measure of deployed chatbot success. Its strongest result is that substantially increasing document context did not produce better AI-assessed answering or guidance; the absolute totals require more caution. This chapter answers the research questions, states the threats to validity and identifies the next evaluation.
+This chapter answers the three research questions, shows where failures happen along the pipeline, lists the threats to validity in a table and names what remains open. The controlled study shows how much help the system gave on selected questions. It is not a validated measure of success in real use. Its strongest result is that more document context did not improve the answers or guidance as rated by the AI judge.
 
 \subsection{RQ1: observed assistance and remaining shortcomings}
 
-Under G0, the prespecified combined endpoint assigns assistance to 31 of 96 email responses and 53 of 96 production-question responses. These totals describe retained AI labels, not the proportion of student questions the assistant factually answered. The email total comprises nine supported-answer and 22 useful-routing labels; the production total comprises 25 supported-answer and 28 useful-routing labels. Appropriate guidance therefore accounts for a substantial part of the positive result. A referral or clarification can be the right response when a question depends on missing information, an individual record or an institutional decision, but it does not resolve the underlying problem, which is why answering and routing are reported separately.
-
-The remaining labels indicate concrete weaknesses. Under G0, 31 email and 22 production outcomes are incomplete, and the judge assigns the unsupported-claim category to twenty email and twelve production outcomes out of 96 each. Completed generation is therefore an insufficient success criterion, although the counts identify kinds of failure rather than their true prevalence.
-
-The supported-answer category also includes responses without substantive factual targets: twenty of the 25 production supported-answer labels under G0 use references with no retained facts. A greeting or useful request for context may deserve a positive assessment, but should not count toward factual accuracy; an empty reference can also reflect failed reference construction. RQ1 is therefore answered descriptively: the system provides both answering and guidance, alongside substantial incompleteness and unsupported-claim labels, while the factual validity of the absolute rates remains unresolved.
-
-\subsection{RQ2: the effect of retrieval policy}
-
-Moving from G0 to S0 lowers the document threshold while holding the FAQ threshold and other selection rules fixed. Assistance changes from 31 to 30 email outcomes and from 53 to 52 production outcomes, a paired difference of $-1.04$ percentage points in each sample. The 95\% intervals, $[-8.33,6.25]$ and $[-7.29,5.21]$, span zero and allow improvement or deterioration. The evidence shows no benefit from this intervention, but neither does it show equivalence or identify a universally preferable threshold.
-
-The small outcome differences occur despite pronounced changes to the retrieved input. For email questions, mean context length increases from 5,110 to 16,481 characters and empty contexts fall from 36 to three. For production questions, mean length increases from 1,010 to 5,808 characters and empty contexts fall from 76 to 52. In the email subset with nonempty checked references, reference-quotation availability also increases. The intervention thus changes the evidence presented to generation without a corresponding improvement in assistance.
-
-Added passages may be irrelevant or redundant, the remaining difficulty may concern clarification or individual applicability, or the reference may omit a required condition; the experiment does not isolate these mechanisms. The result supports examining how answers use evidence rather than treating context volume as an effectiveness measure.
-
-Fallback has to be interpreted through actual exposure. With the shared threshold, G1 changes empty contexts to nonempty ones in 33 email and 27 production cases, yet assistance changes by only $+1/96$ and $-1/96$. With the lower document threshold, S0 and S1 have identical contexts for every email case and for 93 of 96 production cases, so the absence of an email difference follows from identical prompts and answer reuse and says nothing general about fallback. Candidate allocation, neighboring passages, ordering and citation visibility remain untested.
-
-The prompt comparison points the same way from the generation side. A prompt that checks source dates and applicability, preserves procedural steps and states gaps changes strict completion from 6/40 to 5/40, a $-2.5$-point difference with an interval spanning zero (Section~\ref{sec:results-prompt}). The comparison also yields a methodological lesson: under initial labels produced without the full generation evidence, the same answers appeared to show a five-point gain, so an assessment missing the generator's evidence can itself manufacture an improvement.
-
-\subsection{RQ3: dependence on the sample and assessor}
-
-The email and production samples should be read as two question frames. Their equal denominators do not represent the frequency of question types in actual use. Email questions come from correspondence groups already examined in the component study; production questions come from selective text logging, and the replay keeps only the latest turn, so a short follow-up may lack context from the original conversation. Differences between the samples cannot be assigned solely to language, script, retrieval quality or channel.
-
-The assessment procedure adds a second source of uncertainty. Luna constructs references, generates answers and supplies primary judgments. Reference creation precedes the evaluated answers and policy labels are hidden from the judge, which reduces direct policy cues, but the shared model family can leave common omissions and interpretations across roles. Research on self-preference motivates examining this possibility, but does not identify its presence or magnitude here~\cite{panickssery2024selfpreference,chen2025selfpreference}.
-
-Repeated Luna judgments agree on the overall category in 35 of 47 eligible pairs; local Qwen judgments agree with the primary categories in thirteen of 45. One assessment is therefore not perfectly stable, and the same saved evidence supports substantially different automated judgments. Neither comparison supplies human truth: Qwen's lower agreement does not justify replacing the primary labels, and Qwen applying the unsupported-claim category more broadly does not validate Luna.
-
-RQ3 is thus bounded: the study gives interpretable conditional comparisons but weak support for precise absolute quality estimates. ARES, for example, uses human-labeled validation data within its evaluation framework~\cite{saadfalcon2024ares}; the present study has no corresponding human validation of its main labels.
-
-\subsection{Construct validity and reference authority}
-
-The prespecified endpoint deliberately combines supported answering with useful safe routing. This matches a broad assistance objective but is not a factual-accuracy measure, and it is sensitive to empty factual targets. The post-hoc sensitivity analysis requires a nonempty valid reference for the direct-answer category while retaining routing; production assistance then changes from 33/96 under G0 to 32/96 under S0. This alternative excludes some legitimate conversational responses and is not corrected accuracy.
-
-The implemented judge returns an overall category, coverage and support flags, a rationale and evidence quotations, not the exhaustive claim-by-claim checks envisaged in the initial design, so a coverage flag is the assessor's assertion rather than a verified inventory of required facts. Structural and quotation checks establish well-formedness and source occurrence, not semantic entailment, exhaustive coverage or current applicability.
-
-Authority is a separate issue from textual fidelity. Faculty transfer provisions from 2013 and university provisions from 2019 set different credit requirements for overlapping transfer situations, and a 2022 supplement permits an exception for students transferring from a country under a declared state of emergency, crisis or war~\cite{finki2013study,ukim2019study,ukim2022supplement}. Their presence in a retrieval pool does not decide which applies to a particular student. The fee schedule specifies applicability from 2024/25 until replacement~\cite{finki2024fees}; an upload date cannot substitute for that effective scope. The architecture must preserve source identity, dates and authority so they can be reviewed; the study does not certify current rules or individual eligibility.
-
-The offline reference audit makes these weaknesses inspectable without retrospectively repairing the labels. Of 49 rejected main-reference quotations, 32 appear in another block in the same evidence pool and seventeen are absent.
-
-\subsection{Internal, statistical and external validity}
-
-Internal comparison is strengthened by paired questions, frozen GPU results, captured prompts and reuse of identical generated answers, with input rejections and unusable judgments kept in policy denominators. These controls do not remove reference errors shared by all policies. Separate read-only batches do not guarantee one historical database snapshot, and the intervention is specific to the selected corpus, candidate pool and generation configuration. The main experiment has no retrieval-disabled baseline, so it compares selection policies without measuring the contribution of retrieval itself. The cross-model check used a smaller local open-weight model; a comparably capable independent assessor would be more informative.
-
-Statistical uncertainty is conditional on the saved AI judgments. Bootstrapping question groups preserves within-question pairing but does not propagate reference-construction uncertainty or systematic assessor error, and identical prompts are not independent answer draws merely because several policy records point to them. The intervals support a bounded inference about the observed intervention; their inclusion of zero is not a claim of equivalence.
-
-External validity is restricted by both sampling and execution scope. Previously examined email questions are not a new holdout, and selectively recorded production text is not a random sample of interactions. The experiment replays production retrieval and prompts with controlled hosted generation, excluding live tool calls, conversation history, admission checks, storage and client delivery, so it does not cover full conversations, authenticated actions or the deployed agent. A shared reference architecture identifies plausible reuse points but, without another evaluated implementation, does not demonstrate portability to a second institution.
-
-Historical telemetry documents delivery events and timing, but incomplete request linkage, selective feedback and its timing boundary prevent it from validating answer quality. Administrative workload, avoided emails and staff-time savings are outside this thesis's effectiveness scope.
-
-\subsection{Attributing observed failures to architectural stages}
-
-The architecture is most useful where it makes failure sources distinguishable: source preparation determines what can be supported, retrieval which evidence reaches generation, the answer stage how conditions are expressed, and channel adapters what the user sees. Mapping the observations onto these stages and onto the failure points that Barnett et al. report for RAG systems~\cite{barnett2024seven} shows where the remaining weaknesses lie. Table~\ref{tab:failure-attribution} summarizes the mapping; it is an analytical attribution from aggregate evidence, not a case-by-case causal diagnosis.
+\paragraph{Short answer.} The system both answers and guides, but many answers are incomplete or have unsupported claims (under G0, 31 of 96 email and 22 of 96 production answers were incomplete). The absolute rates do not show how often the answers are factually correct.
 
 \begin{table}[htbp]
 \centering
-\caption{Observed failures attributed to architectural stages. FP numbers follow Barnett et al.~\cite{barnett2024seven}; rows without an FP number are additions of this study. Evidence refers to the controlled experiment unless stated otherwise.}
-\label{tab:failure-attribution}
+\caption[Outcomes under G0 (the shared document threshold without fallback), out of 96 responses per sample]{Outcomes under G0 (the shared document threshold without fallback), out of 96 responses per sample. Assistance is the sum of supported-answer and useful-routing labels.}
+\label{tab:rq1-g0}
 \small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}X@{}}
+\begin{tabular}{@{}lrrrrr@{}}
 \toprule
-Stage & Failure point & Observed evidence \\
+Sample & Assistance & Supported & Routing & Incomplete & Unsupported \\
 \midrule
-Source preparation & Missing content (FP1) & Under S0, 52 production contexts remain empty, although some are conversational turns that need no source; seventeen of 49 rejected reference quotations are absent from the evidence pool; overlapping transfer rules and dated fee schedules require authority and currentness metadata. \\
-Evidence selection & Missed top-ranked; not in context (FP2, FP3) & Under G0, 36 email contexts are empty and on average fewer than half of the reference quotations reach the context; the separate document threshold raises this to about two thirds and improves ranked retrieval in the component study. \\
-Answer construction & Not extracted; incomplete (FP4, FP7) & With far more evidence under S0, email incompleteness changes only from 31 to 30 and unsupported-claim categories from twenty to nineteen; the revised prompt does not improve audited completion. \\
-Channel delivery & Input boundary; presentation (cf.\ FP5) & Four email questions exceed the 2,000-character input limit; the Discord adapter ignores the separate source event. Delivery behavior was not experimentally evaluated. \\
-Observation and assessment & Evaluation evidence & Empty references, judge inputs lacking generation evidence and low cross-assessor agreement limit what the labels establish. \\
+Email & 31 & 9 & 22 & 31 & 20 \\
+Production & 53 & 25 & 28 & 22 & 12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The totals count the AI labels that were kept. They do not give the share of questions answered correctly. The failure counts show which kinds of failure occur, but not how common each kind is. Guidance (routing) makes up much of the positive result. A referral can be the right response, but it does not solve the student's problem, so answering and routing are reported separately (Table~\ref{tab:rq1-g0}).
+
+The supported-answer category also includes responses with no factual targets. Twenty of the 25 production supported-answer labels under G0 use references that list no facts. Such labels should not count toward factual accuracy. An empty list can also mean that the AI model failed to extract the facts when it wrote the reference. RQ1 is therefore answered only by description.
+
+\subsection{RQ2: the effect of retrieval policy}
+
+\paragraph{Short answer.} Lowering the document threshold gave no measurable benefit. The evidence does not show that the thresholds are equal, and it does not show that one threshold is best everywhere.
+
+S0 differs from G0 only in a lower document threshold. Assistance changes by $-1/96$ in each sample. The 95\% intervals span zero (Chapter~\ref{ch:results}), so they allow both improvement and decline. This holds even though the retrieved text changes a great deal. Mean context length rises from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production. Empty contexts fall from 36 to 3 and from 76 to 52 (Table~\ref{tab:context-diagnostics}).
+
+The added passages may be irrelevant or repeat what was already there. The remaining problem may be that the question needs clarification, or that it is unclear whether the rule applies to the student. The reference may also leave out a condition. The experiment does not separate these causes. A larger context does not mean a better answer.
+
+Fallback (G1 and S1) changes empty contexts to contexts that are not empty in 33 email and 27 production cases under the shared threshold, yet assistance moves by only $+1/96$ and $-1/96$. Under the lower threshold, S0 and S1 have identical contexts for every email case and 93 of 96 production cases, so the lack of a difference tells us little about fallback in general. How candidates are split between FAQs and documents, whether neighboring passages are added, the order of passages and whether citations are shown were not tested.
+
+The prompt comparison points the same way from the generation side. A prompt that checks source dates and whether a rule applies changes strict completion from 6/40 to 5/40, and the interval spans zero (Section~\ref{sec:results-prompt}). The first labels, made without the full evidence the generator had, showed a five-point gain for the same answers. A judge that lacks the generator's evidence can therefore report an improvement that is not real. The comparison is also confounded, because other things changed at the same time: the audit also changed the scope guidance and the judgment token cap.
+
+\subsection{RQ3: dependence on the sample and judge}
+
+\paragraph{Short answer.} Comparisons between conditions are only suggestive, because the policy contrast was not recomputed under the second judge. Absolute quality numbers have weaker support still.
+
+The email and production samples are two sets of questions. Their equal sizes do not reflect how often each kind of question occurs in real use. Email questions come from groups already examined in the component study. Production questions come from selective logging, and the replay keeps only the latest turn. The samples differ in several ways at once, so a difference between them cannot be put down to language, script, retrieval quality or channel alone.
+
+Luna builds the references, generates the answers and gives the primary judgments. Because the roles share a model family, they may share the same omissions. Research on self-preference gives a reason to check this, but it does not show whether it happens here~\cite{panickssery2024selfpreference,chen2025selfpreference}. Repeated Luna judgments agree on the overall category in 35 of 47 eligible pairs, and local Qwen judgments agree in thirteen of 45. One judgment is therefore not fully stable. Neither comparison uses human labels as the true answer. ARES, for example, uses human-labeled validation data~\cite{saadfalcon2024ares}, and the present study has none for its main labels.
+
+\subsection{Where answers fail}
+
+Figure~\ref{fig:failure-location} places the observations of both evaluations on the pipeline stages and on the failure points that Barnett et al. report for RAG systems~\cite{barnett2024seven}.
+
+\input{figures/failure_location}
+
+Both evaluations point the same way. In the controlled experiment, the document threshold cut empty contexts for email questions from 36 to 3 and raised the ranking scores of the candidates in the pool, while assistance stayed almost the same. In the live evaluation, retrieval misses explain at most 13 of 298 rows, and 18 of 22 partial answers had relevant evidence in context. The largest bucket is \textsc{Gap}, which mostly means missing knowledge. The mapping is an analytical judgment, and the live numbers rest on AI relevance judgments and one run. The delivery of answers to the user was not evaluated.
+
+Claims about selection can only cover what was changed. All four controlled policies kept the shared FAQ floor at 0.10 and varied only the document threshold. The live A/B changed the shared context floor (0.10 to 0.03) together with the rerank query. Both gave large gains on the hard set that tested them (Table~\ref{tab:live-ab}). Lowering the document threshold further is not promising, but selection as a whole still has room to improve.
+
+Some held-out email sets had not been used for any fix. All of them were graded by Sonnet under the current rubric. On these sets the deployed agent was graded correct on 70 to 77 percent of graded rows and wrong on 1 to 3 percent. The largest bucket of non-correct rows on the final set was \textsc{Gap} (38 rows, 12.8 percent of all 298 rows). In run $a$, 9 of the 38 had no relevant item, 24 had a related item in context that lacked the specific fact, and 5 had a relevant item outside the context. The first thing to try is therefore data in the knowledge base that the institution has confirmed.
+
+How the answer is written matters somewhat, but prompt instructions improve it only with difficulty. A rule suppressing hedges halved hedge phrases without improving grades beyond noise, and seven rows contained unsupported dates, fees or procedures. Completeness checks, explicit clarification and metadata that marks which source has authority were not tested.
+
+\subsection{Evidence from the deployed agent}
+
+Prompt rules for query planning, explaining retrieved procedures and treating both meanings of an ambiguous term were tried on the live system (Chapter~\ref{ch:live}). They raised correct answers on 97 hard questions (96 graded rows) from 72.9 to 84.4 percent. Wrong answers fell from 9.4 to 4.2 percent. Hard sets are picked from earlier wrong answers, so such gains are inflated and cannot be compared with tool gains.
+
+Replacing the cross-encoder reranker with a decision model improved ranking against AI relevance labels (hit@1 from 52.7 to 68.7 percent), but it did not improve the end-to-end answers. On 100 holdout-3 emails, 74.5 percent of answers were correct with the cross-encoder and 69.1 percent with the decision model (sign test $p=0.24$). The decision model also gave a smaller context (10,096 versus 17,174 characters per search). The ranking gain is partly circular, because AI models also made the relevance labels it was scored against. In addition, the end-to-end answers came through a different API route. A multi-turn memory test with 42 genuine memory items found the earlier context used in all 42 and the answer correct in 41. It covers memory within one conversation only.
+
+\subsection{Threats to validity}
+
+Table~\ref{tab:validity} lists the threats, their effect on the conclusions and what limits the damage.
+
+\begin{table}[htbp]
+\centering
+\caption{Threats to validity, their effect and what limits them.}
+\label{tab:validity}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Threat & Effect & What limits it \\
+\midrule
+Combined endpoint (answering plus useful routing) & Does not measure factual accuracy, and empty factual targets skew it. & Answering and routing are reported separately. An extra check, made after seeing the results, counts a direct answer only if its reference is valid and not empty. It changes production assistance from 33/96 under G0 to 32/96 under S0. This is not a corrected accuracy. \\
+Judge design & The judge gives a category, flags and quotations. It does not check claim by claim. & Quotation checks show that the text occurs in the source. They do not show that the source supports the claim or is still in force. \\
+Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. No human labels exist. \\
+Reference authority and whether rules are still in force & Faculty provisions from 2013 and university provisions from 2019 set different credit requirements for overlapping transfers, and a 2022 supplement adds an exception~\cite{finki2013study,ukim2019study,ukim2022supplement}. The fee schedule applies from 2024/25 until replaced~\cite{finki2024fees}. Retrieval does not decide which source applies. & The study does not certify current rules or whether a student is eligible. Of 49 rejected main-reference quotations, 32 appear in another block of the same evidence pool and seventeen are absent. \\
+Internal comparison & Reference errors shared by all policies remain. The result is specific to the corpus and configuration, and the main experiment has no baseline without retrieval. & Paired questions and saved prompts. Only the prompt comparison included an arm without evidence: 4/32 strict completions and 14/73 reference facts, against 4/32 and 29/73 with retrieval (Section~\ref{sec:results-prompt}). \\
+Statistical inference & The uncertainty depends on the saved AI judgments. Bootstrapping does not include errors from reference construction or systematic judge error. & Bootstrapping question groups keeps the pairing. An interval that includes zero does not mean the policies are equal. \\
+Sampling and external validity & Email questions that were already examined are not a new holdout, and one month of logged chatbot questions is not a random sample. The replay excludes tool calls and history, and it is not shown to carry over to other settings. & The live evaluation runs the deployed agent on new held-out emails, but it was done step by step, it is AI-graded and it was not pre-registered (Section~\ref{sec:live-limits}). \\
+Telemetry and workload & Historical telemetry records delivery and timing but cannot validate answer quality. & Workload and staff-time savings are outside the scope of this thesis. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The mapping points to a specific engineering conclusion. The separate threshold largely resolves the evidence-selection failure for email questions: empty contexts nearly disappear and more reference quotations reach the model. Assistance nevertheless stays almost unchanged, which locates the dominant remaining weakness in answer construction, together with missing or ambiguous source content. For this system, further loosening of selection is unlikely to be the most productive change. Completeness checks during answer construction, explicit clarification when conditions are missing, and authority and currentness metadata at source preparation are better candidates. These are design implications derived from the stage separation, not interventions shown here to improve the pipeline; preserving the stage boundaries is what makes such attribution possible.
+These measures make the threats smaller but do not remove them. The two most important threats are that no human checked the AI labels, and that AI relevance labels were used to score AI rankers. Both can favor the AI components being tested.
 
-\subsection{Next evaluation}
+\subsection{What remains open}
 
-The first proposed extension is to review references before generating new answers. Each case should receive an explicit factual, conversational, clarification, personal-action, mixed or out-of-scope task type. Factual and mixed cases need required facts with checked sources and applicability; other cases need explicit expected behavior, while any factual assertions still require support. Reviewer identity, AI assistance, human decisions and adjudication should remain distinct. Above all, qualified human review of a subset of answers, compared against the AI labels, would provide the currently absent evidence about label reliability; it is the most important next step for this line of work.
+\begin{enumerate}
+  \item Qualified people should review a subset of answers and compare their view with the AI labels. This is the most important next step.
+  \item References should be reviewed per task type, with the required facts and whether they apply to the student checked against sources.
+  \item A live condition with retrieval turned off would measure how much retrieval adds to the full agent.
+  \item A graph-based RAG baseline such as LightRAG~\cite{guo2024lightrag} is planned as a comparison on a fixed question set and corpus.
+  \item Complete conversations need their own evaluation of tool selection, arguments, returned evidence and final answers.
+\end{enumerate}
+The author inspected all existing cases, including the four email sets, and all but holdout 3 were also used for fixes. Only a newly selected sample can support a new held-out claim, and its baseline, minimum effect and analysis must be fixed in advance.
 
-A subsequent comparison should freeze the baseline, minimum effect of interest, sample and analysis before execution. A retrieval-disabled condition could clarify the contribution of retrieved text, provided that useful links and agent tools are explicitly controlled. A stronger completeness intervention than the tested prompt could combine explicit identification of missing conditions, clarification requests and checks of displayed citations, assessed with the full generation evidence. The post-evaluation retrieval changes (Section~\ref{sec:post-evaluation-changes}) should be evaluated with the same controlled design. Because the existing cases and outcomes have been inspected, their reuse would be exploratory; a new held-out claim requires a newly selected and frozen sample.
-
-Finally, a separate integration set should examine complete conversations and read-only tool tasks, using dated captured tool records to check tool selection, arguments, returned evidence and final answers, and keeping browser and Discord differences in history and source presentation explicit. Such work would extend the evidence beyond the controlled retrieval study reported here.
+\paragraph{Summary.}
+\begin{itemize}
+  \item RQ1: the system answers and guides, but many answers are incomplete or have unsupported claims, and the absolute rates are not validated.
+  \item RQ2: more document context gave no detectable benefit. The live evidence limits this finding to the document threshold.
+  \item RQ3: comparisons between conditions are only suggestive, since the policy contrast was not recomputed under the second judge, and absolute estimates are weaker. Both depend on the sample and on AI judges.
+  \item The largest single loss is \textsc{Gap}, which mostly means missing knowledge, and few failures come from retrieval misses. Institution-confirmed data is the first thing to try, and human validation is the next step.
+\end{itemize}

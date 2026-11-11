@@ -1,0 +1,48 @@
+\section{Secondary analyses of the controlled experiment}
+\label{app:secondary}
+
+This appendix gives analyses that support Chapter~\ref{ch:results}. They are the component study, the prompt comparison details, the quotation audit, two worked cases, and delivery, latency and cost.
+
+\subsection{Component study with a local generator}
+\label{sec:component-study}
+
+The component study preceded the controlled experiment and used a simplified retrieval path with a locally served, quantized Qwen3-8B generator. Retrieval ranking was measured by normalized discounted cumulative gain over the top ten candidates (nDCG@10) against AI relevance judgments of each candidate pool, and answer quality by an AI judge. Its fixed corpus contains 74 FAQs and 1,403 chunks from nineteen documents. A 24-case development set and a protected 320-case test sample support it. Of the 320 test cases, 306 have a positive relevance judgment.
+
+Chapter~\ref{ch:results} reports the ranking result (nDCG@10 from 0.296 to 0.441 on those 306 cases). The answer comparison changes threshold and fallback together. A separate AI audit covers 24 random test cases with their own references and 48 answers, of which 44 were completed. It flags unsupported important claims in 31 of the 44 (12 under the current policy and 19 under the separate thresholds). Its category matches the primary assessment in 12 of the 44. On the same 24 cases, the nDCG@10 gain of the separate thresholds is 0.201 with the main relevance labels and 0.050 with the audit's independent labels, which are positive for 13 of the cases. These findings led to the separation of threshold and fallback in the controlled experiment. They cannot be combined with the Luna assessment.
+
+\subsection{Prompt comparison: method details}
+\label{sec:prompt-method-details}
+
+The comparison runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks. The FAQ text matches the retrieval-policy experiment, but the document set is larger.
+
+A 32-question development sample, balanced between email and production sources, compares current retrieval, AI-selected reference evidence and no evidence. It led to a revision of the prompt only, frozen before the comparison. The revised prompt checks dates and whether a rule applies to the student, instead of automatically favoring FAQs or higher-ranked text. It also keeps needed steps of a procedure and states important gaps.
+
+The comparison uses the first forty emails of a shuffled reserve of 64 archive emails kept apart from the main sample, after excluding exact and near duplicates of evaluated questions. It is not proved that these questions differ in meaning from the evaluated ones. Two AI passes prepare and review the references before generation. They select source lines to avoid copying errors. All forty references pass exact-text checks (34 partial, three insufficient, three not factual). They are not answers approved by the institution.
+
+Both conditions use production retrieval with the fallback enabled, useful links, Luna, gateway sampling defaults and a 1,536-token cap. The outcome measure is strict completion. It is stricter than the retrieval-policy assistance measure and not comparable with it. Paired differences use 20,000 bootstrap resamples and an exact paired test on the discordant cases.
+
+\subsection{Prompt comparison: development sample and checks}
+\label{sec:prompt-development}
+
+In the development sample, AI-selected reference evidence raises the number of covered reference facts from 29/73 to 50/73 and strict completion (Section~\ref{sec:method-prompt}) from 4/32 to 6/32 relative to current retrieval. The no-evidence arm, with neither retrieved text nor links, reaches 4/32 strict completions and 14/73 facts. Retrieval therefore roughly doubles fact coverage without changing strict completion. In no development reference are the facts enough to answer the question fully. The check used difficult cases, so it is not representative, and it does not give an upper limit for what perfect evidence could achieve.
+
+Repeated Luna judgments on twenty random questions agreed on strict completion in 37/40 answer pairs, but they used the same incomplete evidence as the initial assessment. Eight constructed controls matched their expected outcomes.
+\subsection{Audit of rejected reference quotations}
+\label{sec:quote-audit}
+
+An offline audit searched the saved pools for rejected reference quotations. Among 49 rejected main quotations, 32 occur in a different source block and seventeen are absent from the pool. In email, eight are other-block matches and fifteen are absent. In production, 24 are other-block matches and two are absent. These can guide repairs to the references. The audit changes no labels or scores, and a string found elsewhere must still be checked for whether it applies to the student.
+
+\subsection{Two worked cases}
+\label{sec:illustrations}
+
+The first case is a G0/S0 pair with an unchanged label despite a larger context. It was chosen after the main study by a rule that ignores outcomes. Among 72 eligible cases (valid reference that is not empty, completed answers under both policies, strictly longer S0 context), it is the one with the smallest fixed hash of its case identifier. The question asks whether admission under a special category drops the tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters). S0 selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services. Both keep the supported-answer label, although the reference says the question can only be partly answered and its third required quotation is absent from both contexts. The pair is only an example and does not estimate how often extra evidence leaves outcomes unchanged.
+
+The second case, a G0 answer labeled incomplete, shows an omission against a saved source. A student asked for help registering for exams after the deadline. The answer declined to perform the registration, described ordinary registration and mentioned a penalty. The late-registration FAQ instead describes a separate request for each exam, naming the course and session, followed by notification of Student Services after payment. These steps were absent from the answer and from its G0 context, although present in the broader reference pool. The source does not say whether late registration is currently possible for that student. It was picked as an illustration from the 36 incomplete G0 records with valid references that were not empty, and not by a fixed selection rule. The example is not human-validated and does not show how often such omissions occur.
+
+\subsection{Recorded delivery, latency and resource use}
+\label{sec:delivery}
+
+Production telemetry covers 69 days, with the author's own test requests removed. It records 699 request events and 684 generation events. Of these, 651 are labeled completed, seventeen empty and sixteen disconnected. Among completed events the median duration is 12.154 seconds and p95 is 37.225 seconds. Timing starts after the user's credentials are looked up, so it leaves out part of the user's wait. A caught error after partial output can also keep a completed label, so completed events are not a validated success rate.
+The 354 unique main generation calls use 2,258,898 input tokens and 76,352 output tokens. Median provider-call latency is 2.144 seconds for email and 1.466 for production, and p95 is 3.439 and 3.854 seconds. These isolated hosted-call times are not comparable with the production durations above.
+
+At the planning rates of Appendix~\ref{sec:method-cost}, main generation costs an estimated USD~5.43. The full recorded usage of the Luna controlled campaign (1,078 requests), including preparation and assessment, is approximately USD~16.36. The campaign reserved about USD~76.30, plus USD~0.01 for a separate check that the gateway served the requested model. The prompt-comparison campaign is counted separately, with 730 requests, recorded usage of USD~14.80 and USD~79.54 reserved. Together the campaigns used an estimated USD~31.16, with reservations of about USD~155.85. These figures exclude actual gateway billing, GPU computation and total hosting cost. The deployed agent was not measured with this latency protocol. Appendix~\ref{app:live-latency} reports its time to first token.

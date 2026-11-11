@@ -1,0 +1,20 @@
+% Assessment pipeline of the controlled experiment: reference, answer, judge, labels, guard.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[font=\small,
+  st/.style={draw,rounded corners=2pt,align=center,text width=2.45cm,minimum height=2.7cm,inner sep=3pt,fill=white},
+  hd/.style={font=\small\bfseries},
+  res/.style={draw,rounded corners=2pt,align=center,text width=2.45cm,minimum height=2.7cm,inner sep=3pt,fill=black!20,thick},
+  arr/.style={-{Stealth[length=2.2mm]},thick}]
+  \node[st] (r) {\textbf{Reference}\\one per question, shared by all policies, quotations checked};
+  \node[st,right=0.4cm of r] (a) {\textbf{Answer}\\generated per policy, identical prompts reused};
+  \node[st,right=0.4cm of a] (j) {\textbf{Judge}\\sees one anonymous answer, the reference and the prompt};
+  \node[st,right=0.4cm of j] (l) {\textbf{Labels}\\seven categories and a material-claim flag};
+  \node[res,right=0.4cm of l] (g) {\textbf{Guard}\\success becomes uncertain if the reference fails its checks};
+  \foreach \p/\q in {r/a,a/j,j/l,l/g} {
+    \draw[arr] (\p) -- (\q);
+  }
+\end{tikzpicture}
+\caption[Assessment pipeline of the controlled experiment]{Assessment pipeline of the controlled experiment. Each answer is judged against one common reference. The guard is the reference check. It is applied when references and judgments are combined. A material claim is a statement about eligibility, fees, deadlines or procedure.}
+\label{fig:assessment-pipeline}
+\end{figure}

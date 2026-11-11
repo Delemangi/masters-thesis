@@ -1,0 +1,33 @@
+\section{Protocol details of the controlled experiment}
+\label{app:protocol}
+
+This appendix gives the run counts, the protocol with its departures and the costs of the experiment described in Chapter~\ref{ch:methodology}.
+
+\subsection{Prompt identity, reuse and execution accounting}
+\label{sec:method-accounting}
+
+When the question, the prompt bytes and the generation settings are identical across policies, the evaluation run reuses one generated answer. This way, two policies do not differ only because of random variation between separate generations. The four policies produce 768 listed main records. Sixteen input rejections leave 752 eligible records, which map to 354 unique main generation calls (195 email, 159 production), with 398 reuses. The pilot adds 39 unique calls, kept separate from the main estimates.
+
+A rejected input, incomplete output, transport problem or invalid assessment is counted in the total and never as a success. Reused answers remain linked to every policy they represent, so one assessment problem can appear in several policy records. Capture and replay stop the application from sending its normal HTTP calls. They do not save conversations or change quotas, so no synthetic questions enter the usage observations of Appendix~\ref{sec:delivery}.
+
+\subsection{Protocol and departures from it}
+\label{sec:method-deviations}
+
+The retrieval-policy protocol was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the primary contrast S0 minus G0, the reference and judgment procedures, the outcome categories and the analysis. Manifests record content hashes of the frozen inputs. An addition to the plan, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own protocol, and its revised prompt was fixed before it ran.
+
+Some steps were done after outcomes had been observed. They are reported as such and replace no primary result. They are:
+\begin{itemize}
+  \item refined wording of the research questions, with the same hypotheses, policies, outcomes and labels,
+  \item the empty-reference sensitivity analysis,
+  \item the Qwen run on the thirty control prompts, which followed the disagreement between the two models,
+  \item the offline check of rejected reference quotations,
+  \item in the prompt comparison, grading all pairs again with the full generation evidence, revised scope guidance and a 1,024-token judgment cap. A deterministic check had shown that the initial judge lacked part of the generator's evidence.
+\end{itemize}
+The executed assessment also differs from the initial design. It uses the compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and omits a proposed fifth policy with a tuned threshold.
+
+The retained records allow every reported count and interval to be recomputed offline without new inference. The chatbot-log questions and the generated answers are not released. Calling the hosted model again would not necessarily give the same text. The retrieval-policy experiment lacks a complete database snapshot, while the prompt comparison keeps one.
+
+\subsection{Cost accounting}
+\label{sec:method-cost}
+
+The inference client sets aside a budget for each request at planning rates of USD~2 per million input tokens and USD~12 per million output tokens. The experiment had a USD~80 reservation ceiling and a 2,500-request cap. Failed requests keep their reservations. The estimates exclude actual gateway billing and total infrastructure cost. They are in Appendix~\ref{sec:delivery}.

@@ -1,56 +1,80 @@
 \section{Introduction}
 \label{ch:introduction}
 
-\subsection{Institutional questions as a problem of useful assistance}
+This chapter states the problem, goals and research questions, summarizes the study design and lists the contributions. Figure~\ref{fig:roadmap} maps the questions to the experiments.
 
-A student looking for information about enrollment, recognition of credits, or a university procedure rarely begins with the name of the document that contains the answer. The question usually describes a situation: an unclear requirement, a form that must be submitted, or a next step that cannot be inferred from the available instructions. Answering well requires connecting that situation to the right source, identifying the conditions that matter, and explaining what the student can do. A response can sound confident while failing at all of them.
+\subsection{Why institutional questions are hard to answer}
 
-The setting is the finki-hub chatbot, a conversational assistant for students at the Faculty of Computer Science and Engineering (FCSE), Ss. Cyril and Methodius University in Skopje. It draws on short frequently asked questions (FAQs), longer institutional documents, and separate facilities for structured information. Students reach the assistant through web and Discord interfaces and write in Macedonian Cyrillic, transliterated Macedonian in Latin script, and English.
+A student asking about enrollment, recognition of credits or a university procedure rarely starts from the name of the document that holds the answer. The question usually describes a situation. A good answer connects it to the right source, names the conditions that matter and tells the student what to do. A response can sound confident and still fail at any of these steps.
 
-A short FAQ may omit exceptions. A regulation may place an authoritative condition several sections away from the most easily retrieved passage. A question may concern the current academic year while the source belongs to an earlier one, or it may concern an individual decision that public documents cannot establish. Useful assistance depends on recognizing what the available evidence permits the assistant to say.
+The setting is the finki-hub chatbot, a conversational assistant for students at the Faculty of Computer Science and Engineering (FCSE), Ss. Cyril and Methodius University in Skopje. The author designed, built, deployed and maintains the chatbot, including its document pipeline, FAQs and tools, and carried out all evaluations in this thesis. It draws on short frequently asked questions (FAQs), longer institutional documents and separate tools for structured information. Students reach it through web and Discord and write in Macedonian (Cyrillic or Latin script) and English.
 
-This thesis therefore treats effectiveness as a property of the response to a question. The desired response is either a supported and sufficiently complete answer or appropriate guidance when a direct answer is unavailable or unsuitable. Guidance can be a necessary clarification, a request to verify a changing detail, or a referral to the responsible institutional service. It must identify a meaningful next step without implying that the assistant has accessed private records or completed an official transaction.
+The sources are imperfect. A short FAQ may omit exceptions. A regulation may state a binding condition far from the passage that is easiest to retrieve. A question may concern an individual decision that public documents cannot settle. A good answer must stay within what the available sources support.
 
-The study examines the information and guidance the assistant produces. It does not measure staff-time savings, avoided emails, reductions in administrative workload, or user satisfaction; those require different observations.
+This thesis therefore judges each response on its own. A good response is either a supported and sufficiently complete answer or, when a direct answer is unsuitable, appropriate guidance (``useful routing''). Useful routing is a clarification, a request to check a detail that can change, or a referral to the responsible service. It must not imply that the assistant has accessed private records or completed an official transaction. The study does not measure staff-time savings or user satisfaction.
 
 \subsection{Why retrieval and architecture matter}
 
-Retrieval-augmented generation (RAG) provides external evidence to a language model when it constructs an answer~\cite{lewis2020rag}. In an institutional assistant, source selection thus becomes part of the answer process: the model receives passages chosen for the current question rather than relying only on its parameters. This makes evidence inspectable and lets institutional material be updated independently of the generator, but it also creates several places where a request can still produce poor assistance.
+Retrieval-augmented generation (RAG) gives a language model external evidence when it constructs an answer~\cite{lewis2020rag}. The evidence can be inspected, and institutional material can be updated without changing the generator. RAG also creates several places where a request can fail: conversion, chunking, indexing, selection, prompting and delivery.
+A reference architecture names the responsibilities, the interfaces between them and the parts that can be swapped (variation points) in such a system. Here, six responsibilities (source preparation, knowledge retention, evidence selection, answer construction, channel delivery and observation) are separated, so a failure can be traced to the stage where it happens. The architecture is derived from the implemented chatbot and evaluated through that implementation.
 
-A document must be acquired and converted without losing content, divided into retrievable units, indexed, and selected for the question. The generation prompt must preserve the useful conditions in those units and distinguish evidence from instructions, and the answer must reach the user with a suitable explanation of sources. An error in an early stage can survive all later stages, and a well-retrieved passage can still be misread, summarized incompletely, or attached to the wrong claim.
+The controlled study varies the rule that admits FAQs and document passages into the generation context. One score threshold can decide for both source types, or each can have its own. A best-candidate fallback keeps the top candidate when all fall below the threshold. This can give the model useful evidence, but it can also hide that the system has no good support. The candidate passages and their scores are saved once, so the selection rules can change while the prompt and generation settings stay fixed.
 
-A reference architecture addresses this concern by identifying responsibilities, interfaces, and variation points. In this thesis, source preparation, retrieval, generation, channel delivery, and observation are separated so that a response can be traced through them and a failure attributed to the stage where it arises. The architecture is derived from the implemented chatbot and evaluated through that instantiation: the controlled study tests one of its variation points, and the observed failures are mapped back to its stages.
+\subsection{Goals and research questions}
 
-One concrete design choice concerns FAQs and document passages. Their length and structure differ, yet a single score threshold can determine whether either enters the generation context. Lowering the threshold for document passages could recover conditions missed by a stricter shared threshold, or admit loosely related material that makes the answer harder to construct. Similarly, retaining the best candidate when every candidate falls below the threshold could supply useful evidence or merely prevent the system from recognizing that it lacks support.
+The thesis has four goals.
 
-Both choices operate at an identifiable boundary: the candidate pool and scores can be captured once, the selection rules varied, and the prompt and generation settings held fixed, isolating the effect of the supplied evidence on assistance outcomes.
+\begin{itemize}
+  \item \textbf{Goal 1.} Derive a reference architecture from the implemented chatbot.
+  \item \textbf{Goal 2.} Measure, in a controlled comparison, how often responses are supported or useful routing, and how the rule for choosing evidence changes this.
+  \item \textbf{Goal 3.} Show how far the automated assessment can be trusted.
+  \item \textbf{Goal 4.} Evaluate the deployed agent on real emails and locate where its answers still fail.
+\end{itemize}
 
-\subsection{Research questions}
-
-The central research problem is to determine what the available evidence establishes about the chatbot's ability to answer real student questions and provide useful guidance. Three questions organize the investigation.
+Five questions guide the work. The first three concern the controlled experiments.
 
 \begin{description}
   \item[RQ1.] How often do the evaluated responses receive supported-answer or useful-routing labels, and what shortcomings remain?
-  \item[RQ2.] How do separate FAQ and document score thresholds and a best-candidate fallback affect these outcomes when generation settings remain fixed?
-  \item[RQ3.] How do question selection, reference construction, and AI-assessor behavior limit conclusions about effectiveness?
+  \item[RQ2.] How do separate FAQ and document score thresholds and a best-candidate fallback affect these outcomes when generation settings stay fixed?
+  \item[RQ3.] How do the choice of questions, the way references are built and the behavior of the AI judge limit what the results show?
 \end{description}
 
-RQ1 separates factual answers from helpful next steps and from failure categories, because a combined positive total can hide whether a system answers or mostly redirects. Incomplete answers, unsupported material claims, uncertainty, and execution or assessment failures remain visible rather than being absorbed into a single score.
+Two further questions concern the deployed agent.
 
-RQ2 examines two retrieval decisions in a paired design. Each question is processed under a shared threshold or separate source thresholds, with fallback disabled or enabled. Matched comparison reduces variation attributable to the question set, and the four combinations separate the threshold change from the fallback change. The policies are judged by answer outcomes; context diagnostics such as the number of selected passages explain the intervention rather than define its success.
+\begin{description}
+  \item[LQ1.] How often are the deployed agent's answers to real student emails graded correct, and where do the remaining losses arise?
+  \item[LQ2.] Does retrieval limit answer quality, and do a decision-model reranker and conversation memory change this? A reranker rescores the retrieved passages. A decision model answers yes or no for each passage, and its probability is the score.
+\end{description}
 
-RQ3 treats assessment quality as part of the research problem. Automated judgments scale to many responses but add uncertainty about evidence interpretation, completeness, and category assignment, which repeated judgments and an additional assessor expose.
+\subsection{Study design}
 
-\subsection{Study design and contribution}
+The main evaluation contains 192 questions. 96 come from an anonymized archive of historical student emails and 96 from questions typed into the deployed chatbot during one month of logging (production questions). A separate pilot of 20 other emails comes first and only checks that the pipeline runs. The two sources are reported separately.
 
-The main evaluation contains 192 questions: 96 drawn from historical email groups and 96 from groups of questions selectively recorded by the deployed chatbot, referred to as production questions. A separate 20-case email pilot precedes the main analysis. Production questions are shorter and sometimes context-dependent. The two sources are reported separately because their balanced mixture does not represent actual use. Historical staff replies are not treated as authoritative expected answers.
+The experiment reduces the deployed system to a fixed retrieve-then-generate configuration (the controlled configuration). It reuses the production retrieval and prompt code. A hosted model, GPT-5.6 Luna (from here on Luna), generates the answers. Four fixed retrieval policies are compared on the original questions, without rewriting them. A floor (also called a threshold) is the minimum relevance score a passage needs to enter the model's prompt. The 0.10 FAQ context floor of the experiment differs from the deployed setting. Conversation history, remote tools and the delivery path are outside the experiment.
 
-The experiment reuses production retrieval and prompt code, with answers generated under fixed settings by a hosted language model, \texttt{gpt-5.6-luna} (hereafter Luna), in place of the live provider agent. It captures evidence and prompts once, then compares four frozen retrieval policies on the original, unrewritten questions. Conversation history, remote tools, and the browser or Discord delivery path are outside the controlled experiment.
+A second evaluation tests the deployed agent, with its tools and prompts, on real student emails. It uses three held-out sets, which are sets kept apart from the fixes made to the system. Each set was unseen when first measured, and the third was never used for fixes. The evaluation was done in repeated rounds and was not pre-registered, so it is reported apart from the controlled experiments (Chapter~\ref{ch:live}). All outcomes in both parts are AI-assessed and are not validated accuracy rates. The architecture has not been shown to work at a second institution.
 
-The contribution has three connected parts. First, the thesis proposes a reference architecture grounded in the chatbot implementation, with explicit responsibilities, contracts and variation points, including how sources become answer context and where structured access and delivery connect to that path. Second, it reports a controlled comparison of retrieval policies using real institutional questions and response-level outcomes, and maps the observed failures to the architecture's stages. Third, it examines the reliability of the automated assessment through reference checks, repeated judgments, and cross-assessor comparison.
+\subsection{Contributions}
 
-Admitting more document text did not improve outcomes. The shared-threshold configuration without fallback receives positive assistance labels on 31 of 96 email questions and 53 of 96 production questions; lowering the document threshold changes those totals to 30 and 52, and the paired uncertainty intervals permit both improvement and deterioration. These are AI-assessed outcomes rather than validated accuracy rates, and the reference architecture is a grounded proposal for reuse rather than a result demonstrated at a second institution.
+The thesis makes five contributions.
+\begin{enumerate}
+  \item A reference architecture grounded in the chatbot implementation, with explicit responsibilities, contracts and variation points (Chapters~\ref{ch:architecture} and~\ref{ch:implementation}).
+  \item A controlled comparison of four retrieval policies on real institutional questions, with failures mapped to the architecture's stages (Chapters~\ref{ch:results} and~\ref{ch:discussion}).
+  \item A check of how reliable the automated assessment is, using reference checks, repeated judgments and a comparison of two judges (Chapters~\ref{ch:methodology} and~\ref{ch:results}).
+  \item An evaluation of the deployed agent on three held-out sets of real student emails (Chapter~\ref{ch:live}).
+  \item Follow-up tests on the deployed agent: a recall analysis, a decision-model reranker and a multi-turn memory test (Chapter~\ref{ch:live}).
+\end{enumerate}
+
+\input{figures/roadmap}
 
 \subsection{Organization of the thesis}
 
-The thesis proceeds from background and institutional data to architecture and implementation. Methodology defines the frozen retrieval-policy and prompt comparisons before results describe assistance outcomes, retrieval changes, the prompt comparison and assessment sensitivity. Discussion answers the research questions, attributes the observed failures to architectural stages and identifies future work; the conclusion summarizes the supported findings.
+Chapters~\ref{ch:background} to~\ref{ch:implementation} give the background, the data, the reference architecture and its implementation. Chapters~\ref{ch:methodology} and~\ref{ch:results} define and report the controlled comparisons. Chapter~\ref{ch:live} evaluates the live system. Chapter~\ref{ch:discussion} answers the questions, and Chapter~\ref{ch:conclusion} concludes.
+
+\paragraph{Summary.}
+\begin{itemize}
+  \item The thesis asks how well the chatbot answers real student questions. Supported answers and useful routing count as good responses.
+  \item It proposes a six-responsibility reference architecture and tests the source-selection rule on 192 questions.
+  \item A separate live evaluation checks the deployed agent on held-out emails.
+  \item All outcomes are AI-assessed, and none is a validated accuracy rate.
+\end{itemize}

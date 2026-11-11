@@ -1,43 +1,45 @@
 \section{Results and diagnostic analysis}
 \label{ch:results}
 
-\subsection{Completion and the meaning of a result}
+Lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but the share of good answers does not clearly rise. Secondary analyses are in Appendix~\ref{app:secondary}.
 
-All 192 main questions have four policy records. Of the 768 nominal records, sixteen are application-input rejections and 752 are eligible for generation. The eligible records use 354 unique main generations, with 398 reuses of identical prompts. The 20-case pilot adds 39 unique generations, giving 393 saved generation requests overall, all completed within the configured output limit.
+\subsection{Completion of the runs}
 
-All 393 primary assessment requests also returned responses, but only 386 passed structural consistency checks. Seven unique assessments were contradictory: the raw material-claim flag was true while the overall category was incomplete or uncertain. One belongs to the pilot; the remaining six map to twelve nominal main policy outcomes because answers are reused. They remain failures in the reported results, without repairing their category or treating the raw flag as an adjudicated factual error.
+All 192 main questions have four policy records. Of the 768 records, sixteen are rejected inputs and 752 can go to generation. These use 354 unique main generations with 398 reuses of identical prompts. The pilot adds 39 unique generations, giving 393 saved requests, all completed within the output limit.
 
-The pilot (38 valid assessments from 39 unique generations, one invalid) established only that the pipeline could execute. The main results exclude pilot questions and keep the full denominator of 96 in each frame and policy.
+Of the 393 saved judgments (354 main and 39 pilot), 386 passed the consistency checks. Seven contradicted themselves: the raw material-claim flag was true, but the category was incomplete or uncertain. One belongs to the pilot and six map to twelve of the main outcomes. They count as failures and are not repaired. The pilot (38 valid assessments from 39 generations) is excluded from the main results, which keep the full denominator of 96 per frame and policy.
 
 \subsection{Supported answering and useful routing}
 
-Table~\ref{tab:luna-outcomes} presents the guarded outcome categories. Under G0, email assistance comprises nine supported-answer labels and 22 useful-routing labels, for 31 of 96 questions. Production assistance comprises 25 supported-answer labels and 28 useful-routing labels, for 53 of 96. Under S0, the respective totals are 30 and 52. Useful guidance therefore accounts for a substantial part of the combined outcome, and not every positive label represents a complete factual answer.
+Figure~\ref{fig:outcome-bars} and Table~\ref{tab:luna-outcomes} show the outcome categories after the guard, the reference check against invalid references (Section~\ref{sec:reference-quality}). Chapter~\ref{ch:methodology} defines the policy names. A useful-routing label means the answer points the student to the right office or link without giving the full fact.
+
+\input{figures/outcome_bars}
 
 \input{tables/controlled_results}
 
-A source-supported greeting or scope explanation can receive an Answer label when no institutional fact is at issue, while a referral may be the appropriate response to an individual request (Section~\ref{sec:reference-quality}).
+Under G0, email has nine supported-answer and 22 useful-routing labels (31 of 96), and production has 25 and 28 (53 of 96). Under S0 the totals are 30 and 52. Not every positive label is a complete factual answer. A greeting or a scope explanation can receive a supported-answer label when the question has no institutional fact in it.
 
-Unsupported material claims and incompleteness remain common. Under G0 and S0, unsupported categories number twenty and nineteen for email, and twelve and eleven for production. Incomplete-answer counts are 31 and 30 for email, and 22 and 24 for production. Many responses therefore fail the assistance criterion even though generation completes.
-
-Material-claim flag rates use a different denominator. Among assessable records, the email counts under G0/G1/S0/S1 are 20/91, 25/91, 19/88 and 19/88; production counts are 12/95, 11/94, 11/95 and 11/95. Invalid judgments, unavailable assessments and unspecified flags are not counted as false flags.
+Unsupported material claims and incomplete answers remain common. Under G0 and S0, the unsupported categories number twenty and nineteen for email and twelve and eleven for production. Incomplete answers number 31 and 30 for email and 22 and 24 for production. The flag rates for material claims divide by the records that could be assessed. The email counts under G0, G1, S0 and S1 are 20/91, 25/91, 19/88 and 19/88. The production counts are 12/95, 11/94, 11/95 and 11/95. The email decline from 20 to 19 is not clear evidence of safer answers. The records with a specified flag fall from 91 to 88, and invalid judgments with a raw unsupported flag rise from one to three.
 
 \subsection{Paired retrieval-policy effects}
 
-The primary S0-minus-G0 contrast is $-1/96$, or approximately $-1.04$ percentage points, in each frame. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email contains five gains, six losses and 85 ties; production contains four gains, five losses and 87 ties. An exact sign test on the discordant questions gives $p=1.0$ in both frames.
+\input{figures/policy_effects}
 
-Both intervals allow improvement or deterioration. Their upper limits indicate that, under these labels, an assistance gain larger than about six points for email or five points for production is not supported by the data; smaller effects in either direction remain possible. The study therefore finds no clear assistance benefit from the lower document threshold under the fixed candidate budgets, corpus, prompt construction and generation settings of Chapter~\ref{ch:methodology}. It does not show that the policies are equivalent or that a better threshold cannot exist.
+The primary S0-minus-G0 contrast is $-1/96$, or approximately $-1.04$ percentage points, in each frame. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both frames. A p-value near 1 means the gains and losses are about as balanced as chance would give.
 
-With fallback enabled, lowering the document floor changes the combined outcome by $-2.08$ percentage points for email and $+1.04$ for production. Adding fallback under the shared floor changes it by $+1.04$ and $-1.04$ points, respectively; under the separate floor, the fallback effect is zero for email and $+1.04$ points for production. The interaction estimates are $-1.04$ and $+2.08$ points, with intervals spanning zero (Table~\ref{tab:luna-effects}).
+Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about six points for email or five for production. The study finds no clear benefit from the lower document threshold. It does not show that the policies are equal or that a better threshold cannot exist.
 
-Fallback exposure differs sharply across thresholds. Comparing G1 with G0 changes empty contexts to nonempty ones for 33 email and 27 production cases, whereas S1 versus S0 changes no email contexts and only three production contexts. S0 and S1 select identical source identifiers and context for all 96 email cases and 93 production cases, so the email S1-minus-S0 zero difference reflects identical inputs, not evidence that fallback never matters. These counts are reconstructed from paired contexts rather than from an instrument counting fallback execution. They show that under the lower floor the all-below-floor rule rarely alters retrieval, while under the shared floor it changes many inputs without a clear assistance benefit. The four policy names are therefore not equally distinct treatments.
+The secondary contrasts and the interaction estimates ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
 
-\subsection{More evidence without a clear assistance gain}
+The fallback is used much more often with the higher threshold (G0 and G1). Comparing G1 with G0, 33 email and 27 production cases change from an empty to a non-empty context. Comparing S1 with S0, no email and only three production contexts change. S0 and S1 select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
 
-The retrieval context changes much more than the assistance outcome (Table~\ref{tab:context-diagnostics}). From G0 to S0, email empty contexts fall from 36 to three and mean context length more than triples; production empty contexts fall from 76 to 52.
+\subsection{More evidence without a clear gain}
+
+The mean context grows from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production (Table~\ref{tab:context-diagnostics}), while the share of good answers stays the same. Even when no evidence is retrieved, the prompt still contains the list of useful links and the role instructions. This may explain why routing responses are still possible. Among the 55 empty S0 contexts (three email and 52 production), 23 still received a useful-routing label (three email and twenty production).
 
 \begin{table}[htbp]
 \centering
-\caption{Context diagnostics for the primary comparison. Context excludes the separately supplied useful-link catalog.}
+\caption[Context diagnostics for the primary comparison]{Context diagnostics for the primary comparison. Context excludes the separate list of useful links.}
 \label{tab:context-diagnostics}
 \begin{tabular}{llrr}
 \toprule
@@ -52,28 +54,22 @@ Production & Mean context characters & 1,010 & 5,808 \\
 \end{tabular}
 \end{table}
 
-An empty retrieval block does not leave the prompt without information: the link catalog and role instructions are supplied separately, which helps explain why routing responses remain possible.
+Empty contexts have two causes. Under G0, candidates were retrieved but none reached the 0.10 floor in 33 of the 36 empty email contexts and 27 of the 76 empty production contexts. Under S0 the document floor is 0.00, so these candidates are kept. For most S0 contexts that stay empty, the saved replay holds no candidate at all (all three email and 49 of the 52 production contexts). Examples include greetings and very short or off-topic messages. In the other three production cases, only FAQ candidates were found and they fell below the FAQ floor of 0.10.
 
-Among 66 email cases with valid nonempty references, the mean proportion of retained reference quotations present in context rises from 0.486 under G0 to 0.661 under S0, and all quotations are present in eighteen versus 29 cases. This is a text-occurrence diagnostic, not semantic recall. Lowering the document floor thus supplies more text and more reference quotations, yet the assistance measure changes little. Missing evidence is not the only explanation of weak answers: how the response combines conditions, recognizes uncertainty and covers the actual question also matters. These are plausible next targets, not causal explanations tested here.
+Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. Two cases chosen afterwards show the pattern and say nothing about how often it occurs (Appendix~\ref{sec:illustrations}).
 
-\subsection{An observed paired illustration}
-
-A saved G0/S0 pair illustrates an unchanged label despite a larger context. It was selected after the main study by an outcome-independent rule: main cases with a valid nonempty reference, completed answers under both policies and strictly longer S0 context were ranked by a fixed hash of the case identifier, and the smallest hash was taken from 72 eligible cases.
-
-The paraphrased question asks whether admission under a special category waives tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters); S0 retains three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, distinguish other semester charges and advise contacting Student Services; S0 also mentions proof of status. Both keep the \texttt{supported\_answer} label, although the reference rates answerability as partial and its third required quotation is absent from both contexts. Because eligibility favors cases with extra context and factual references, the pair is explanatory, not an estimate of how often extra evidence leaves outcomes unchanged.
-
-\subsection{Reference quality and the success guard}
+\subsection{Reference quality and the guard}
 \label{sec:reference-quality}
 
-Of 212 pilot and main references, 182 pass the recorded quotation checks and thirty fail. Main passing references number 78 for email and 88 for production. Across policies, the invalid-reference guard changes 47 otherwise successful main outcomes to uncertain: 32 email and fifteen production records, representing 28 unique answers. Under G0 and S0, the email counts are seven and eight, while production has four under each policy. The guard does not verify source authority, interpretation or completeness of a passing reference; raw and guarded labels are retained separately.
+Of 212 pilot and main references, 182 pass the quotation checks and thirty fail. In the main sample, 78 email and 88 production references pass (Table~\ref{tab:reference-states}). The guard changes a positive label to uncertain when the reference quotations fail their checks. It changes 47 otherwise positive policy records in the main sample, 32 for email and fifteen for production. Policies reuse identical answers, so these records come from 28 unique answers. Under G0 and S0 the email counts are seven and eight, and production has four under each. The guard does not check whether a source is official or whether a passing reference is complete.
 
 \begin{table}[htbp]
 \centering
-\caption{Main reference states. Passing means the implemented quotation checks pass; it is not institutional validation.}
+\caption[Main reference states]{Main reference states. Passing means the quotation checks pass. The institution has not approved the reference.}
 \label{tab:reference-states}
 \begin{tabular}{lrrrr}
 \toprule
-Frame & Nonempty, passing & Empty, passing & Invalid & Total \\
+Frame & Not empty, passing & Empty, passing & Invalid & Total \\
 \midrule
 Email & 66 & 12 & 18 & 96 \\
 Production & 25 & 63 & 8 & 96 \\
@@ -81,22 +77,18 @@ Production & 25 & 63 & 8 & 96 \\
 \end{tabular}
 \end{table}
 
-The 182 passing references include 76 with no retained facts. In the main sample, 75 of 166 passing references are empty: twelve email and 63 production cases. Twenty of the 25 production Answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no factual requirement to fail. Greetings and clarifications may legitimately need no fact, but combining them with factual answering makes an aggregate label appear stronger than its evidence permits.
+The 182 passing references include 76 with no retained facts, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no fact to miss.
 
-\subsection{Post-hoc reference sensitivity and audit}
+A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the G0 and S0 totals become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. An offline audit of the rejected quotations suggests how references could be repaired and changes no labels (Appendix~\ref{sec:quote-audit}).
 
-A labeled sensitivity analysis accepts the direct Answer category only when its reference is valid and nonempty, while retaining useful routing. Under this stricter rule, G0 and S0 totals become 31 and 29 for email, and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$; the production difference remains $-1.04$ with interval $[-7.29,5.21]$. The stricter rule is not corrected accuracy, since it also excludes appropriate nonfactual responses, but the large drop in production totals shows why the empty-reference issue must be reported.
+\subsection{Judge consistency and disagreement between models}
 
-An offline audit searched the saved pools for rejected reference quotations. Among 49 rejected main quotations, 32 occur in a different source block and seventeen are absent from the pool. The email split is eight other-block matches and fifteen absent quotations; production has 24 other-block matches and two absent quotations. These are reference-repair leads only: the audit changes no reference facts, labels or scores, and a string found elsewhere must still be checked for applicability.
-
-\subsection{Assessor consistency and cross-model disagreement}
-
-Table~\ref{tab:assessor-agreement} summarizes agreement. All 48 repeated Luna assessments returned outputs and 47 were valid; the invalid repeat overlaps the subset's invalid primary assessment, leaving 47 category pairs, and one unspecified flag pair is excluded from material-claim agreement. Of 48 local Qwen assessments, 46 are valid; removing the two failures and a distinct invalid primary judgment leaves 45 category pairs. Qwen flags an unsupported material claim in 23 pairs where Luna does not; the reverse occurs once. Citation flags agree in fourteen of 32 pairs with specified values.
+Table~\ref{tab:judge-agreement} shows the agreement. All 48 repeated Luna judgments returned outputs and 47 were valid. This leaves 47 category pairs, and one pair with an unspecified flag is left out of the material-claim agreement. Of 48 local Qwen judgments, 46 are valid, leaving 45 category pairs. Qwen flags an unsupported material claim in 23 pairs where Luna does not, and the reverse occurs once. Citation flags agree in fourteen of 32 pairs with specified values.
 
 \begin{table}[htbp]
 \centering
-\caption{Sensitivity of assessment under matched prompts and references. Neither comparison establishes which assessor is correct.}
-\label{tab:assessor-agreement}
+\caption[Sensitivity of assessment under matched prompts and references]{Sensitivity of assessment with the same prompts and references. Neither comparison shows which judge is correct.}
+\label{tab:judge-agreement}
 \begin{tabular}{llrrr}
 \toprule
 Comparison & Measure & Agreement & Percent & $\kappa$ \\
@@ -109,27 +101,24 @@ Local Qwen & Material flag & 20/44 & 45.5 & 0.104 \\
 \end{tabular}
 \end{table}
 
-Matched prompt hashes confirm identical inputs, but the models differ in capacity, quantization, sampling and rubric interpretation. The disagreement limits confidence in absolute scores; it does not mean the harsher assessment should replace the primary one. The post-hoc local control diagnostic supports this reading: Qwen produces valid records for all thirty unchanged controls and matches expected categories and material flags on fourteen of eighteen original controls and ten of twelve script versions. All six mismatches classify an omission, useful routing response or unnecessary abstention as unsupported, indicating a broader interpretation of unsupported claims.
+The models differ in size, in quantization (a smaller numeric format for the model weights) and in how they read the rubric. The disagreement lowers confidence in the absolute scores. It does not mean that the stricter judge should replace the main one. On the thirty control prompts Qwen matches the expected categories and flags on fourteen of eighteen original controls and ten of twelve script versions. In all six mismatches, Qwen labels an omission, useful routing or an unnecessary refusal as unsupported. Luna matches all twelve Macedonian versions. These are development checks on AI-written controls.
+
+For the assistance labels, with the original guard and without pilot answers, repeated Luna agrees in 38 of 40 usable pairs (95.0\%), with fourteen assistance labels in each run. Qwen agrees in 25 of 38 pairs (65.8\%). Nine losses and four gains reduce its assistance count from thirteen to eight. The shared guard can inflate agreement. The check does not show which judge is correct and does not recompute the policy effect.
 
 \subsection{Component study with a local generator}
-\label{sec:component-study}
 
-A separate component study preceded the controlled experiment and used different generation and assessment conditions. It ran a simplified retrieval path with a locally served, quantized Qwen3-8B generator and evaluated two levels: retrieval ranking, measured by normalized discounted cumulative gain over the top ten candidates (nDCG@10) against AI relevance judgments of each candidate pool, and answer quality, assessed by an AI judge. Its frozen corpus contains 74 FAQs and 1,403 chunks from nineteen documents. A 24-case development set and a protected 320-case sample support that experiment, while a 241-case generated regression suite serves a different testing purpose and adds no observations of real student demand.
-
-On 306 test cases with positive AI relevance judgments, pool-relative nDCG@10 rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a reported group-bootstrap interval of $[0.124,0.166]$. Alternative reference labels attenuate the gain. Read together with the controlled experiment, this is a central finding: the separate-threshold policy measurably improves ranked retrieval, yet the same kind of change does not produce a detectable gain in assessed assistance.
-
-Its answer comparison changes both threshold and fallback. A separate AI audit with different references flags unsupported consequential claims in 31 of 44 completed answers, with category agreement of 12/44 against the primary assessment. These findings motivated the threshold/fallback separation in the present study but cannot be pooled with the current Luna assessment.
+A separate component study used a simplified retrieval path and a local Qwen3-8B generator (Appendix~\ref{sec:component-study}). It has 306 test cases with positive AI relevance judgments. For each case, nDCG@10 measures how high the relevant passages rank among the candidates in the pool (higher is better). It rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a group-bootstrap interval of $[0.124,0.166]$, and independently built reference labels make the gain smaller (0.050 instead of 0.201 on a 24-case audit, Appendix~\ref{sec:component-study}). Together with the controlled experiment, this is a main finding. The separate-threshold policy ranks the relevant passages higher within the pool, yet no gain appears in the assessed answers. The AI audit of this study cannot be combined with the Luna assessment.
 
 \subsection{Prompt comparison}
 \label{sec:results-prompt}
 
-In the 32-question development sample of the prompt comparison (Section~\ref{sec:method-prompt}), AI-selected reference evidence raises covered reference facts from 29/73 to 50/73 and strict completion from 4/32 to 6/32 relative to current retrieval. No development reference establishes full factual answerability, so this difficult-case diagnostic is neither representative nor a perfect-evidence upper bound.
+The prompt comparison (Section~\ref{sec:method-prompt}) asks whether a revised prompt improves strict completion on forty emails. In a 32-question development sample used to write the revised prompt, giving the model AI-selected evidence instead of normal retrieval raises the share of reference facts covered by the answers from 29/73 to 50/73 and strict completion from 4/32 to 6/32 (Appendix~\ref{sec:prompt-development}).
 
-In the forty-question comparison, the initial assessment did not receive all of the generation evidence. It flagged fifteen citation errors per condition, whereas a deterministic check found only one answer per condition citing a URL absent from the generator's context and links. All pairs were therefore reassessed with the full generation context, revised scope guidance and a 1,024-token judgment cap (Section~\ref{sec:method-deviations}). The reassessment, labelled ``audit'' below, is the reported result; the initial labels are retained only to document the effect of incomplete judge inputs.
+In the forty-question comparison the first judge did not see part of the evidence given to the generator. It flagged fifteen citation errors per condition, while a rule-based check found one per condition. All pairs were therefore graded again with the full generation context, new scope guidance and a 1,024-token limit on the judgment (Appendix~\ref{sec:method-deviations}). This audit is the reported result (Table~\ref{tab:prompt}).
 
 \begin{table}[t]
 \centering\small
-\caption{Forty-question prompt comparison. Audit denotes the repeated assessment with the full generation evidence.}\label{tab:prompt}
+\caption[Forty-question prompt comparison]{Forty-question prompt comparison. Audit means the repeated assessment with the full generation evidence.}\label{tab:prompt}
 \begin{tabular}{lrr}
 \toprule
 Measure & Current prompt & Revised prompt\\
@@ -143,16 +132,16 @@ Audit citation-error flags & 1/37 & 1/36\\
 \end{tabular}
 \end{table}
 
-Under the audit, the revised prompt changes strict completion from 6/40 to 5/40, a paired difference of $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$) from two gains and three losses; an exact sign test gives $p=1.0$ (Table~\ref{tab:prompt}). The five-point gain under the initial labels arose from judge inputs that lacked part of the evidence and is not a finding about the prompt; it shows how an assessment missing the generator's evidence can manufacture an apparent improvement. Three oversized inputs produce no answer in either condition but remain in the denominators. One revised-prompt judgment has an invalid source span and counts as a failure; flag denominators count valid judgments only. Because references are partial, fewer unsupported-claim flags do not establish overall improvement.
+Under the audit the revised prompt changes strict completion from 6/40 to 5/40. The paired difference is $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$), from two gains and three losses, and an exact sign test gives $p=1.0$. The five-point gain under the first labels may have come from the judge's incomplete input, so it is not a finding about the prompt. The audit also changed the scope guidance and the token limit, so the change in labels cannot be credited to the evidence alone. Three inputs that were too long produce no answer in either condition but stay in the denominators. Because the references are partial, fewer unsupported-claim flags do not show an improvement.
 
-Repeated Luna judgments on twenty random questions agreed on strict completion in 37/40 answer pairs, but shared the initial assessment's incomplete evidence. Eight constructed controls matched their expected outcomes. Component checks confirmed that prompt assembly preserved history in six saved user turns and that read-only MCP functions returned staff and course lists and an exact staff lookup.
+\subsection{Delivery, latency and cost}
 
-\subsection{Recorded delivery, latency and resource use}
+Production telemetry, generation latency and estimated cost are reported in Appendix~\ref{sec:delivery}. The telemetry comes from the deployed system. It records 699 request events over 69 days, with a median generation time of 12.2 seconds and a 95th percentile of 37.2 seconds. The latency and cost figures describe the fixed path only, with median hosted-call times of 2.1 seconds for email and 1.5 for production. Chapter~\ref{ch:live} measures the deployed agent.
 
-Historical telemetry covers 28 June 2026 inclusive through 5 September 2026 exclusive, with explicitly marked smoke-test events removed. It records 699 request events and 684 generation events: 651 labeled completed, seventeen empty and sixteen disconnected. Among completed events, median duration is 12.154 seconds and p95 is 37.225 seconds; timing begins after credential resolution, so it excludes part of the user's wait. Because records cannot always be linked and a caught error after partial output can keep a completed label, completed events are not a validated success rate. Feedback comprises 37 events over sixteen response IDs.
-
-The 354 unique main generation calls consume 2,258,898 input tokens and 76,352 output tokens. Median provider-call latency is 2.144 seconds for email and 1.466 seconds for production; p95 is 3.439 and 3.854 seconds. These isolated hosted-call intervals are not comparable with historical server lifecycle duration.
-
-At the stated planning rates, main generation has an estimated cost of USD~5.43. The full recorded evaluation usage, including preparation and assessment, is approximately USD~16.36 excluding a separate identity diagnostic. The campaign reserved about USD~76.30 plus USD~0.01 for that diagnostic. Actual gateway billing, GPU computation and total hosting cost remain unverified.
-
-In summary, the tested configuration sometimes produces a supported answer or useful next step, but incomplete answers, unsupported claims and assessment uncertainty remain substantial, and broader document retrieval changes evidence availability much more than the measured assistance outcome.
+\paragraph{Summary.}
+\begin{itemize}
+  \item Under G0 and S0, incomplete answers (22 to 31 of 96 per frame) and unsupported claims (11 to 20) remain common, and the judge's assessments are uncertain.
+  \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both frames, and every interval includes zero.
+  \item The same change ranks relevant passages higher in the component study, so better ranking does not mean better assessed answers.
+  \item Many passing references are empty, and the judge's inputs and strictness can move the apparent results.
+\end{itemize}

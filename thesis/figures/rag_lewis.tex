@@ -1,0 +1,32 @@
+% RAG architecture of Lewis et al. (2020), redrawn. Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  b/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,execute at begin node={\hyphenpenalty 10000 },minimum height=.9cm,inner sep=3pt},
+  s/.style={b,fill=black!6},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  note/.style={align=center,font=\footnotesize\itshape,text=black!70}
+]
+  \node[b,text width=2.0cm] (q) at (0,0) {Question $x$};
+  \node[s,text width=2.5cm] (enc) at (3.3,0) {Query encoder $q(x)$};
+  \node[s,text width=2.7cm] (mips) at (6.9,0) {Search for the closest documents};
+  \node[b,text width=3.4cm] (idx) at (6.9,2.3) {Document index $d(z)$, built in advance};
+  \node[b,text width=2.5cm] (docs) at (10.5,0) {Top $k$ documents $z_1,\dots,z_k$};
+  \node[s,text width=2.5cm] (gen) at (10.5,-2.4) {Generator $p_\theta(y \mid x, z)$};
+  \node[b,text width=2.0cm] (y) at (13.8,-2.4) {Answer $y$};
+
+  \draw[flow] (q) -- (enc);
+  \draw[flow] (enc) -- (mips);
+  \draw[flow] (idx) -- (mips);
+  \draw[flow] (mips) -- (docs);
+  \draw[flow] (docs) -- (gen);
+  \draw[flow] (q.south) |- (gen.west);
+  \draw[flow] (gen) -- (y);
+
+  \node[note,above=2pt of enc] {trained};
+  \node[note,below=2pt of gen] {trained, combines the $k$ documents};
+  \node[note,above=2pt of idx] {fixed during training};
+\end{tikzpicture}
+\caption[The RAG architecture of Lewis et al.]{The RAG architecture of Lewis et al., redrawn and simplified from their overview figure~\cite{lewis2020rag}. A query encoder turns the question into an embedding, a search finds the documents whose embeddings are closest to it, and a generator writes the answer from the question and the top $k$ documents. The query encoder and the generator are trained together, while the document index stays fixed. The chatbot keeps the retrieve-then-generate structure but trains nothing. It uses ready-made models and adds a reranker between search and generation.}
+\label{fig:rag-lewis}
+\end{figure}
