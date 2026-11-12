@@ -11,18 +11,20 @@ Term & Meaning in this thesis \\
 \endhead
 API & Application programming interface. \\
 Assistance & The combined outcome of a supported answer or useful routing (a clarification, verification step or referral). It is an AI-assessed measure, not verified factual accuracy. \\
-Bootstrap & A way to get an interval by repeatedly drawing new samples of the questions and calculating the result again. \\
+Baseline & The controlled policy with both score floors at 0.10, run with the fallback off or on. \\
 BM25 & A keyword ranking based on how often the query words appear in a passage. \\
+Bootstrap & A way to get an interval by repeatedly drawing new samples of the questions and calculating the result again. \\
 CI & Confidence interval. The reported paired intervals are based on saved AI labels. \\
 Clean and contaminated sets & A set is clean if no fix had been aimed at it before it was measured. It is contaminated once fixes were made for failures seen on it. \\
 Component study & The evaluation with a local generator (Section~\ref{sec:component-study}). \\
-Fixed pipeline & The simplified chatbot of the controlled experiments: one search, then one model call, without the agent or its tools (Chapter~\ref{ch:methodology}). \\
+Cross-encoder & A model that reads the question and one passage together and gives the pair a relevance score. The reranker of this thesis is a cross-encoder. \\
 Decision model & A model that answers yes or no for each passage. Its probability is used as the score. \\
+Embedding & A list of numbers that a model computes for a text, so that texts with similar meaning get similar numbers. \\
 Fallback & Keeping the best candidate when neither the FAQ nor the document corpus has a candidate above its score floor. It is distinct from recovery after a reranker error. \\
 FAQ & Frequently asked question and its stored answer. \\
 FCSE & Faculty of Computer Science and Engineering. \\
+Fixed pipeline & The simplified chatbot of the controlled experiments: one search, then one model call, without the agent or its tools (Chapter~\ref{ch:methodology}). \\
 Floor & The minimum reranker score a passage needs to enter the model's prompt. Threshold means the same thing. \\
-Baseline & The controlled policy with both score floors at 0.10, run with the fallback off or on. \\
 \textsc{Gap} & A grade in the live evaluation: no confirmed fact covers the question and the answer is reasonable. \\
 GPU & Graphics processing unit used for embedding, reranking or running local models. \\
 Guard & See reference check. \\
@@ -31,12 +33,13 @@ Hit@$k$ & The share of questions where a relevant passage is among the top $k$ r
 Holdout & A set of questions kept apart from the fixes made to the system, so it can test the system fairly. \\
 Kappa ($\kappa$) & Agreement between two judges beyond what chance alone would give. 0 is chance level and 1 is perfect agreement. \\
 LLM & Large language model. \\
+Lower floor & The controlled policy with the FAQ floor at 0.10 and no document floor, run with the fallback off or on. \\
 LQ1/LQ2 & The 2 questions about the deployed agent in Chapter~\ref{ch:introduction}. RQ1 to RQ3 are the questions about the controlled experiments. \\
 Luna & GPT-5.6 Luna, the hosted model used for references, generation and primary judgments in the controlled experiments. The live evaluation used GPT-6 Luna. \\
 Material claim & An important statement about matters such as eligibility, fees, deadlines, procedure or an institutional action. \\
 MCP & Model Context Protocol, used by the application for structured tool access. \\
 MRR & Mean reciprocal rank, the average of 1 divided by the rank of the first relevant passage. \\
-nDCG@10 & Normalized discounted cumulative gain over the top 10 ranked candidates. Higher is better. \\
+nDCG@10 & Normalized discounted cumulative gain, a ranking score from 0 to 1 over the top 10 candidates that rewards relevant items near the top. \\
 Opus & Claude Opus 5.5, the judge model of the tuned-set runs and the first grading of holdouts 1 and 2. \\
 Production question & A question recorded by the deployed chatbot, as opposed to a historical email question. \\
 Qwen & Qwen3-8B, a local model compressed to 4 bits. It re-judged a subset of answers in the controlled experiments, and the generator and judge of the component study. \\
@@ -44,7 +47,8 @@ RAG & Retrieval-augmented generation. \\
 Reference & The AI-produced description of required facts, evidence, action and uncertainty used for assessment. \\
 Reference check & The automatic check that each quotation in a reference occurs in its named source. If it fails, a good label is downgraded to uncertain. Also called the guard. \\
 Replay & Re-running the production retrieval and prompt logic on captured candidates, with controlled policy changes. \\
-Lower floor & The controlled policy with the FAQ floor at 0.10 and no document floor, run with the fallback off or on. \\
+Reranker & A model that scores the retrieved candidates again against the question and puts them in a new order. \\
+Rubric & A written set of grading rules that says which label or grade an answer gets in which case. \\
 Sign test & A paired test of whether gains and losses are balanced. A p-value near 1 means they are about equal. \\
 Sonnet & Claude Sonnet 5.5, the judge model of all clean live-evaluation runs. It is also the app's default model for signed-in users, but it did not answer in the evaluations. \\
 Stage & A numbered step in the development of the deployed agent (Stages 1 to 11 in Chapter~\ref{ch:live}). In the architecture, a stage is one part of the answering pipeline. \\
