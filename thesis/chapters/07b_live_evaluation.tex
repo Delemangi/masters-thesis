@@ -213,6 +213,10 @@ Figure~\ref{fig:recall-heatmap} gives the ranking quality of the 9 methods. BM25
 
 Figure~\ref{fig:recall-context} shows what reaches the model. One production search on the raw email brings 6.2 items on average. It puts a relevant item in context for 85.5 percent of the emails, and its recall is 68.2 percent, meaning that on average 68.2 percent of an email's relevant items reach the context. The agent searches about 1.7 times per answer and brings 10.4 items on average. It puts a relevant item in context for 94.5 percent of the emails, with a recall of 86.6 percent.
 
+\input{figures/recall_steps}
+
+Figure~\ref{fig:recall-steps} follows the evidence step by step. Reranking the dense candidates keeps about the same share of relevant items in a list half as long. The floor and the limit then drop some relevant items, so one search puts slightly less into the context than the reranked top 10 holds. The agent's further searches make up for this. Its first search alone puts a relevant item in context for 86.5 percent of the emails, with a recall of 68.0 percent. The second search raises these to 93.1 and 81.8 percent, and the third and fourth add little. Of the 275 emails, 209 got a second search, 100 a third and 38 a fourth. In the end, 72.4 percent of the answers are correct. The distance from 94.5 percent comes mostly from missing facts and from how the answers are built, not from retrieval (Section~\ref{sec:live-failures}).
+
 \input{figures/error_attribution}
 
 Figure~\ref{fig:error-attribution} joins these results with the grades of run $a$: a relevant item was in context for 196 of 205 \textsc{Correct} answers and for 18 of 22 \textsc{Partial} answers.
