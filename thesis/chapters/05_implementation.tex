@@ -8,7 +8,7 @@ This chapter describes how the chatbot implements the architecture. It marks whe
 \subsection{Repository and service organization}
 
 The main chatbot repository contains the Next.js web application, the FastAPI service and the GPU (graphics processing unit) service for embedding and reranking. An embedding worker shares the API image, the PostgreSQL storage and Valkey, an open-source Redis-compatible key-value store.
-A documents repository holds the original files and their Markdown versions. A Discord bot repository connects Discord to the shared API. A third repository contains a local MCP server and a copy of a faculty data service.
+A documents repository holds the original files and their Markdown versions. A Discord bot repository connects Discord to the shared API. A third repository contains the local MCP server and a service for public faculty data.
 
 The controlled experiment ran a fixed version of each of these repositories. The exact versions are recorded with the evaluation records.
 
@@ -52,18 +52,18 @@ Table~\ref{tab:agent-tools} lists the tools the agent can call. Two are built in
 Tool & Source & What it does \\
 \midrule
 Knowledge-base search & Built in & FAQ and document retrieval with reranking, plus matching useful links. \\
-Committee recommender & Built in & Recommends thesis committee candidates from database records. Advisory only. \\
+Committee recommender & Built in & Recommends thesis committee candidates from public thesis records. Advisory only. \\
 Courses, staff, rooms, exam sessions & Local MCP server & Read-only lookups. \\
 Timetables & EduPage adapter & Timetable records. \\
 Thesis defenses, master's theses, diplomas & Thesis-listing adapters & Public listings from faculty pages and the author's thesis catalog services. \\
 Announcements & Local MCP server & Search with WordPress short links. \\
 Study programs, curricula, syllabi, course abbreviations & Local MCP server and the faculty's public API & Program, curriculum and syllabus lookups and abbreviation resolution. \\
-Further faculty data & The faculty's public API and a second faculty API & Read-only database-backed tools. \\
+Further faculty data & The faculty's public API & Read-only lookups of public faculty data. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The MCP client loads configured servers over streamable HTTP or server-sent events (SSE). It can attach a service API key, filters tool names, and caches tool definitions for one hour. A server that fails to load does not disable the others. The production configuration blocks a configured list of tools of the faculty's public API but keeps the academic calendar. Some records are cached and may be served as old copies after a refresh fails. A record can therefore be out of date until the next refresh succeeds.
+The MCP client loads configured servers over streamable HTTP or server-sent events (SSE). It filters tool names and caches tool definitions for one hour. A server that fails to load does not disable the others. The production configuration blocks a configured list of tools of the faculty's public API but keeps the academic calendar. Some records are cached and may be served as old copies after a refresh fails. A record can therefore be out of date until the next refresh succeeds.
 
 \subsection{Discord delivery and conversation continuity}
 
