@@ -39,7 +39,7 @@ MRR & Mean reciprocal rank, the average of 1 divided by the rank of the first re
 nDCG@10 & Normalized discounted cumulative gain over the top ten ranked candidates. Higher is better. \\
 Opus & Claude Opus 5.5, the judge model of the tuned-set runs and the first gradings of holdouts 1 and 2. \\
 Production question & A question recorded by the deployed chatbot, as opposed to a historical email question. \\
-Qwen & Qwen3-8B, a local model compressed to 4 bits. It is the second judge in the controlled experiments, and the generator and judge of the component study. \\
+Qwen & Qwen3-8B, a local model compressed to 4 bits. It re-judged a subset of answers in the controlled experiments, and the generator and judge of the component study. \\
 RAG & Retrieval-augmented generation. \\
 Reference & The AI-produced description of required facts, evidence, action and uncertainty used for assessment. \\
 Reference check & The automatic check that each quotation in a reference occurs in its named source. If it fails, a good label is downgraded to uncertain. Also called the guard. \\

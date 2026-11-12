@@ -1,7 +1,7 @@
 \section{The controlled experiment}
 \label{ch:methodology}
 
-This chapter describes the controlled experiment and its results. The experiment compares four retrieval policies on the same questions using the fixed pipeline. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from, and Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Section~\ref{sec:method-deviations} lists the changes to the plan. The main result is that lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but under the main judge the share of good answers does not clearly rise. A second judge finds a gain for production questions (Section~\ref{sec:sonnet-rejudge}).
+This chapter describes the controlled experiment and its results. The experiment compares four retrieval policies on the same questions using the fixed pipeline. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from, and Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Section~\ref{sec:method-deviations} lists the changes to the plan. The main result is that lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but under the main judge the share of good answers does not clearly rise. Of two further judges, one finds a gain for production questions and the other finds none (Section~\ref{sec:sonnet-rejudge}).
 
 \input{figures/eval_dataflow}
 
@@ -129,7 +129,7 @@ The retrieval diagnostics are the number of empty contexts, the mean context len
 
 The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the main comparison of the lower floor against the baseline, how references and judgments are made, the outcome categories and the analysis. A fingerprint (hash) of every input file was saved, so later changes would show. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
 
-The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Six steps were added after the results were seen. They are marked as such and replace no main result. The research questions were reworded, with the same hypotheses, policies, outcomes and labels. Three extra checks were run: the analysis without empty references, the Qwen run on the thirty control prompts, and the search for rejected reference quotations. The prompt comparison was graded a second time. Finally, all answers were judged again by Claude Sonnet 5.5 (Section~\ref{sec:sonnet-rejudge}). That grading used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
+The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Six steps were added after the results were seen. They are marked as such and replace no main result. The research questions were reworded, with the same hypotheses, policies, outcomes and labels. Three extra checks were run: the analysis without empty references, the Qwen run on the thirty control prompts, and the search for rejected reference quotations. The prompt comparison was graded a second time. Finally, all answers were judged again by Claude Sonnet 5.5 and by GPT-6 Luna (Section~\ref{sec:sonnet-rejudge}). Both gradings used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
 
 The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The controlled experiment lacks a complete database snapshot, while the prompt comparison keeps one.
 
@@ -138,7 +138,7 @@ The saved records allow every reported count and interval to be recomputed witho
 
 The results count how many of the 96 questions in each sample received a useful response, that is, a supported answer or useful routing. Comparisons between two policies are given as differences in percentage points. A difference of $-1.04$ points means that, per 100 questions, about one fewer question received a useful response under the second policy than under the first. Because every question is answered under every policy, the difference compares the same questions and is not affected by which questions happened to be drawn.
 
-Each difference comes with a 95 percent interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies, given the AI labels and the sampled questions. If the interval includes zero, the data cannot tell whether the change helps or hurts. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval does not account for errors of the judge itself, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with a second judge.
+Each difference comes with a 95 percent interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies, given the AI labels and the sampled questions. If the interval includes zero, the data cannot tell whether the change helps or hurts. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval does not account for errors of the judge itself, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with two further judges.
 
 \subsection{Completion of the runs}
 
@@ -165,7 +165,7 @@ Unsupported material claims and incomplete answers remain common. Under the base
 
 The main comparison, the lower floor against the baseline, is $-1/96$, or approximately $-1.04$ percentage points, in each sample. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both samples. A p-value near 1 means the gains and losses are about as balanced as chance would give.
 
-Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about six points for email or five for production. With the main judge's labels, the study finds no clear benefit from the lower document threshold (for a second judge, see Section~\ref{sec:sonnet-rejudge}). It does not show that the policies are equal or that a better threshold cannot exist.
+Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about six points for email or five for production. With the main judge's labels, the study finds no clear benefit from the lower document threshold (for two further judges, see Section~\ref{sec:sonnet-rejudge}). It does not show that the policies are equal or that a better threshold cannot exist.
 
 The other comparisons and the interaction ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
 
@@ -245,16 +245,16 @@ The models differ in size, in quantization (a smaller numeric format for the mod
 
 For the assistance labels, with the original guard and without pilot answers, repeated Luna agrees in 38 of 40 usable pairs (95.0\%), with fourteen assistance labels in each run. Qwen agrees in 25 of 38 pairs (65.8\%). Nine losses and four gains reduce its assistance count from thirteen to eight. The shared guard can inflate agreement. The check does not show which judge is correct and does not recompute the policy effect.
 
-\subsection{Re-judging with Claude Sonnet 5.5}
+\subsection{Re-judging with two further judges}
 \label{sec:sonnet-rejudge}
 
-To test how much the results depend on the judge, every saved answer was judged again by Claude Sonnet 5.5, a model from a different family than the answers. The prompts, references, contexts and scoring rules were the same, so only the judge changed. This check was added after the main results were known (Section~\ref{sec:method-deviations}). Sonnet gave a usable judgment for 363 of the 393 answers. The other 30 flagged an unsupported claim but chose another category, which the rules count as a failure, as they do for Luna's seven such judgments.
+To test how much the results depend on the judge, every saved answer was judged again by two more models. Claude Sonnet 5.5 comes from a different family than the answers. GPT-6 Luna is the newer model of the same family, and it also answers questions in the live deployment. The prompts, references, contexts and scoring rules were the same for both, so only the judge changed. This check was added after the main results were known (Section~\ref{sec:method-deviations}). Sonnet gave a usable judgment for 363 of the 393 answers. The other 30 flagged an unsupported claim but chose another category, which the rules count as a failure, as they do for Luna's seven such judgments. GPT-6 Luna gave a usable judgment for 359 answers. Its other 34 judgments broke the same rule, did not finish within the token limit or failed to parse, and count as failures too.
 
-Table~\ref{tab:sonnet-rejudge} compares the assistance counts. Sonnet labels more answers as useful routing, so its totals are higher. The two judges agree on whether an answer counts as assistance for 259 of the 358 answers that both judged validly (72.3 percent, $\kappa=0.45$), and on the exact category for 197 (55.0 percent, $\kappa=0.40$).
+Table~\ref{tab:sonnet-rejudge} compares the assistance counts. Sonnet labels more answers as useful routing, so its totals are higher. GPT-6 Luna is the strictest of the three and labels more answers incomplete. Table~\ref{tab:judge-agreement} shows how often each pair of judges agrees. Here $\kappa$ (Cohen's kappa) is the agreement beyond what chance alone would give, where 0 means chance level and 1 means full agreement. No pair agrees on whether an answer counts as assistance for more than three quarters of the answers.
 
 \begin{table}[htbp]
 \centering
-\caption[Assistance under the two judges]{Assistance under the two judges, out of 96 questions per sample. The last column is the difference between the lower floor and the baseline in percentage points, with the 95\% interval in brackets.}
+\caption[Assistance under the three judges]{Assistance under the three judges, out of 96 questions per sample. Luna is GPT-5.6 Luna, the main judge. The last column is the difference between the lower floor and the baseline in percentage points, with the 95\% interval in brackets.}
 \label{tab:sonnet-rejudge}
 \small
 \begin{tabular}{@{}llrrrrr@{}}
@@ -263,13 +263,32 @@ Sample & Judge & Baseline & + fallback & Lower floor & + fallback & Difference \
 \midrule
 Email & Luna & 31 & 32 & 30 & 30 & $-1.04$ $[-8.3, 6.3]$ \\
 Email & Sonnet & 40 & 34 & 41 & 41 & $+1.04$ $[-7.3, 9.4]$ \\
+Email & GPT-6 Luna & 21 & 21 & 19 & 19 & $-2.08$ $[-9.4, 5.2]$ \\
+\addlinespace
 Production & Luna & 53 & 52 & 52 & 53 & $-1.04$ $[-7.3, 5.2]$ \\
 Production & Sonnet & 54 & 58 & 61 & 62 & $+7.29$ $[1.0, 13.5]$ \\
+Production & GPT-6 Luna & 37 & 37 & 36 & 36 & $-1.04$ $[-5.2, 3.1]$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The main comparison depends on the judge. For email, both judges find no clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while Luna finds none. Sonnet also finds that the fallback lowers email assistance under the baseline ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under the main judge and not under the second one.
+\begin{table}[htbp]
+\centering
+\caption[Agreement between the judges]{Agreement between each pair of judges on the answers that both judged validly. Assistance agreement compares only whether the answer counts as assistance, and category agreement compares the exact outcome category.}
+\label{tab:judge-agreement}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Judges & Answers & Assistance agreement & Category agreement \\
+\midrule
+Luna and Sonnet & 358 & 72.3\% ($\kappa=0.45$) & 55.0\% ($\kappa=0.40$) \\
+Luna and GPT-6 Luna & 354 & 74.0\% ($\kappa=0.48$) & 57.9\% ($\kappa=0.45$) \\
+Sonnet and GPT-6 Luna & 334 & 66.8\% ($\kappa=0.38$) & 53.0\% ($\kappa=0.40$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The main comparison depends on the judge. For email, no judge finds a clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while both Luna models find none. Sonnet also finds that the fallback lowers email assistance under the baseline ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under two of the three judges and not under Sonnet. GPT-6 Luna judges far fewer answers as useful than the other two, yet its policy differences match those of the main judge. The judges therefore disagree more on how good the answers are than on which policy is better, with Sonnet's production result as the exception.
 
 \subsection{Component study with a local generator}
 \label{sec:component-study}

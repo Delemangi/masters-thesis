@@ -1,7 +1,7 @@
 \section{Discussion}
 \label{ch:discussion}
 
-This chapter answers the three research questions, shows where failures happen along the pipeline, lists the threats to validity in a table and names what remains open. The controlled study shows how much help the system gave on selected questions. It is not a validated measure of success in real use. Its strongest result is that more document context did not improve the answers or guidance as rated by the main AI judge, although a second judge finds a gain for production questions.
+This chapter answers the three research questions, shows where failures happen along the pipeline, lists the threats to validity in a table and names what remains open. The controlled study shows how much help the system gave on selected questions. It is not a validated measure of success in real use. Its strongest result is that more document context did not improve the answers or guidance as rated by the main AI judge, although one of two further judges finds a gain for production questions.
 
 \subsection{RQ1: observed assistance and remaining shortcomings}
 
@@ -28,7 +28,7 @@ The supported-answer category also includes responses with no factual targets. T
 
 \subsection{RQ2: the effect of retrieval policy}
 
-\paragraph{Short answer.} Under the main judge, lowering the document threshold gave no measurable benefit. A second judge from another model family, Claude Sonnet 5.5, finds a gain of 7.29 points for production questions and none for email (Section~\ref{sec:sonnet-rejudge}). The result therefore depends on the judge, and the evidence does not show that one threshold is best everywhere.
+\paragraph{Short answer.} Under the main judge, lowering the document threshold gave no measurable benefit. A judge from another model family, Claude Sonnet 5.5, finds a gain of 7.29 points for production questions and none for email. A third judge, GPT-6 Luna, finds no gain in either sample (Section~\ref{sec:sonnet-rejudge}). The result therefore depends on the judge, and the evidence does not show that one threshold is best everywhere.
 
 The lower floor differs from the baseline only in its document threshold. Assistance changes by $-1/96$ in each sample. The 95\% intervals span zero (Section~\ref{sec:policy-effects}), so they allow both improvement and decline. This holds even though the retrieved text changes a great deal. Mean context length rises from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production. Empty contexts fall from 36 to 3 and from 76 to 52 (Table~\ref{tab:context-diagnostics}).
 
@@ -40,7 +40,7 @@ The prompt comparison points the same way from the generation side. A prompt tha
 
 \subsection{RQ3: dependence on the sample and judge}
 
-\paragraph{Short answer.} Comparisons between conditions depend on the judge. Recomputed with Claude Sonnet 5.5, the main comparison for production questions changes from $-1.04$ to $+7.29$ points, and the two judges agree on assistance for 72.3 percent of answers. Absolute quality numbers have weaker support still.
+\paragraph{Short answer.} Comparisons between conditions depend on the judge. Recomputed with Claude Sonnet 5.5, the main comparison for production questions changes from $-1.04$ to $+7.29$ points, while GPT-6 Luna gives $-1.04$ again. Pairs of judges agree on assistance for 67 to 74 percent of answers. Absolute quality numbers have weaker support still.
 
 The email and production samples are two sets of questions. Their equal sizes do not reflect how often each kind of question occurs in real use. Email questions come from groups already examined in the component study. Production questions come from selective logging, and the replay keeps only the latest turn. The samples differ in several ways at once, so a difference between them cannot be put down to language, script, retrieval quality or channel alone.
 
@@ -81,7 +81,7 @@ Threat & Effect & What limits it \\
 \midrule
 Combined measure (answering plus useful routing) & Does not measure factual accuracy, and empty factual targets skew it. & Answering and routing are reported separately. An extra check, made after seeing the results, counts a direct answer only if its reference is valid and not empty. It changes production assistance from 33/96 under the baseline to 32/96 under the lower floor. This is not a corrected accuracy. \\
 Judge design & The judge gives a category, flags and quotations. It does not check claim by claim. & Quotation checks show that the text occurs in the source. They do not show that the source supports the claim or is still in force. \\
-Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. A judge from another family, Claude Sonnet 5.5, re-judged every answer (Section~\ref{sec:sonnet-rejudge}). No human labels exist. \\
+Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. A judge from another family, Claude Sonnet 5.5, and the newer GPT-6 Luna re-judged every answer (Section~\ref{sec:sonnet-rejudge}). No human labels exist. \\
 Reference authority and whether rules are still in force & Faculty provisions from 2013 and university provisions from 2019 set different credit requirements for overlapping transfers, and a 2022 supplement adds an exception~\cite{finki2013study,ukim2019study,ukim2022supplement}. The fee schedule applies from 2024/25 until replaced~\cite{finki2024fees}. Retrieval does not decide which source applies. & The study does not certify current rules or whether a student is eligible. Of 49 rejected main-reference quotations, 32 appear in another block of the same evidence pool and seventeen are absent. \\
 Internal comparison & Reference errors shared by all policies remain. The result is specific to the corpus and configuration, and the controlled experiment has no baseline without retrieval. & Paired questions and saved prompts. Only the prompt comparison included a condition without evidence: 4/32 strict completions and 14/73 reference facts, against 4/32 and 29/73 with retrieval (Section~\ref{sec:results-prompt}). \\
 Statistical inference & The uncertainty depends on the saved AI judgments. Bootstrapping does not include errors from reference construction or systematic judge error. & Bootstrapping question groups keeps the pairing. An interval that includes zero does not mean the policies are equal. \\
@@ -107,7 +107,7 @@ The author inspected all existing cases, including the four email sets, and all 
 \paragraph{Summary.}
 \begin{itemize}
   \item RQ1: the system answers and guides, but many answers are incomplete or have unsupported claims, and the absolute rates are not validated.
-  \item RQ2: under the main judge, more document context gave no detectable benefit, but a second judge finds a gain for production questions. The live evidence limits this finding to the document threshold.
-  \item RQ3: comparisons between conditions depend on the judge, since a second judge changes the main production result, and absolute estimates are weaker. Both depend on the sample and on AI judges.
+  \item RQ2: under the main judge, more document context gave no detectable benefit, but one of two further judges finds a gain for production questions. The live evidence limits this finding to the document threshold.
+  \item RQ3: comparisons between conditions depend on the judge, since one of two further judges changes the main production result, and absolute estimates are weaker. Both depend on the sample and on AI judges.
   \item The largest single loss is \textsc{Gap}, which mostly means missing knowledge, and few failures come from retrieval misses. Institution-confirmed data is the first thing to try, and human validation is the next step.
 \end{itemize}
