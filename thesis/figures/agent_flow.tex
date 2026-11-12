@@ -34,6 +34,6 @@
   \draw[back] (agent.north) -- ++(0,.9) -| (user.north);
   \node[lab] at (6.8,1.65) {streamed answer: tokens, tool-call steps, status, done};
 \end{tikzpicture}}
-\caption[Request flow of the deployed agent]{Request flow of the deployed agent. The question reaches the API through a client, the agent decides which tools to call, and the answer returns as a stream of events. Shaded boxes are tools. In the controlled configuration the agent and its tools are replaced by one fixed retrieval step.}
+\caption[Request flow of the deployed agent]{Request flow of the deployed agent. The question reaches the API through a client, the agent decides which tools to call, and the answer returns as a stream of events. Shaded boxes are tools. In the fixed pipeline the agent and its tools are replaced by one fixed retrieval step.}
 \label{fig:agent-flow}
 \end{figure}

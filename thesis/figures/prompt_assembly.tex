@@ -25,6 +25,6 @@
 
   \node[note] at (9.0,-1.9) {In the deployed agent, the FAQs, passages and links come from the agent's own search calls during the answer.};
 \end{tikzpicture}
-\caption[How the prompt for an answer is put together]{How the prompt for an answer is put together. Six inputs are combined into one prompt, which the language model answers. In the controlled configuration (one search, then one model call) the evidence and links are retrieved before the model call. In the deployed system the agent gets them itself by calling the knowledge-base search tool, so they are added during the answer.}
+\caption[How the prompt for an answer is put together]{How the prompt for an answer is put together. Six inputs are combined into one prompt, which the language model answers. In the fixed pipeline (one search, then one model call) the evidence and links are retrieved before the model call. In the deployed system the agent gets them itself by calling the knowledge-base search tool, so they are added during the answer.}
 \label{fig:prompt-assembly}
 \end{figure}

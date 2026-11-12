@@ -11,7 +11,7 @@ Retrieval-augmented generation bases a language model's answer on evidence retri
 \input{figures/rag_lewis}
  A model can fail even when a relevant passage is present. It can also write a plausible answer when retrieval finds no adequate support. Questions about procedures add two difficulties. One passage may state a requirement and another an exception, so an answer can be supported sentence by sentence and still be incomplete. Also, public documents cannot decide what happens in one student's case.
 
-Figure~\ref{fig:rag-variants} compares three ways to organize the pattern. The fixed pipeline always retrieves first and then generates. The controlled configuration of this thesis uses this form.
+Figure~\ref{fig:rag-variants} compares three ways to organize the pattern. The fixed pipeline always retrieves first and then generates. The controlled experiment of this thesis uses this form.
 
 In agentic RAG the model decides whether to retrieve, what to query and whether the evidence is enough. It may also call other tools~\cite{singh2025agenticrag}. ReAct mixes reasoning steps with actions such as search calls~\cite{yao2023react}. Toolformer trains a model to decide when to call external tools~\cite{schick2023toolformer}. Self-RAG trains a model to retrieve on demand and to critique its own retrieved passages~\cite{asai2024selfrag}. Corrective RAG takes a corrective action when retrieval quality looks poor~\cite{yan2024crag}. The Model Context Protocol (MCP) standardizes how an application exposes tools and data sources to a language model~\cite{anthropic2024mcp}. The deployed FINKI Hub assistant is an agent of this kind and calls knowledge-base search as a tool. Chapter~\ref{ch:live} evaluates it, while the controlled experiment fixes the retrieval path.
 
@@ -69,7 +69,7 @@ Marcel is a closely related conversational system for university student support
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item The controlled configuration is a fixed retrieve-then-generate pipeline, and the deployed agent calls search as a tool.
+  \item The controlled experiment uses a fixed pipeline, and the deployed agent calls search as a tool.
   \item Retrieval, thresholds and answer quality are separate measures. Score thresholds are selection settings and not confidence values.
   \item AI judges can be consistent and still wrong. Repeated and cross-model assessment are therefore sensitivity checks and do not replace human validation.
   \item The architecture is a single-organization design aid, and no cited result transfers directly to FCSE.

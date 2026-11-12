@@ -16,7 +16,7 @@ BM25 & A keyword ranking based on how often the query words appear in a passage.
 CI & Confidence interval. The reported paired intervals are based on saved AI labels. \\
 Clean and contaminated sets & A set is clean if no fix had been aimed at it before it was measured. It is contaminated once fixes were made for failures seen on it. \\
 Component study & The evaluation with a local generator (Section~\ref{sec:component-study}). \\
-Controlled configuration & The fixed retrieve-then-generate setup of the controlled experiments (Chapter~\ref{ch:methodology}). \\
+Fixed pipeline & The simplified chatbot of the controlled experiments: one search, then one model call, without the agent or its tools (Chapter~\ref{ch:methodology}). \\
 Decision model & A model that answers yes or no for each passage. Its probability is used as the score. \\
 Fallback & Keeping the best candidate when neither the FAQ nor the document corpus has a candidate above its score floor. It is distinct from recovery after a reranker error. \\
 FAQ & Frequently asked question and its stored answer. \\

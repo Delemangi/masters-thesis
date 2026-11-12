@@ -3,13 +3,13 @@
 
 This chapter describes how an institutional question becomes an answer that a student can check and act on. The architecture comes from the chatbot implementation. It is written as responsibilities and contracts that another implementation could follow. What can be reused elsewhere is a proposal based on one system.
 
-Figure~\ref{fig:architecture} shows the application as deployed, where the answering agent calls knowledge-base search and structured tools itself. It also shows the smaller path that the controlled experiment replays. There, retrieval runs first and the agent is skipped (the controlled configuration, a fixed retrieve-then-generate setup).
+Figure~\ref{fig:architecture} shows the application as deployed, where the answering agent calls knowledge-base search and structured tools itself. It also shows the smaller path that the controlled experiment replays. There, retrieval runs first and the agent is skipped (the fixed pipeline).
 
 \input{figures/architecture}
 
 \subsection{Responsibilities and architectural contracts}
 
-The system has six connected responsibilities: preparing sources, storing knowledge, selecting evidence, building and generating answers, delivering conversations, and recording state and observations. In the deployed system, knowledge-base search is one of the agent's tools (Section~\ref{sec:arch-answer}). In the controlled configuration, selection and construction are sequential stages.
+The system has six connected responsibilities: preparing sources, storing knowledge, selecting evidence, building and generating answers, delivering conversations, and recording state and observations. In the deployed system, knowledge-base search is one of the agent's tools (Section~\ref{sec:arch-answer}). In the fixed pipeline, selection and construction are sequential stages.
 
 Table~\ref{tab:architecture-contracts} lists the main boundaries. A contract here means the information that crosses a boundary and what each side must do with it. The system does not enforce every obligation automatically.
 
@@ -46,7 +46,7 @@ A third path, for the thesis-committee recommender (a tool that suggests committ
 
 A FAQ may repeat the user's question, while a regulation may state the relevant condition in formal language. The same reranker score therefore may not mean the same for the two source types, so the architecture makes the thresholds variation points. FAQ candidates get priority within the final limit on candidates. Neighboring passages can be added around selected document chunks, so a limit on candidates does not limit the amount of text the model sees. Comparisons must report these choices. Otherwise an apparent threshold effect may also include changes in ordering or context.
 
-Letting evidence into the prompt is not the same as showing it as a source. In the controlled configuration the FAQ context floor (the minimum reranker score for a candidate to enter the prompt) is 0.10, and the source-display threshold is 0.30. A passage may therefore influence generation without producing a visible source card, the link to a source that the web client shows under an answer. The deployed system uses a single shared context floor of 0.03 and the same display threshold. The 0.03 floor is not one of the four policies tested in the controlled experiment.
+Letting evidence into the prompt is not the same as showing it as a source. In the fixed pipeline the FAQ context floor (the minimum reranker score for a candidate to enter the prompt) is 0.10, and the source-display threshold is 0.30. A passage may therefore influence generation without producing a visible source card, the link to a source that the web client shows under an answer. The deployed system uses a single shared context floor of 0.03 and the same display threshold. The 0.03 floor is not one of the four policies tested in the controlled experiment.
 
 Two more properties of the deployed system change what the model receives. The reranker scores candidates against the original question, not the rewritten query. A context that only just passes the score floor is flagged as a weak match, so the model can ask for clarification instead of guessing. Useful links are collected separately from retrieval. This keeps useful routing (pointing the student to the right place) apart from a supported answer.
 
@@ -57,7 +57,7 @@ Answer construction puts together the question, the selected evidence, useful li
 
 \input{figures/prompt_assembly}
 
-This description matches the controlled configuration. The deployed agent instead calls knowledge-base search as one of its tools, with a short Macedonian query that it writes itself. It may search several times within a limit per answer, and its prompt contains no pre-retrieved sources. The replay reproduces only the fixed path, so the controlled findings say nothing about when and what the agent decides to search.
+This description matches the fixed pipeline. The deployed agent instead calls knowledge-base search as one of its tools, with a short Macedonian query that it writes itself. It may search several times within a limit per answer, and its prompt contains no pre-retrieved sources. The replay reproduces only the fixed path, so the controlled findings say nothing about when and what the agent decides to search.
 
 The agent can also find tools offered through the Model Context Protocol (MCP), a standard way to connect a model to outside services, and call them, for example to look up courses, rooms, schedules or announcements. Their failures differ from retrieval failures. A structured service may be unavailable or return an ambiguous entity match.
 
@@ -75,12 +75,12 @@ The stages fail in different ways. A request may be rejected at the start, and r
 
 An institution adopting this architecture would replace its corpus, its source-review process, its adapters for structured data and its identity policy. It would keep the separation of source preparation, evidence selection, answer construction and channel delivery. Models, limits on candidates and thresholds are further variation points.
 
-The experiment covers a smaller part. It reuses production retrieval and prompt construction with the original queries, then sends the saved prompts to Luna, the generation model of the controlled configuration. It leaves out query rewriting, conversation history, live provider agents, tool execution, access checks, saving of conversations, and real web or Discord display. The input schema still decides which questions are eligible. Only evidence selection changes, so the retrieval comparison is easy to interpret. Chapter~\ref{ch:live} evaluates the deployed system, including its agent and tools, but does not follow the controlled protocol.
+The experiment covers a smaller part. It reuses production retrieval and prompt construction with the original queries, then sends the saved prompts to Luna, the generation model of the fixed pipeline. It leaves out query rewriting, conversation history, live provider agents, tool execution, access checks, saving of conversations, and real web or Discord display. The input schema still decides which questions are eligible. Only evidence selection changes, so the retrieval comparison is easy to interpret. Chapter~\ref{ch:live} evaluates the deployed system, including its agent and tools, but does not follow the controlled protocol.
 
 \paragraph{Summary.}
 \begin{itemize}
   \item The architecture has six responsibilities joined by the contracts of Table~\ref{tab:architecture-contracts}.
   \item Evidence selection is a stage that can be inspected, with explicit variation points.
-  \item The deployed agent calls knowledge-base search and structured tools itself. The controlled configuration fixes retrieval before generation.
+  \item The deployed agent calls knowledge-base search and structured tools itself. The fixed pipeline always searches once before the model answers.
   \item The controlled experiment covers only evidence selection and answer construction. The live evaluation covers the rest.
 \end{itemize}

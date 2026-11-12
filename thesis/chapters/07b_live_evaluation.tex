@@ -1,7 +1,7 @@
 \section{Live-system evaluation on held-out emails}
 \label{ch:live}
 
-This chapter measures the deployed agent itself (Section~\ref{sec:post-evaluation-changes}) on real student emails. The controlled experiment of the preceding chapters tests one retrieval decision on a fixed retrieve-then-generate configuration. The live evaluation was done step by step over eleven numbered development stages (Stage 1 to Stage 11, successive versions of the system), and its protocol was not fixed in advance (not pre-registered). Its numbers must not be combined with those of the controlled study. The data are private, so only aggregate counts are reported.
+This chapter measures the deployed agent itself (Section~\ref{sec:post-evaluation-changes}) on real student emails. The controlled experiment of the preceding chapters tests one retrieval decision on a fixed pipeline. The live evaluation was done step by step over eleven numbered development stages (Stage 1 to Stage 11, successive versions of the system), and its protocol was not fixed in advance (not pre-registered). Its numbers must not be combined with those of the controlled study. The data are private, so only aggregate counts are reported.
 
 \subsection{Purpose and difference from the controlled protocol}
 
@@ -125,7 +125,7 @@ Figure~\ref{fig:live-stages} plots the results on all 334 tuned emails at each d
 \toprule
 Stage & State of the system & Correct \% & Wrong \% & \textsc{Gap} \% \\
 \midrule
-1 & After first FAQ fixes, fixed retrieve-then-generate pipeline & 59.0 & 19.0 & 22.1 \\
+1 & After first FAQ fixes, fixed pipeline & 59.0 & 19.0 & 22.1 \\
 2 & After a review of all FAQs by the author and document titles that name the study cycle & 70.4 & 18.9 & 10.7 \\
 3 & Context floor lowered to 0.03, reranking on the original question, FAQ edits (the retrieval repairs) & 78.0 & 11.7 & 10.3 \\
 4 & Fixed pipeline, graded pairwise with Stage 5 & 75.9 & 8.9 & 12.0 \\

@@ -1,13 +1,13 @@
 \section{Evaluation methodology}
 \label{ch:methodology}
 
-This chapter describes the controlled experiment, a fixed retrieve-then-generate setup in which four retrieval policies are compared on the same questions. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from. Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Section~\ref{sec:method-deviations} lists the changes to the plan.
+This chapter describes the controlled experiment, which compares four retrieval policies on the same questions using the fixed pipeline. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from. Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Section~\ref{sec:method-deviations} lists the changes to the plan.
 
 \input{figures/eval_dataflow}
 
 \subsection{Purpose and comparison design}
 
-The experiment asks whether two choices about selecting evidence change the responses to institutional questions. It reduces the deployed system to the controlled configuration, which replaces the agent with one retrieval call and one generation call. Production retrieval and prompt construction are reused. The conclusions apply only to this narrower path.
+The experiment asks whether two choices about selecting evidence change the responses to institutional questions. It reduces the deployed system to the fixed pipeline, which replaces the agent with one retrieval call and one generation call. Production retrieval and prompt construction are reused. The conclusions apply only to this narrower path.
 
 The main sample contains 192 questions, divided equally between anonymized email questions and production questions (the two samples). A separate pilot of 20 emails from the development set (Chapter~\ref{ch:data}) came before it. Sampling uses seed 24905307 (a fixed number that makes a random draw repeatable), and the selected questions are saved in lists. The email questions had already been examined in the component study (Section~\ref{sec:component-study}). The production sample takes the latest message of each recorded conversation, and the chatbot recorded the text of only some requests. Chapter~\ref{ch:data} explains why neither sample shows everything students need.
 
@@ -15,7 +15,7 @@ The four policies cross two factors. The first is the document score floor, the 
 
 \begin{table}[htbp]
 \centering
-\caption[Retrieval policies of the controlled configuration, not the deployed settings]{Retrieval policies of the controlled configuration, not the deployed settings. The source-display threshold remains 0.30 and the final candidate budget remains ten in every policy.}
+\caption[Retrieval policies of the fixed pipeline, not the deployed settings]{Retrieval policies of the fixed pipeline, not the deployed settings. The source-display threshold remains 0.30 and the final candidate budget remains ten in every policy.}
 \label{tab:thesis-policies}
 \begin{tabular}{lrrc}
 \toprule

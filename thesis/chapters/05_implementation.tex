@@ -1,7 +1,7 @@
 \section{Reference implementation}
 \label{ch:implementation}
 
-This chapter describes how the chatbot implements the architecture. It marks where the controlled configuration (the fixed retrieve-then-generate setup of the controlled experiment) differs from the deployed system. Figure~\ref{fig:agent-flow} gives the request flow of the deployed agent, and Section~\ref{sec:post-evaluation-changes} summarizes its behavior.
+This chapter describes how the chatbot implements the architecture. It marks where the fixed pipeline of the controlled experiment differs from the deployed system. Figure~\ref{fig:agent-flow} gives the request flow of the deployed agent, and Section~\ref{sec:post-evaluation-changes} summarizes its behavior.
 
 \input{figures/agent_flow}
 
@@ -15,7 +15,7 @@ Each Markdown file is split into chunks at legal-article headings where they exi
 
 Both retrieval models run locally, on the author's own GPU server, and not through an outside service. The embedding model is BGE-M3, whose model family supports multilingual retrieval~\cite{chen2024m3}. It was chosen because it is multilingual and can run locally. BGE-M3 is built on XLM-RoBERTa, whose training data include about 449 million tokens of Macedonian text~\cite{conneau2020xlmr}. No published benchmark measures BGE-M3 on Macedonian, and MIRACL, the main multilingual test in its paper, does not include Macedonian~\cite{zhang2023miracl}. The recall analysis of Section~\ref{sec:live-recall} gives the evidence for this setting. On real student emails, most of them in Macedonian, dense BGE-M3 alone places a relevant item in the top ten for 86.2 percent of the 275 emails that have one. The embeddings are stored in PostgreSQL with pgvector and searched with an approximate nearest-neighbor index~\cite{malkov2020hnsw}, and they are recomputed whenever a chunk or title changes.
 
-Snapshot A, the corpus of the controlled experiment, has 74 FAQs and 1,403 chunks from nineteen documents. Retrieval searches the FAQ and document corpora separately before merging candidates. In the raw-query path used by the controlled configuration, the dense limit is 31 candidates per corpus. The cross-encoder BGE-reranker-v2-m3, on the same local GPU server, then reranks the candidates~\cite{baaiBgeRerankerV2M3}. The final selection keeps at most ten candidates, gives FAQs priority and adds neighboring chunks.
+Snapshot A, the corpus of the controlled experiment, has 74 FAQs and 1,403 chunks from nineteen documents. Retrieval searches the FAQ and document corpora separately before merging candidates. In the raw-query path used by the fixed pipeline, the dense limit is 31 candidates per corpus. The cross-encoder BGE-reranker-v2-m3, on the same local GPU server, then reranks the candidates~\cite{baaiBgeRerankerV2M3}. The final selection keeps at most ten candidates, gives FAQs priority and adds neighboring chunks.
 
 The controlled comparison keeps the FAQ context floor (the minimum reranker score to enter the prompt) at 0.10 and the source-display threshold (the minimum score to show a source) at 0.30. It varies the document floor. It also varies whether the single highest-scoring candidate is kept when all candidates fail the floor (the experimental fallback). The 0.10 floor was the production setting of the code under test when the controlled experiment was fixed. The 0.30 display threshold makes only clearly relevant passages appear as visible sources, while weaker passages can still inform the answer. It was chosen during development to remove unhelpful sources while keeping the useful ones, and a later measurement on real emails supports this choice (Section~\ref{sec:live-recall}). The deployed context floor is instead a single shared 0.03, with the same 0.30 display threshold. All these values are scores of BGE-reranker-v2-m3 and hold only for that model. Section~\ref{sec:live-ab} explains how 0.03 was chosen, and Section~\ref{sec:live-decisions} shows what happens when another ranker keeps the same floor. The study counts a reranker failure as an execution failure and does not use a substitute method.
 
@@ -23,7 +23,7 @@ The controlled comparison keeps the FAQ context floor (the minimum reranker scor
 
 Users sign in with a Google or Microsoft account. Signed-in users get a free tier, a daily quota on a hosted model offered at no cost to them, or they can use their own API key. The free tier lets students try the chatbot, and their conversations were one source of data for this thesis, used only in anonymized form (Chapter~\ref{ch:data}). Signing in controls only the use of the model and gives no access to any student data.
 
-In the controlled configuration, retrieval and the selection of useful links run as separate steps, and the prompt combines their output with the question, the date and the interface instructions. In the deployed system the agent does this itself through a built-in knowledge-base search tool, which runs the same retrieval and adds the matching useful links. The prompt tells the agent to search before answering questions in scope, with one concept per search. For each answer, the agent may make at most four searches and fifteen tool calls in total.
+In the fixed pipeline, retrieval and the selection of useful links run as separate steps, and the prompt combines their output with the question, the date and the interface instructions. In the deployed system the agent does this itself through a built-in knowledge-base search tool, which runs the same retrieval and adds the matching useful links. The prompt tells the agent to search before answering questions in scope, with one concept per search. For each answer, the agent may make at most four searches and fifteen tool calls in total.
 
 The chatbot supports several hosted and local model families. Claude Sonnet 5.5 is the default model for signed-in users. GPT-6 Luna is the free-tier model, and it answered all live-evaluation runs with reasoning disabled. The controlled experiments used the earlier GPT-5.6 Luna (Luna in Chapters~\ref{ch:methodology} and~\ref{ch:results}). The answer is streamed to the client together with the tool calls, so the user sees progress while the agent works. For benchmarks only, a setting adds each tool's full output to the stream so that judges can see the evidence. Usage analytics record request metadata and no question text.
 
@@ -71,11 +71,11 @@ The deployed agent has the following elements, grouped by the failure stage each
   \item \textbf{Tools, clients and corpus.} The tools of Table~\ref{tab:agent-tools} are available, with the academic calendar unblocked in production. Both clients show tool-call steps.
 \end{itemize}
 
-The controlled configuration lacks these elements, and the live evaluation tests the system as a whole. Neither can show which single element caused a change in answer quality. The small extra step for short queries, the FAQ constraints and the FAQ-over-regulation rule are design choices that were not tested on their own.
+The fixed pipeline lacks these elements, and the live evaluation tests the system as a whole. Neither can show which single element caused a change in answer quality. The small extra step for short queries, the FAQ constraints and the FAQ-over-regulation rule are design choices that were not tested on their own.
 
 \paragraph{Summary.}
 \begin{itemize}
   \item One chat service serves the web and Discord clients, and a local GPU server runs the embedding model (BGE-M3) and the reranker (BGE-reranker-v2-m3).
-  \item The deployed agent searches the knowledge base and calls MCP tools itself. The controlled configuration replaces this with fixed retrieval and generation by Luna.
+  \item The deployed agent searches the knowledge base and calls MCP tools itself. The fixed pipeline replaces this with one search and one answer by Luna.
   \item Controlled and deployed settings differ in context floor (0.10 for FAQs against a shared 0.03), history, query rewriting and tools.
 \end{itemize}
