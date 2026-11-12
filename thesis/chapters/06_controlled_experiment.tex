@@ -201,7 +201,7 @@ The labels above come from one AI judge and from references written by the same 
 
 \subsubsection{Design of the checks}
 
-Five checks test the judging. Table~\ref{tab:check-design} lists what each one asks and which answers it uses. None of them uses human labels, so none can show which judge is right. Together they show where the labels are stable and where they depend on the judge or on the references.
+Six checks test the judging. Table~\ref{tab:check-design} lists what each one asks and which answers it uses. Only the last one uses a person, the author, and the others cannot show which judge is right. Together they show where the labels are stable and where they depend on the judge or on the references.
 
 \begin{table}[htbp]
 \centering
@@ -217,6 +217,7 @@ Reference check & Do the references quote their sources correctly? & Code, no mo
 Repeated judgment & Does the judge give the same label a second time? & Luna & 48 answers \\
 Local model & Does a different, small model agree with the judge? & Qwen & The same 48 answers \\
 Further judges & Do the results hold under other judges? & Claude Sonnet 5.5 and GPT-6 Luna & All 393 answers \\
+Author review & Do the AI labels match a person who knows the faculty's rules? & The author & 50 answers and their 50 references \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -226,6 +227,8 @@ Further judges & Do the results hold under other judges? & Claude Sonnet 5.5 and
 \textbf{Repeated judgment and the local model.} Forty-eight answers were drawn at random with seed 24905309 (41 from the main study and 7 from the pilot). Luna judged each of them a second time with exactly the same messages, which shows how consistent one judge is with itself. The same messages also went to Qwen3-8B~\cite{yang2025qwen3} (Qwen from here on), a much smaller model run locally in a compressed 4-bit form. It ran with temperature zero, so it always picks its most likely next word, with a 1,024-token limit and no retry. This shows how much two different judges differ. Because the two disagreed substantially, Qwen was afterwards also run on the 30 controls. This extra check changes no main label and does not mean that the stricter model is correct.
 
 \textbf{Further judges.} To test how much the results depend on the judge, every saved answer was judged again by 2 more models. Claude Sonnet 5.5 comes from a different family than the answers. GPT-6 Luna is the newer model of the same family, and it also answers questions in the live deployment. Both received exactly the same 2 messages as the main judge (Figure~\ref{fig:call-inputs}), with the same scoring rules afterwards, so only the model changed. GPT-6 Luna ran with the main judge's settings, a 1,024-token limit and no extra reasoning. Sonnet could use up to 4,096 tokens, without extended thinking. This check was added after the main results were known (Section~\ref{sec:method-deviations}).
+
+\textbf{Author review.} After all AI judgments were made, the author graded a sample of answers by hand without seeing any AI label. The sample has 50 answers from the controlled experiment, 25 email and 25 production questions drawn at random with one answer per question, under the baseline or the lower floor. They were mixed in random order with 50 answers of the live evaluation (Chapter~\ref{ch:live}), so the author did not know which evaluation an answer came from. Each answer got one of 5 grades: correct, good referral, incomplete, wrong, or not a real question. Correct and good referral count as good, which matches assistance. After grading all answers, the author graded the 50 references of the controlled answers as correct and complete, missing facts, containing a wrong or irrelevant fact, correctly empty, or wrongly empty. The author knows the faculty's rules well, but is one person and also built the system, so the review is a check and not an independent gold standard.
 
 \subsubsection{Control answers}
 
@@ -324,6 +327,31 @@ Sonnet and GPT-6 Luna & 334 & 66.8\% ($\kappa=0.38$) & 53.0\% ($\kappa=0.40$) \\
 
 The main comparison depends on the judge. For email, no judge finds a clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while both Luna models find none. Sonnet also finds that the fallback lowers email assistance under the baseline ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under 2 of the 3 judges and not under Sonnet. GPT-6 Luna judges far fewer answers as useful than the other two, yet its policy differences match those of the main judge. The judges therefore disagree more on how good the answers are than on which policy is better, with Sonnet's production result as the exception.
 
+\subsubsection{Review by the author}
+\label{sec:author-review}
+
+Of the 50 controlled answers, the author marked 13 as not a real question, such as greetings or messages the chatbot should not answer, and these are left out. Of the remaining 37, the author rated 30 as good. \textbf{All 3 AI judges were much stricter than the author} (Table~\ref{tab:author-review}). The main judge rated 20 of these answers as good, and in 15 of its 20 disagreements with the author it called an answer incomplete or unsupported that the author accepted. On good versus not good, the judges agree with the author on 41 to 53 percent of the answers, with kappa close to zero or below. Their labels on these answers therefore agree with the author no better than chance. Kappa is low partly because the author rated most answers as good, which leaves little room for agreement beyond chance, so the counts in the table matter more than kappa.
+
+\begin{table}[htbp]
+\centering
+\caption[The author's grades against the AI judges]{The author's grades against the AI judges on the sampled controlled answers. Only answers that both the author and the judge could grade are counted, so answers the author marked as not a real question and failed judgments are left out. Good means a supported answer or useful routing for the judges, and correct or good referral for the author.}
+\label{tab:author-review}
+\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Judge & Answers & Good by author & Good by judge & Agreement & $\kappa$ \\
+\midrule
+GPT-5.6 Luna (main) & 36 & 30 & 20 & 16 (44.4\%) & $-0.20$ \\
+Claude Sonnet 5.5 & 36 & 30 & 23 & 19 (52.8\%) & $-0.16$ \\
+GPT-6 Luna & 34 & 30 & 12 & 14 (41.2\%) & 0.04 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This changes how the absolute results should be read. The assistance counts of Section~\ref{sec:policy-effects} and Table~\ref{tab:luna-outcomes}, 31 of 96 email and 53 of 96 production questions with a good response under the baseline, are probably too low, because the judges call many answers incomplete that the author accepts. The comparison between policies is a different matter. The author graded one policy per question, so the review cannot say which policy is better, and the policy differences still rest on the AI judges alone.
+
+The author found 42 of the 50 references fine, 26 of them correct and complete and 16 correctly empty, for example for greetings. The other 8 were faulty. 5 contain a wrong or irrelevant fact, 2 are empty although the question needs facts, and 1 misses a fact. The automatic quotation check does not track these problems well. It failed 10 of the 50 references, yet the author found 9 of those 10 fine, and all 5 references with a wrong fact passed it. Faulty references do not explain the judges' disagreements with the author either. The main judge disagrees with the author on 4 of the 7 answers with a faulty reference and on 16 of the 29 with a fine one.
+
 \subsection{The prompt comparison}
 
 \subsubsection{Design}
@@ -369,7 +397,7 @@ The saved records allow every reported count and interval to be calculated again
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item Four policies cross a document score floor with a fallback rule on the fixed pipeline, which does not evaluate the deployed system. One shared AI reference and one anonymous AI judge produce the labels, and no check is human validation.
+  \item Four policies cross a document score floor with a fallback rule on the fixed pipeline, which does not evaluate the deployed system. One shared AI reference and one anonymous AI judge produce the labels, and the author's review of 50 answers finds the judges much stricter than the author.
   \item Under the baseline and the lower floor, incomplete answers (22 to 31 of 96 per sample) and unsupported claims (11 to 20) remain common.
   \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both samples, and every interval includes zero.
   \item The same change ranks relevant passages higher in the component study, so better ranking does not mean better assessed answers.

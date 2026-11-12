@@ -52,7 +52,7 @@ The main evaluation contains 192 questions. 96 come from an anonymized archive o
 
 The experiment uses a simplified version of the chatbot, the fixed pipeline: it runs one search with the student's question and then one model call, without the agent, its tools or the conversation history. It reuses the production retrieval and prompt code. A hosted model, GPT-5.6 Luna (from here on Luna), generates the answers. Four fixed retrieval policies are compared on the original questions, without rewriting them. A floor (also called a threshold) is the minimum relevance score a passage needs to enter the model's prompt. The 0.10 FAQ context floor of the experiment differs from the deployed setting. Conversation history, remote tools and the delivery path are outside the experiment.
 
-A second evaluation tests the deployed agent, with its tools and prompts, on real student emails. It uses 3 held-out sets, which are sets kept apart from the fixes made to the system. Each set was unseen when first measured, and the third was never used for fixes. The evaluation was done in repeated rounds and was not pre-registered, so it is reported apart from the controlled experiments (Chapter~\ref{ch:live}). All outcomes in both parts are AI-assessed and are not validated accuracy rates. The architecture has not been shown to work at a second institution.
+A second evaluation tests the deployed agent, with its tools and prompts, on real student emails. It uses 3 held-out sets, which are sets kept apart from the fixes made to the system. Each set was unseen when first measured, and the third was never used for fixes. The evaluation was done in repeated rounds and was not pre-registered, so it is reported apart from the controlled experiments (Chapter~\ref{ch:live}). All outcomes in both parts are AI-assessed. The author graded a sample of 100 answers by hand to check the AI judges. The architecture has not been shown to work at a second institution.
 
 \subsection{Contributions}
 
@@ -60,7 +60,7 @@ The thesis makes 5 contributions.
 \begin{enumerate}
   \item A reference architecture grounded in the chatbot implementation, with explicit responsibilities, contracts and variation points (Chapters~\ref{ch:architecture} and~\ref{ch:implementation}).
   \item A controlled comparison of 4 retrieval policies on real institutional questions, with failures mapped to the architecture's stages (Chapters~\ref{ch:methodology} and~\ref{ch:discussion}).
-  \item A check of how reliable the automated assessment is, using reference checks, repeated judgments and a comparison of 3 judges (Chapter~\ref{ch:methodology}).
+  \item A check of how reliable the automated assessment is, using reference checks, repeated judgments, a comparison of 3 judges and the author's review of 100 answers (Chapter~\ref{ch:methodology}).
   \item An evaluation of the deployed agent on 3 held-out sets of real student emails (Chapter~\ref{ch:live}).
   \item Follow-up tests on the deployed agent: a recall analysis, a decision-model reranker and a multi-turn memory test (Chapter~\ref{ch:live}).
 \end{enumerate}

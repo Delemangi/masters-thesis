@@ -5,7 +5,7 @@ This chapter answers the 3 research questions, shows where failures happen along
 
 \subsection{RQ1: observed assistance and remaining shortcomings}
 
-\paragraph{Short answer.} \textbf{The system both answers and guides, but many answers are incomplete or have unsupported claims} (under the baseline, 31 of 96 email and 22 of 96 production answers were incomplete). The absolute rates do not show how often the answers are factually correct.
+\paragraph{Short answer.} \textbf{The system both answers and guides, but many answers are incomplete or have unsupported claims} (under the baseline, 31 of 96 email and 22 of 96 production answers were incomplete). The absolute rates are probably too low. The author, grading a sample of these answers by hand, rated 30 of 37 real questions as good, where the main judge rated 20 (Section~\ref{sec:author-review}).
 
 \begin{table}[htbp]
 \centering
@@ -40,11 +40,11 @@ The prompt comparison points the same way from the generation side. A prompt tha
 
 \subsection{RQ3: dependence on the sample and judge}
 
-\paragraph{Short answer.} \textbf{Comparisons between conditions depend on the judge.} Calculated again with Claude Sonnet 5.5, the main comparison for production questions changes from $-1.04$ to $+7.29$ points, while GPT-6 Luna gives $-1.04$ again. Pairs of judges agree on assistance for 67 to 74 percent of answers. Absolute quality numbers have weaker support still.
+\paragraph{Short answer.} \textbf{Comparisons between conditions depend on the judge.} Calculated again with Claude Sonnet 5.5, the main comparison for production questions changes from $-1.04$ to $+7.29$ points, while GPT-6 Luna gives $-1.04$ again. Pairs of judges agree on assistance for 67 to 74 percent of answers. \textbf{The AI judges are also much stricter than the author}, who rated 30 of 37 sampled answers as good, against 12 to 23 for the judges, with agreement no better than chance. In the live evaluation, the author and Sonnet agree far better, on 84.8 percent of correct versus not correct.
 
 The email and production samples are 2 sets of questions. Their equal sizes do not reflect how often each kind of question occurs in real use. Email questions come from groups already examined in the component study. Production questions come from selective logging, and the replay keeps only the latest turn. The samples differ in several ways at once, so a difference between them cannot be put down to language, script, retrieval quality or channel alone.
 
-Luna builds the references, generates the answers and gives the primary judgments. Because the roles share a model family, they may share the same omissions. Research on self-preference gives a reason to check this, but it does not show whether it happens here~\cite{panickssery2024selfpreference,chen2025selfpreference}. Repeated Luna judgments agree on the overall category in 35 of 47 eligible pairs, and local Qwen judgments agree in 13 of 45. \textbf{One judgment is therefore not fully stable.} Neither comparison uses human labels as the true answer. ARES, for example, uses human-labeled validation data~\cite{saadfalcon2024ares}, and the present study has none for its main labels.
+Luna builds the references, generates the answers and gives the primary judgments. Because the roles share a model family, they may share the same omissions. Research on self-preference gives a reason to check this, but it does not show whether it happens here~\cite{panickssery2024selfpreference,chen2025selfpreference}. Repeated Luna judgments agree on the overall category in 35 of 47 eligible pairs, and local Qwen judgments agree in 13 of 45. \textbf{One judgment is therefore not fully stable.} Neither comparison uses human labels as the true answer. ARES, for example, uses human-labeled validation data~\cite{saadfalcon2024ares}. Here only a sample of 100 answers was graded by a person, the author, who is a single grader and also built the system.
 
 \subsection{Where answers fail}
 
@@ -92,7 +92,7 @@ Threat & Effect & What limits it \\
 \midrule
 Combined measure (answering plus useful routing) & Does not measure factual accuracy, and empty factual targets skew it. & Answering and routing are reported separately. An extra check, made after seeing the results, counts a direct answer only if its reference is valid and not empty. It changes production assistance from 33/96 under the baseline to 32/96 under the lower floor. This is not a corrected accuracy. \\
 Judge design & The judge gives a category, flags and quotations. It does not check claim by claim. & Quotation checks show that the text occurs in the source. They do not show that the source supports the claim or is still in force. \\
-Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. A judge from another family, Claude Sonnet 5.5, and the newer GPT-6 Luna re-judged every answer (Section~\ref{sec:sonnet-rejudge}). No human labels exist. \\
+Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree, and the judges are much stricter than the author (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. A judge from another family, Claude Sonnet 5.5, and the newer GPT-6 Luna re-judged every answer (Section~\ref{sec:sonnet-rejudge}). The author graded 100 answers and 50 references by hand (Section~\ref{sec:author-review}). \\
 Reference authority and whether rules are still in force & Faculty provisions from 2013 and university provisions from 2019 set different credit requirements for overlapping transfers, and a 2022 supplement adds an exception~\cite{finki2013study,ukim2019study,ukim2022supplement}. The fee schedule applies from 2024/25 until replaced~\cite{finki2024fees}. Retrieval does not decide which source applies. & The study does not certify current rules or whether a student is eligible. Of 49 rejected main-reference quotations, 32 appear in another block of the same evidence pool and 17 are absent. \\
 Internal comparison & Reference errors shared by all policies remain. The result is specific to the corpus and configuration, and the controlled experiment has no baseline without retrieval. & Paired questions and saved prompts. Only the prompt comparison included a condition without evidence: 4/32 strict completions and 14/73 reference facts, against 4/32 and 29/73 with retrieval (Section~\ref{sec:results-prompt}). \\
 Statistical uncertainty & The uncertainty depends on the saved AI judgments. Bootstrapping does not include errors from reference construction or systematic judge error. & Bootstrapping question groups keeps the pairing. An interval that includes zero does not mean the policies are equal. \\
@@ -102,12 +102,12 @@ Telemetry and workload & Historical telemetry records delivery and timing but ca
 \end{tabularx}
 \end{table}
 
-These measures make the threats smaller but do not remove them. \textbf{The 2 most important threats are that no human checked the AI labels, and that AI relevance labels were used to score AI rankers.} Both can favor the AI components being tested.
+These measures make the threats smaller but do not remove them. \textbf{The 2 most important threats are that the AI labels of the controlled experiment disagree with the author's grades, and that AI relevance labels were used to score AI rankers.} Both can favor the AI components being tested.
 
 \subsection{What remains open}
 
 \begin{enumerate}
-  \item Qualified people should review a subset of answers and compare their view with the AI labels. \textbf{This is the most important next step.}
+  \item More people than the author, such as faculty staff, should grade a larger sample of answers, so that the AI judges can be calibrated against them. \textbf{This is the most important next step.}
   \item The author should add FAQ entries for the topics where answers most often lack the fact, such as master's procedures, verification of degrees and admission details. Each fact should be checked against an official source or confirmed by the faculty, and each source should get a date and a validity.
   \item Ranking could use the date, validity and authority of each source, and large FAQs could be split so that each fact can be found and scored on its own.
   \item References should be reviewed per task type, with the required facts and whether they apply to the student checked against sources.
@@ -119,8 +119,8 @@ The author inspected all existing cases, including the 4 email sets, and all but
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item \textbf{RQ1:} the system answers and guides, but many answers are incomplete or have unsupported claims, and the absolute rates are not validated.
+  \item \textbf{RQ1:} the system answers and guides, but many answers are incomplete or have unsupported claims, and the author's review suggests that the AI judges understate how often the answers are good.
   \item \textbf{RQ2:} under the main judge, more document context gave no detectable benefit, but one of two further judges finds a gain for production questions. The live evidence limits this finding to the document threshold.
-  \item \textbf{RQ3:} comparisons between conditions depend on the judge, since one of two further judges changes the main production result, and absolute estimates are weaker. Both depend on the sample and on AI judges.
-  \item The largest single loss is \textsc{Gap}, which mostly means missing knowledge. Retrieval finds a relevant item for most questions, and better ranking did not improve the answers. Institution-confirmed data is the first thing to try, and human validation is the next step.
+  \item \textbf{RQ3:} comparisons between conditions depend on the judge, since one of two further judges changes the main production result, and the AI judges of the controlled experiment are much stricter than the author. Both depend on the sample and on the judges.
+  \item The largest single loss is \textsc{Gap}, which mostly means missing knowledge. Retrieval finds a relevant item for most questions, and better ranking did not improve the answers. Institution-confirmed data is the first thing to try, and grading by more people than the author is the next step.
 \end{itemize}
