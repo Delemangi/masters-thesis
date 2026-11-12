@@ -30,7 +30,7 @@ The controlled comparison keeps the FAQ context floor (the minimum reranker scor
 
 \subsection{Web request and generation flow}
 
-The Next.js server acts as a backend-for-frontend, a thin server layer between the browser and the API. It maps a signed-in Google or Microsoft session to a backend user, loads the saved conversation and converts the stream. The user's identity is kept separate from the server-side credentials for the faculty's Central Authentication Service (CAS), which some catalog adapters use.
+The Next.js server acts as a backend-for-frontend, a thin server layer between the browser and the API. It maps a signed-in Google or Microsoft session to a backend user, loads the saved conversation and converts the stream.
 
 FastAPI first runs admission checks. These find the provider credentials and model access and apply the quota rules for sponsored users. These are signed-in users who may use the model the project pays for without their own API key. In the controlled configuration, evidence retrieval and useful-link selection run as separate steps. The prompt combines their outputs with the question, the date, any history and the instructions for the interface. In the deployed system the agent does this selection itself through a built-in knowledge-base search tool. The tool runs the same retrieval and adds the matching useful links. The prompt tells the agent to search before answering in-scope questions, with one concept per search. For each answer, the agent may make at most four searches and fifteen tool calls in total.
 
@@ -55,7 +55,7 @@ Knowledge-base search & Built in & FAQ and document retrieval with reranking, pl
 Committee recommender & Built in & Recommends thesis committee candidates from database records. Advisory only. \\
 Courses, staff, rooms, exam sessions & Local MCP server & Read-only lookups. \\
 Timetables & EduPage adapter & Timetable records. \\
-Thesis defenses, master's theses, diplomas & Thesis-listing adapters & Listings from faculty pages or public listing APIs, using CAS where required. \\
+Thesis defenses, master's theses, diplomas & Thesis-listing adapters & Public listings from faculty pages and the author's thesis catalog services. \\
 Announcements & Local MCP server & Search with WordPress short links. \\
 Study programs, curricula, syllabi, course abbreviations & Local MCP server and the faculty's public API & Program, curriculum and syllabus lookups and abbreviation resolution. \\
 Further faculty data & The faculty's public API and a second faculty API & Read-only database-backed tools. \\
