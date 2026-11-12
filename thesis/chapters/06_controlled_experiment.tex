@@ -88,7 +88,9 @@ Failure & Assigned by the analysis, not the judge: rejected input, failed genera
 \end{tabularx}
 \end{table}
 
-When more than one category could apply, the judge follows a fixed order: unsupported material claim first, then uncertain, unnecessary refusal, supported answer and useful routing. An answer that fits none of these is an incomplete answer. For example, a control answer about credit recognition (Section~\ref{sec:judge-checks}) gives only the 50-denar fee (the denar is the Macedonian currency) and leaves out the certificates and the submission steps. The fee is supported, so there is no unsupported claim, but required facts are missing, so the answer is incomplete.
+When more than one category could apply, the judge follows a fixed order: unsupported material claim first, then uncertain, unnecessary refusal, supported answer and useful routing. An answer that fits none of these is an incomplete answer. Figure~\ref{fig:judgment-example} shows a complete example. A control answer about credit recognition (Section~\ref{sec:judge-checks}) gives only the 50-denar fee (the denar is the Macedonian currency) and leaves out the certificates and the submission steps. The fee is supported, so there is no unsupported claim, but required facts are missing, so the answer is incomplete.
+
+\input{figures/judgment_example}
 
 \textbf{Rules applied after judging.} Two rules turn the judgments into the final labels. The first is the guard. If the reference failed its check, a supported-answer or useful-routing label becomes uncertain, because a faulty reference cannot confirm that the answer is right. Negative labels are left as they are. The second rule assigns failure, the seventh outcome in Table~\ref{tab:categories}, which the judge never chooses. It applies when the application rejects the question, generation fails, or the judgment cannot be read or contradicts itself, for example a supported answer that is also flagged for an unsupported material claim. A judgment that passes these checks may still be wrong.
 
