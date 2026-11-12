@@ -74,20 +74,20 @@ Each answer is assessed in three steps, shown in Figure~\ref{fig:assessment-pipe
 
 \begin{table}[htbp]
 \centering
-\caption[Outcome categories of the controlled experiment and how they are counted]{Outcome categories of the controlled experiment and how they are counted. Assistance, the main measure, is one for supported answer and useful routing and zero for everything else.}
+\caption[Outcome categories of the controlled experiment and how they are counted]{Outcome categories of the controlled experiment and how they are counted. Good outcomes count as one in the main measure, assistance. Bad outcomes and outcomes that could not be judged both count as zero, so every question stays in the count. A zero therefore does not always mean the answer was wrong.}
 \label{tab:categories}
 \small
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.17\linewidth}@{}}
 \toprule
-Category & Meaning & Counted as \\
+Category & Meaning & Outcome \\
 \midrule
-Supported answer & A direct answer that contains the reference's facts and conditions, with no unsupported material claim, and every cited source supports what it is cited for. & Assistance \\
-Useful routing & A needed clarification, advice to check information that is still unclear, or a referral to the right service, with the required facts and no material error. It must not claim a private transaction (such as a submitted request) that never happened. & Assistance \\
-Unsupported material claim & The answer contains a material claim that the evidence contradicts or does not support. & No assistance \\
-Incomplete answer & No material error, but a required fact, condition or step is missing, or a citation is wrong. & No assistance \\
-Unnecessary refusal & The answer refuses, although the evidence was enough to answer. & No assistance \\
-Uncertain & The evidence needed to judge the answer is unclear or conflicting, or the reference failed its check, so the answer cannot be judged. & No assistance \\
-Failure & Assigned by the analysis, not the judge: rejected input, failed generation or an unusable judgment. & No assistance \\
+Supported answer & A direct answer that contains the reference's facts and conditions, with no unsupported material claim, and every cited source supports what it is cited for. & Good (assistance) \\
+Useful routing & A needed clarification, advice to check information that is still unclear, or a referral to the right service, with the required facts and no material error. It must not claim a private transaction (such as a submitted request) that never happened. & Good (assistance) \\
+Unsupported material claim & The answer contains a material claim that the evidence contradicts or does not support. & Bad \\
+Incomplete answer & No material error, but a required fact, condition or step is missing, or a citation is wrong. & Bad \\
+Unnecessary refusal & The answer refuses, although the evidence was enough to answer. & Bad \\
+Uncertain & The evidence needed to judge the answer is unclear or conflicting, or the reference failed its check, so the answer cannot be judged. & Not judged \\
+Failure & Assigned by the analysis, not the judge: rejected input, failed generation or an unusable judgment. & Not judged \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -146,7 +146,7 @@ All 192 main questions have four policy records. Of the 768 records, sixteen are
 
 Of the 393 saved judgments (354 main and 39 pilot), 386 passed the consistency checks. Seven contradicted themselves: the raw material-claim flag was true, but the category was incomplete or uncertain. One belongs to the pilot and six map to twelve of the main outcomes. They count as failures and are not repaired. The pilot (38 valid assessments from 39 generations) is excluded from the main results, which keep all 96 questions per sample and policy in the count.
 
-\subsubsection{Supported answering and useful routing}
+\subsubsection{Outcome categories}
 
 Figure~\ref{fig:outcome-bars} and Table~\ref{tab:luna-outcomes} show the outcome categories after the guard, the reference check against invalid references (Section~\ref{sec:reference-quality}). Table~\ref{tab:thesis-policies} defines the policy names. A useful-routing label means the answer points the student to the right office or link without giving the full fact.
 
