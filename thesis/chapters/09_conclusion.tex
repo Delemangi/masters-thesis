@@ -14,7 +14,7 @@ This thesis proposes a reference architecture and examines how well the chatbot,
 \begin{itemize}
   \item On held-out email sets that no fix had targeted, \textbf{70 to 77 percent of graded answers were correct and 1 to 3 percent were wrong}, graded by Claude Sonnet 5.5 under one fixed rubric. On 50 of these answers, the author's own grades agree with Sonnet on correct versus not correct for 84.8 percent. The tuned set, on which the fixes were made, scored about 11 points higher when both were graded by the same judge.
   \item \textbf{The largest single loss is missing knowledge.} On the final held-out set, about 13 percent of answers were graded \textsc{Gap}, meaning that no source held the fact the student needed. A third of them fall in a few topics, such as master's procedures and admission details. The first fix is for the author to add FAQ entries for these topics, checked against official sources or confirmed by the faculty. The next problems are hedging, where the answer avoids stating a rule that the sources give, and unsupported details.
-  \item \textbf{Retrieval mostly finds the needed evidence, and better ranking did not improve the answers.} The agent's searches put a relevant item in the context for 94.5 percent of the emails that have one. A hosted decision model, which answers yes or no for each passage, ranked relevant items higher than the current reranker. Yet 69.1 percent of answers were correct with it against 74.5 percent with the reranker, a difference within chance.
+  \item \textbf{Retrieval mostly finds the needed evidence, and better ranking did not improve the answers.} The agent's searches put a relevant item in the context for 94.5 percent of the emails that have one. A graph-based retriever, LightRAG, found the evidence no better than plain dense search. A hosted decision model, which answers yes or no for each passage, ranked relevant items higher than the current reranker. Yet 69.1 percent of answers were correct with it against 74.5 percent with the reranker, a difference within chance.
   \item The controlled finding concerns the document threshold only. In the live system, a lower shared context floor (0.03) and reranking against the original question gave large gains on a hard set, made of emails that earlier versions had answered wrongly. Such hard sets inflate gains, and a prompt rule against hedging gave no gain beyond noise.
   \item In a memory test, 42 of 60 generated conversations had a last question that could only be answered from earlier turns. The agent used the earlier context in all 42 and answered 41 correctly.
 \end{itemize}
@@ -25,6 +25,6 @@ This thesis proposes a reference architecture and examines how well the chatbot,
 \begin{itemize}
   \item Grading of a larger sample by more people than the author, such as faculty staff, to calibrate the AI judges. This is the most important next step.
   \item New FAQ entries for the topics with missing knowledge, and a date, validity and authority for each source that ranking can use.
-  \item A graph-based RAG comparison such as LightRAG, and a live baseline with retrieval turned off.
+  \item A live baseline with retrieval turned off, and a test of LightRAG's answers, not only its retrieval.
   \item Decision-model reranking with a tuned floor, and evaluation of complete conversations.
 \end{itemize}

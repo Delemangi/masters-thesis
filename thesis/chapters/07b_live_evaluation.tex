@@ -201,7 +201,7 @@ For the deployed agent on fresh emails, the largest single loss is \textsc{Gap}.
 
 This subsection measures whether the knowledge that answers an email reaches the model's context. It uses the 298 emails of holdout 3 and the live knowledge base. The knowledge base has 104 FAQs and 65 documents (2,524 chunks). Three measures are used, and higher is better for all of them. Hit@$k$ is the share of emails with at least one relevant item among the top $k$ results. Recall@$k$ asks how many of the relevant items were found. It is the share of an email's relevant items that appear in the top $k$, averaged over the emails. The 2 measures differ because an email can have several relevant items, 2.4 on average here. MRR (mean reciprocal rank) is the average of 1/rank of the first relevant item.
 
-\textbf{Gold standard.} Relevance was judged on one pool of candidates per email. The pool held the top 3 results of every method and every item that reached the production or agent context. It also held the FAQs that Claude Sonnet 5.5 agents had marked in an earlier first pass as answering each email. This gave 4,804 judgments. Ten Sonnet judges decided whether each item contains a fact needed for the answer. Of the 298 emails, 275 have at least one relevant item, and there are 654 relevant items, 70 percent of them FAQs. The pool included 350 FAQ labels from the earlier first pass, and the judges confirmed 298 of them. Relevance includes partial relevance, and items not judged count as non-relevant, so hit@5 and hit@10 are lower bounds. Recall@$k$ can be off in both directions. A relevant item that was never judged lowers it when it sits in the top $k$, and raises it when it does not, because it is then missing from the count of relevant items. All rates are shares of the 275 emails with a relevant item.
+\textbf{Gold standard.} Relevance was judged on one pool of candidates per email. The pool held the top 3 results of every method and every item that reached the production or agent context. It also held the FAQs that Claude Sonnet 5.5 agents had marked in an earlier first pass as answering each email. This gave 4,804 judgments. Ten Sonnet judges decided whether each item contains a fact needed for the answer. Of the 298 emails, 275 have at least one relevant item, and there are 654 relevant items, 70 percent of them FAQs. The pool included 350 FAQ labels from the earlier first pass, and the judges confirmed 298 of them. Relevance includes partial relevance, and items not judged count as non-relevant, so hit@5 and hit@10 are lower bounds. Recall@$k$ can be off in both directions. A relevant item that was never judged lowers it when it sits in the top $k$, and raises it when it does not, because it is then missing from the count of relevant items. Section~\ref{sec:live-lightrag} measures this with deeper judging. All rates are shares of the 275 emails with a relevant item.
 
 \textbf{Methods.} BM25, a classic keyword ranking that scores passages by the query words they share, and BGE-M3 dense retrieval are the base methods. Hybrid retrieval combines both rankings by reciprocal rank fusion (RRF), which merges two ranked lists by adding 1/rank from each. HyDE searches with a hypothetical answer written by a language model. The last method is an LLM rewrite of the email into a search query. Dense, hybrid, HyDE and rewrite retrieval were also run with the BGE-reranker-v2-m3 cross-encoder re-scoring the top 30 against the original email. Two more runs show the context the model receives: the production retrieval call on the raw email, and the agent's own recorded searches replayed through production retrieval. Sonnet wrote the HyDE and rewrite texts, not the deployed model, so they show what the techniques can reach.
 
@@ -239,6 +239,40 @@ Threshold & Shown & Relevant among shown & Irrelevant hidden & Relevant kept & E
 \end{table}
 
 \textbf{Findings.} Both the reranker and HyDE raise the top ranks, and HyDE with the reranker is best (hit@10 91.3 percent, MRR 0.69). In 13 of the 298 holdout-3 rows (about 4 percent), relevant items existed but none reached the context. These rows of run $a$ are 3 \textsc{Correct}, 4 \textsc{Partial}, 1 \textsc{Wrong} and 5 \textsc{Gap}. Partial answers are more often answer-construction failures, in line with the controlled finding, but retrieval also plays a part. 18 of the 22 had a relevant item in context, yet in 8 of these 18 another relevant item did not reach the context. For 5 of the 8, the missing item is an FAQ that holds the fact that the grader's note says the answer lacks. Together with the 4 partial answers without any relevant item in context, about 9 of the 22 trace back to retrieval. A missing relevant item does not by itself predict a worse grade, because many items repeat the same fact. Of the 145 correct answers to emails with several relevant items, 44 also lacked one of them. \textsc{Gap} is mostly missing knowledge, although 24 of the 38 \textsc{Gap} rows had an item judged relevant in context. The judges were less strict and also marked passages that were only about the same topic.
+
+\subsection{Graph-based retrieval with LightRAG}
+\label{sec:live-lightrag}
+
+This subsection tests whether a knowledge graph finds the evidence better than the current retrieval. LightRAG~\cite{guo2024lightrag}, version 1.5.7, indexed the same live knowledge base, 104 FAQs, 37 official documents and 28 web pages, with one item per FAQ or document. It splits the text into chunks of 1,200 tokens. A language model, GPT-5.6 Luna without reasoning, then reads every chunk and writes down the entities in it, such as a study program, a fee or a form, and the relations between them. These form the knowledge graph. The embeddings are BGE-M3, as in production. The index has 695 chunks and a graph of 10,214 entities and 14,861 relations. Building it took 1,859 model calls, with 6.0 million input and 2.5 million output tokens, and about 15 minutes.
+
+LightRAG offers several query modes, and 3 were run on the 298 holdout-3 emails, without generating answers. The naive mode searches the chunks by embedding similarity only. The hybrid mode uses only the graph. A model call extracts keywords from the email, the keywords are matched to entities and relations, and the chunks linked to them are returned. The mix mode, LightRAG's default, combines the graph and the chunk search. No reranker was used. The returned chunks were turned into a ranked list of items in the same way as for the other methods.
+
+LightRAG returned many items that were not in the judged pool, 48 to 56 percent of its top 10 against 20 to 39 percent for the other methods. Counting them as not relevant would understate LightRAG, so Sonnet judges with the same instructions labeled these 2,548 items. They found 163 more relevant items, which raises the total from 654 to 817. Table~\ref{tab:lightrag} scores all methods against these extended labels. LightRAG was judged down to rank 10 and the other methods mostly to rank 3, so the table, if anything, favors LightRAG.
+
+\begin{table}[htbp]
+\centering
+\caption[LightRAG against the other retrieval methods on holdout 3]{LightRAG against the other retrieval methods on holdout 3, with the relevance labels extended by the items LightRAG retrieved. Percentages are of the 275 emails with a relevant item. The time is the mean time per email for retrieval alone.}
+\label{tab:lightrag}
+\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Method & hit@1 & hit@10 & recall@10 & MRR & Time \\
+\midrule
+BM25 & 32.0 & 73.5 & 42.2 & 0.454 & \\
+Dense (BGE-M3) & 51.3 & 87.6 & 58.8 & 0.627 & \\
+Hybrid + rerank & 54.5 & 90.2 & 63.6 & 0.670 & \\
+HyDE + rerank & 56.7 & 91.3 & 64.7 & 0.690 & \\
+\midrule
+LightRAG naive (chunks only) & 53.5 & 90.9 & 65.5 & 0.654 & 0.1 s \\
+LightRAG hybrid (graph only) & 53.8 & 86.9 & 56.5 & 0.629 & 2.0 s \\
+LightRAG mix (graph and chunks) & 53.5 & 86.9 & 56.6 & 0.628 & 2.1 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{The graph did not help.} The 2 graph modes reach a hit@10 of 86.9 percent and a recall@10 of about 56.5 percent, about the same as plain dense search and below the methods with the reranker. They also need a model call for every question, which raises the time from 0.1 to about 2 seconds, on top of the cost of building the graph. The naive mode, which ignores the graph, does best. Its hit@10 and recall@10 are as high as those of the best reranked methods, but it puts a relevant item first less often, and its MRR stays lower. LightRAG's chunks are longer than the production chunks, which may explain its good recall, but this was not tested separately. With only the original labels, the mix mode reaches a hit@10 of 78.2 percent and the naive mode 84.4 percent. The result matches the expectation of Chapter~\ref{ch:background}. Students mostly ask for a rule or procedure that one FAQ entry or a few passages state, so linking entities across documents adds little.
+
+The deeper judging also shows how much the pooled labels miss. With the 163 added items, recall@10 of the earlier methods falls by 8.5 to 12.1 points, while their hit@10 changes by at most 1.4 points. The hit rates of Figure~\ref{fig:recall-heatmap} are therefore robust, but its recall values are too high, by roughly 10 points.
 
 \subsection{Reranking with a decision model}
 \label{sec:live-decisions}
