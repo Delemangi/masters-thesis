@@ -192,7 +192,7 @@ On holdout 3 the largest loss is \textsc{Gap} (38 rows, 12.8 percent of all 298 
 
 Partial answers have two main causes. In one, the right FAQ was retrieved but the model hedged instead of stating the rule. In the other, the model added a detail from a loosely related passage. The second holdout shows more cases, and they appeared in both identical runs. Examples include a fact buried in a large FAQ, a model that hedged although the correct FAQ was the top hit, and retrieval that missed an unusual phrasing. In other rows the model misread a context, for example by applying an admission statement to the wrong applicant, and some dates came from old announcements and were unsupported. The hedge test suggests that a blunt prompt rule cannot remove hedging without a cost.
 
-For the deployed agent on fresh emails, the largest single loss is \textsc{Gap}. \textsc{Gap} rows (38 per run) outnumber wrong and partial rows combined (25 and 27), and filling a gap requires a fact confirmed by the institution. Only 9 of the 38 rows in run $a$ had no related item anywhere, so missing data is not the whole explanation. This does not contradict the controlled experiment, which held the corpus fixed and found no benefit from more context.
+For the deployed agent on fresh emails, the largest single loss is \textsc{Gap}. \textsc{Gap} rows (38 per run) outnumber wrong and partial rows combined (25 and 27), and filling a gap requires a confirmed fact. Only 9 of the 38 rows in run $a$ had no related item anywhere, so missing data is not the whole explanation. This does not contradict the controlled experiment, which held the corpus fixed and found no benefit from more context.
 
 \subsection{Retrieval methods and recall}
 \label{sec:live-recall}
