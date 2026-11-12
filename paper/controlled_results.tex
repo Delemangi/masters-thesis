@@ -3,7 +3,7 @@
 \begin{table*}[t]
 \centering\small
 \setlength{\tabcolsep}{5pt}
-\caption{AI-assessed outcomes (controlled configuration, not the deployed settings). Each sample and policy keeps all 96 selected cases. Answer is the judge's supported-answer label and can include conversational replies. It is not verified factual accuracy, because twenty of the 25 chatbot Answer labels under G0 and S0 use references with no retained facts.}
+\caption{AI-assessed outcomes (controlled configuration, not the deployed settings). Each sample and policy keeps all 96 selected cases. Answer is the judge's supported-answer label and can include conversational replies. It is not verified factual accuracy, because twenty of the 25 chatbot Answer labels under G0 and S0 use references with no facts after the check.}
 \label{tab:luna-outcomes}
 \begin{tabular}{llrrrrrrrr}
 \toprule
@@ -28,7 +28,7 @@ Chatbot logs & S1 & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
 \label{tab:luna-effects}
 \begin{tabular}{lrr}
 \toprule
-Contrast & Email: $\Delta$ [CI] & Chatbot logs: $\Delta$ [CI] \\
+Comparison & Email: $\Delta$ [CI] & Chatbot logs: $\Delta$ [CI] \\
 \midrule
 S0-G0 & -1.0 [-8.3, 6.3] & -1.0 [-7.3, 5.2] \\
 S1-G1 & -2.1 [-9.4, 5.2] & 1.0 [-4.2, 6.3] \\

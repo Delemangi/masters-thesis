@@ -72,7 +72,7 @@ The stages fail in different ways. A request may be rejected at the start, and r
 
 An institution adopting this architecture would replace its corpus, its source-review process, its adapters for structured data and its identity policy. It would keep the separation of source preparation, evidence selection, answer construction and channel delivery. Models, limits on candidates and thresholds are further variation points.
 
-The experiment covers a smaller part. It reuses production retrieval and prompt construction with the original queries, then sends the saved prompts to Luna, the generation model of the controlled configuration. It leaves out query rewriting, conversation history, live provider agents, tool execution, request checks at admission, saving of conversations, and real web or Discord display. The input schema still decides which questions are eligible. Only evidence selection changes, so the retrieval comparison is easy to interpret. Chapter~\ref{ch:live} evaluates the deployed system, including its agent and tools, but does not follow the controlled protocol.
+The experiment covers a smaller part. It reuses production retrieval and prompt construction with the original queries, then sends the saved prompts to Luna, the generation model of the controlled configuration. It leaves out query rewriting, conversation history, live provider agents, tool execution, access checks, saving of conversations, and real web or Discord display. The input schema still decides which questions are eligible. Only evidence selection changes, so the retrieval comparison is easy to interpret. Chapter~\ref{ch:live} evaluates the deployed system, including its agent and tools, but does not follow the controlled protocol.
 
 \paragraph{Summary.}
 \begin{itemize}

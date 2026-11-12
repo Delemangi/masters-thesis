@@ -7,7 +7,7 @@ Lowering the document threshold gives the model about three times as much contex
 
 All 192 main questions have four policy records. Of the 768 records, sixteen are rejected inputs and 752 can go to generation. These use 354 unique main generations with 398 reuses of identical prompts. The pilot adds 39 unique generations, giving 393 saved requests, all completed within the output limit.
 
-Of the 393 saved judgments (354 main and 39 pilot), 386 passed the consistency checks. Seven contradicted themselves: the raw material-claim flag was true, but the category was incomplete or uncertain. One belongs to the pilot and six map to twelve of the main outcomes. They count as failures and are not repaired. The pilot (38 valid assessments from 39 generations) is excluded from the main results, which keep the full denominator of 96 per frame and policy.
+Of the 393 saved judgments (354 main and 39 pilot), 386 passed the consistency checks. Seven contradicted themselves: the raw material-claim flag was true, but the category was incomplete or uncertain. One belongs to the pilot and six map to twelve of the main outcomes. They count as failures and are not repaired. The pilot (38 valid assessments from 39 generations) is excluded from the main results, which keep all 96 questions per sample and policy in the count.
 
 \subsection{Supported answering and useful routing}
 
@@ -25,11 +25,11 @@ Unsupported material claims and incomplete answers remain common. Under G0 and S
 
 \input{figures/policy_effects}
 
-The primary S0-minus-G0 contrast is $-1/96$, or approximately $-1.04$ percentage points, in each frame. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both frames. A p-value near 1 means the gains and losses are about as balanced as chance would give.
+The main comparison, S0 minus G0, is $-1/96$, or approximately $-1.04$ percentage points, in each sample. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both samples. A p-value near 1 means the gains and losses are about as balanced as chance would give.
 
 Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about six points for email or five for production. The study finds no clear benefit from the lower document threshold. It does not show that the policies are equal or that a better threshold cannot exist.
 
-The secondary contrasts and the interaction estimates ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
+The other comparisons and the interaction ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
 
 The fallback is used much more often with the higher threshold (G0 and G1). Comparing G1 with G0, 33 email and 27 production cases change from an empty to a non-empty context. Comparing S1 with S0, no email and only three production contexts change. S0 and S1 select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
 
@@ -43,7 +43,7 @@ The mean context grows from 5,110 to 16,481 characters for email and from 1,010 
 \label{tab:context-diagnostics}
 \begin{tabular}{llrr}
 \toprule
-Frame & Diagnostic & G0 & S0 \\
+Sample & Measure & G0 & S0 \\
 \midrule
 Email & Empty contexts & 36 & 3 \\
 Email & Mean context characters & 5,110 & 16,481 \\
@@ -56,7 +56,7 @@ Production & Mean context characters & 1,010 & 5,808 \\
 
 Empty contexts have two causes. Under G0, candidates were retrieved but none reached the 0.10 floor in 33 of the 36 empty email contexts and 27 of the 76 empty production contexts. Under S0 the document floor is 0.00, so these candidates are kept. For most S0 contexts that stay empty, the saved replay holds no candidate at all (all three email and 49 of the 52 production contexts). Examples include greetings and very short or off-topic messages. In the other three production cases, only FAQ candidates were found and they fell below the FAQ floor of 0.10.
 
-Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. It was chosen afterwards by a rule that ignores outcomes: among 72 cases with a valid, non-empty reference, completed answers under both policies and a strictly longer S0 context, it has the smallest fixed hash of its identifier. The question asks whether admission under a special category drops the tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters), and S0 selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
+Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. To avoid picking a convenient example, it was chosen by a fixed rule that does not look at the outcomes, from 72 cases with a valid, non-empty reference, completed answers under both policies and a longer S0 context. The question asks whether admission under a special category drops the tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters), and S0 selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
 
 \subsection{Reference quality and the guard}
 \label{sec:reference-quality}
@@ -69,7 +69,7 @@ Of 212 pilot and main references, 182 pass the quotation checks and thirty fail.
 \label{tab:reference-states}
 \begin{tabular}{lrrrr}
 \toprule
-Frame & Not empty, passing & Empty, passing & Invalid & Total \\
+Sample & Not empty, passing & Empty, passing & Invalid & Total \\
 \midrule
 Email & 66 & 12 & 18 & 96 \\
 Production & 25 & 63 & 8 & 96 \\
@@ -77,7 +77,7 @@ Production & 25 & 63 & 8 & 96 \\
 \end{tabular}
 \end{table}
 
-The 182 passing references include 76 with no retained facts, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no fact to miss.
+The 182 passing references include 76 with no facts left, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no fact to miss.
 
 A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the G0 and S0 totals become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. A check made afterwards found 32 of the 49 rejected main quotations in a different source block of the same pool and seventeen nowhere in it. This can guide repairs to the references, and it changes no labels.
 
@@ -113,7 +113,7 @@ The component study came before the controlled experiment. It used a simplified 
 \subsection{Prompt comparison}
 \label{sec:results-prompt}
 
-The prompt comparison (Section~\ref{sec:method-prompt}) asks whether a revised prompt improves strict completion on forty emails. In a 32-question development sample used to write the revised prompt, giving the model AI-selected evidence instead of normal retrieval raises the share of reference facts covered by the answers from 29/73 to 50/73 and strict completion from 4/32 to 6/32. With no evidence at all, the answers reach 4/32 strict completions and 14/73 facts.
+The prompt comparison (Section~\ref{sec:method-prompt}) asks whether a revised prompt improves strict completion on forty emails. A 32-question development sample was used to write the revised prompt. On it, giving the model AI-selected evidence instead of normal retrieval raises the reference facts covered by the answers from 29/73 to 50/73. Strict completion rises from 4/32 to 6/32. With no evidence at all, the answers reach 4/32 strict completions and 14/73 facts.
 
 In the forty-question comparison the first judge did not see part of the evidence given to the generator. It flagged fifteen citation errors per condition, while a rule-based check found one per condition. All pairs were therefore graded again with the full generation context, new scope guidance and a 1,024-token limit on the judgment (Section~\ref{sec:method-deviations}). This audit is the reported result (Table~\ref{tab:prompt}).
 
@@ -133,7 +133,7 @@ Audit citation-error flags & 1/37 & 1/36\\
 \end{tabular}
 \end{table}
 
-Under the audit the revised prompt changes strict completion from 6/40 to 5/40. The paired difference is $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$), from two gains and three losses, and an exact sign test gives $p=1.0$. The five-point gain under the first labels may have come from the judge's incomplete input, so it is not a finding about the prompt. The audit also changed the scope guidance and the token limit, so the change in labels cannot be credited to the evidence alone. Three inputs that were too long produce no answer in either condition but stay in the denominators. Because the references are partial, fewer unsupported-claim flags do not show an improvement.
+Under the audit the revised prompt changes strict completion from 6/40 to 5/40. The paired difference is $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$), from two gains and three losses, and an exact sign test gives $p=1.0$. The five-point gain under the first labels may have come from the judge's incomplete input, so it is not a finding about the prompt. The audit also changed the scope guidance and the token limit, so the change in labels cannot be put down to the evidence alone. Three inputs that were too long produce no answer in either condition but stay in the denominators. Because the references are partial, fewer unsupported-claim flags do not show an improvement.
 
 \subsection{Delivery, latency and cost}
 
@@ -141,8 +141,8 @@ The production telemetry comes from the deployed system, with the author's own t
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item Under G0 and S0, incomplete answers (22 to 31 of 96 per frame) and unsupported claims (11 to 20) remain common, and the judge's assessments are uncertain.
-  \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both frames, and every interval includes zero.
+  \item Under G0 and S0, incomplete answers (22 to 31 of 96 per sample) and unsupported claims (11 to 20) remain common, and the judge's assessments are uncertain.
+  \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both samples, and every interval includes zero.
   \item The same change ranks relevant passages higher in the component study, so better ranking does not mean better assessed answers.
   \item Many passing references are empty, and the judge's inputs and strictness can move the apparent results.
 \end{itemize}

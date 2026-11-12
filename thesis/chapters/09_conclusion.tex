@@ -15,7 +15,7 @@ This thesis examines how well the chatbot answers real institutional questions a
   \item No fix had targeted some held-out email sets. On these, 70 to 77 percent of graded answers were correct and 1 to 3 percent were wrong, under one judge and rubric. The tuned set, on which the fixes were made, overstated quality by about 11 points.
   \item The largest single loss was \textsc{Gap} rows, which mostly mean missing knowledge. The first fix to try is therefore data confirmed by the institution. The next problems were hedging and unsupported details.
   \item The controlled finding concerns the document threshold only. In the live system, the shared context floor (lowered to 0.03) and reranking against the original question gave large gains on the hard set that tested them.
-  \item Prompt gains on hard sets are inflated by construction, and a rule that suppressed hedges gave no gain beyond noise.
+  \item Prompt gains on hard sets are inflated, because hard sets consist of earlier wrong answers, and a rule that suppressed hedges gave no gain beyond noise.
   \item A decision-model reranker improved ranking against AI labels but not the answers: 74.5 percent were correct with the cross-encoder and 69.1 percent with the decision model, a difference within chance. A memory test found earlier context used in 42 of 42 genuine items and the answer correct in 41.
 \end{itemize}
 
