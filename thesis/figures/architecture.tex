@@ -1,102 +1,46 @@
-% Native, grayscale-readable source architecture. Required TikZ library: arrows.meta.
-% Explicit two/three-line labels avoid paragraph wrapping in boxes.
-% Target dimensions: below 17 cm wide and approximately 8.3 cm tall, at 8 pt.
+% Chatbot architecture, simplified. Grayscale, plain TikZ, drawn at text width without scaling.
 \begin{figure}[htbp]
 \centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-  x=1cm,y=1cm,
-  font=\fontsize{8}{9.2}\selectfont,
-  box/.style={draw=black!75,line width=.45pt,rounded corners=1.5pt,
-    fill=white,align=center,inner xsep=3pt,inner ysep=4pt,
-    minimum height=.65cm},
-  tested/.style={box,line width=1.25pt,fill=black!6},
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  box/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=3.0cm,minimum height=1.05cm,inner sep=3pt},
+  tested/.style={box,line width=1.2pt,fill=black!8},
   flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
-  exchange/.style={arrows={{Stealth[length=1.6mm,width=1.15mm]}-{Stealth[length=1.6mm,width=1.15mm]}},line width=.5pt},
-  optional/.style={exchange,dashed},
-  note/.style={align=left,inner sep=0pt},
-  edgeword/.style={fill=white,inner sep=1.5pt,align=center}
+  two/.style={{Stealth[length=1.6mm,width=1.15mm]}-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  opt/.style={two,dashed},
+  head/.style={font=\small\bfseries,anchor=west},
+  lab/.style={font=\footnotesize,fill=white,inner sep=1.5pt,align=center}
 ]
-  % Preparation: archival originals are distinct from FAQ records.
-  \node[note,font=\fontsize{8}{9.2}\selectfont\bfseries,anchor=west]
-    at (0,.95) {PREPARATION};
-  \node[box,minimum width=1.8cm] (originals) at (.9,0)
-    {Originals\\PDF / DOCX};
-  \node[box,minimum width=2.05cm] (markdown) at (3.2,0)
-    {Markdown\\review required};
-  \node[box,minimum width=2.55cm] (ingest) at (6.05,0)
-    {Ingestion / worker\\chunk + embed};
-  \node[box,minimum width=2.65cm] (vectors) at (9.55,0)
-    {PostgreSQL\\pgvector index};
-  \node[box,minimum width=3.1cm] (gpu) at (13.75,0)
-    {GPU service\\embed + rerank};
-  \draw[flow] (originals) -- (markdown);
-  \draw[flow] (markdown) -- (ingest);
-  \draw[flow] (ingest) -- (vectors);
-  \node[note,anchor=south] (faq) at (6.05,.95) {FAQ records};
-  \draw[flow] (faq.south) -- (ingest.north);
-  \draw[exchange] (ingest.north east) -- (7.5,.85)
-    -- node[edgeword,above] {embeddings} (13.75,.85) -- (gpu.north);
+  % Preparing knowledge
+  \node[head] at (-0.2,1.55) {Preparing knowledge};
+  \node[box] (docs) at (1.6,0) {Official documents\\(PDF, DOCX)};
+  \node[box] (text) at (5.4,0) {Text versions, checked by the author};
+  \node[box] (index) at (9.2,0) {Indexing: passages and embeddings};
+  \node[box] (store) at (13.0,0) {Search index (database)};
+  \node[box,minimum height=.75cm] (faq) at (9.2,1.55) {The author's FAQs};
+  \draw[flow] (docs) -- (text);
+  \draw[flow] (text) -- (index);
+  \draw[flow] (index) -- (store);
+  \draw[flow] (faq) -- (index);
 
-  % Serving: reply arrows denote request/stream exchanges, not shared state.
-  \node[note,font=\fontsize{8}{9.2}\selectfont\bfseries,anchor=west]
-    at (0,-1.05) {SERVING};
-  \node[box,minimum width=1.25cm] (web) at (.65,-1.8) {Web UI};
-  \node[box,minimum width=1.85cm] (bff) at (2.7,-1.8)
-    {Next.js BFF};
-  \node[box,minimum width=1.85cm] (discord) at (2.7,-2.9)
-    {Discord\\adapter};
-  \node[box,minimum width=1.8cm] (api) at (5.5,-2.35)
-    {FastAPI\\chat API};
-  \node[box,minimum width=3.1cm,minimum height=1cm] (agent)
-    at (9.3,-2.35) {Provider agent\\hosted / local LLM};
-  \node[tested,minimum width=3.1cm,minimum height=1cm] (retrieval)
-    at (13.75,-2.35) {Knowledge-base search\\retrieval + links};
-  \draw[exchange] (web) -- (bff);
-  \draw[exchange] (bff.east) -- (4.12,-1.8) |- (api.north west);
-  \draw[exchange] (discord.east) -- (4.12,-2.9) |- (api.south west);
-  \draw[exchange] (api) -- (agent);
-  \draw[exchange] (agent) -- node[edgeword,above] {search\\tool} (retrieval);
-  \draw[flow] (vectors.south) -- (9.55,-1.05)
-    -| ([xshift=-.7cm]retrieval.north);
-  \draw[exchange] ([xshift=.5cm]gpu.south) -- ([xshift=.5cm]retrieval.north);
+  % Answering
+  \node[head] at (-0.2,-1.45) {Answering};
+  \node[box] (client) at (1.6,-2.6) {Web app or Discord bot};
+  \node[box] (api) at (5.4,-2.6) {Chat service};
+  \node[box] (agent) at (9.2,-2.6) {AI agent (language model)};
+  \node[tested] (search) at (13.0,-2.6) {Knowledge-base search and reranking};
+  \draw[two] (client) -- (api);
+  \draw[two] (api) -- (agent);
+  \draw[two] (agent) -- (search);
+  \draw[flow] (store) -- (search);
 
-  % Stored conversations (web and Discord) are kept by the API.
-  \node[box,minimum width=2.6cm] (store) at (2.6,-4.4)
-    {Stored conversations\\PostgreSQL};
-  \draw[exchange] (api.south) -- ++(0,-1.2) -| (store.north);
-
-  % Controlled replay: retrieval, then prompt; the agent and tools are bypassed.
-  \node[tested,minimum width=2.5cm] (luna) at (14.7,-4.05)
-    {Controlled Luna\\Chat Completions};
-  \draw[flow,line width=.8pt] ([xshift=.45cm]retrieval.south)
-    -- node[edgeword,right] {controlled replay} ([xshift=-.5cm]luna.north);
-
-  % Structured records stay outside the FAQ/document embedding path.
-  \node[box,minimum width=2.55cm] (localmcp) at (7.9,-4.05)
-    {Local MCP\\Python tools};
-  \node[box,minimum width=2.8cm] (facultymcp) at (11.5,-4.05)
-    {Faculty API / MCP\\Spring AI + JPA};
-  \draw[optional] (8.3,-2.85) -- (8.3,-3.3) -- (7.9,-3.3)
-    -- (localmcp.north);
-  \draw[optional] (10.3,-2.85) -- (10.3,-3.3) -- (11.5,-3.3)
-    -- (facultymcp.north);
-  \node[box,minimum width=2.2cm] (assets) at (5.6,-5.55)
-    {JSON assets\\courses / staff\\rooms / sessions};
-  \node[box,minimum width=2.6cm] (adapters) at (8.4,-5.55)
-    {Dedicated APIs\\EduPage timetables\\faculty thesis lists};
-  \node[box,minimum width=2.8cm] (facultydb) at (11.5,-5.55)
-    {Faculty PostgreSQL\\operational records};
-  \draw[flow] (assets.north) -- (5.6,-4.75) -| (localmcp.south);
-  \draw[flow] (adapters.north) -- (8.4,-4.75) -| (localmcp.south);
-  \draw[flow] (facultydb) -- (facultymcp);
-
-  \node[note,text width=16.35cm,anchor=north west] at (0,-6.55)
-    {\textbf{Deployed path:} the agent calls knowledge-base search and MCP tools itself (solid and dashed two-way arrows).
-     \enspace \textbf{Bold border:} the controlled replay that was tested, in which retrieval and prompt construction run first and controlled Luna answers. The agent and MCP tools are skipped.\\
-     Dashed arrows: optional MCP tools, not evaluated in the replay. Stream resumption and monitoring are omitted.};
-\end{tikzpicture}}
-\caption[Chatbot architecture and the components tested]{Chatbot architecture and the components tested. In the deployed system the provider agent calls knowledge-base search as a tool alongside MCP tools. In the controlled configuration retrieval runs as a fixed step before generation, and the controlled replay exercises that path.
-Structured-data lookup is separate from document and FAQ retrieval. GPU is the graphics processing unit server that computes embeddings and reranks. BFF is the backend for frontend, the web app's server-side layer. Next.js and FastAPI are the web frameworks of the web app and the API. pgvector is the PostgreSQL extension for vector search. Spring AI and JPA are the Java libraries of the faculty service. EduPage is the school timetable service. LLM is a large language model.}
+  % Below the answering row
+  \node[box] (conv) at (5.4,-5.0) {Saved conversations};
+  \node[box] (tools) at (9.2,-5.0) {Faculty data tools: courses, rooms, timetables, announcements};
+  \node[tested] (replay) at (13.0,-5.0) {Controlled experiment: one search, then one model call};
+  \draw[two] (api) -- (conv);
+  \draw[opt] (agent) -- (tools);
+  \draw[flow,line width=.9pt] (search) -- (replay);
+\end{tikzpicture}
+\caption[Chatbot architecture and the parts tested]{Chatbot architecture and the parts tested. Official documents are turned into checked text versions and, together with the author's FAQs, split into passages with embeddings that are stored in a search index. A student asks through the web app or the Discord bot. The chat service passes the question to the AI agent, which decides when to search the knowledge base and when to call the faculty data tools (dashed). A separate model server computes the embeddings and the reranking scores. The bold boxes are the parts the controlled experiment tested: there, one search runs first and its results go to a single model call, without the agent or the tools.}
 \label{fig:architecture}
 \end{figure}
