@@ -98,45 +98,36 @@ When more than one category could apply, the judge follows a fixed order: unsupp
 
 \textbf{Rules applied after judging.} Two rules turn the judgments into the final labels. The first is the guard. If the reference failed its check, a supported-answer or useful-routing label becomes uncertain, because a faulty reference cannot confirm that the answer is right. Negative labels are left as they are. The second rule assigns failure, the seventh outcome in Table~\ref{tab:categories}, which the judge never chooses. It applies when the application rejects the question, generation fails, or the judgment cannot be read or contradicts itself, for example a supported answer that is also flagged for an unsupported material claim. A judgment that passes these checks may still be wrong.
 
-\subsubsection{Measures and uncertainty}
+\subsubsection{Measures and how to read them}
+\label{sec:read-results}
 
-Let $Y_{i,p}$ equal one when question $i$ under policy $p$ keeps a supported-answer or useful-routing label, and zero otherwise. For each sample, the main estimate is
-\begin{equation}
-\widehat{\Delta}_{\mathrm{floor}}=\frac{1}{96}\sum_{i=1}^{96}\left(Y_{i,\mathrm{lower}}-Y_{i,\mathrm{base}}\right).
-\label{eq:thesis-primary}
-\end{equation}
-The reported percentage-point difference is $100\widehat{\Delta}_{\mathrm{floor}}$. A percentage point is the difference between two percentages, so a change from 53 to 52 percent is one point. Table~\ref{tab:metrics} defines this and the other measures used in this chapter and in Chapter~\ref{ch:live}.
+\textbf{Assistance.} The main measure is simple. Each question gets a score of 1 under a policy if its answer is a good response, that is, a supported answer or useful routing (Table~\ref{tab:categories}), and 0 otherwise. Bad responses, uncertain cases and failures all score 0, so every question stays in the count. The assistance count of a policy is the number of questions, out of 96, that score 1. Email and production questions are always counted separately.
+
+\textbf{Comparing two policies.} Every question is answered under every policy, so two policies can be compared question by question. When the lower floor is compared with the baseline, a question gains if its response is good only under the lower floor, loses if it is good only under the baseline, and ties otherwise. The difference between the policies is the number of gains minus the number of losses, divided by 96 and given in percentage points. For example, email has 5 gains and 6 losses, so the difference is $(5-6)/96$, or $-1.04$ points. This means that per 100 questions, about 1 fewer question received a good response under the lower floor. A percentage point is the difference between two percentages, so a change from 53 to 52 percent is 1 point. Because the same questions are compared, the difference does not depend on which questions happened to be drawn into the sample.
+
+\textbf{The 95 percent interval.} A different sample of questions could give a somewhat different difference. To see by how much, the analysis draws a new sample of 96 questions at random from the 96 that were used, with repeats allowed, recomputes the difference, and repeats this 20,000 times. This is called a bootstrap~\cite{efron1993bootstrap}. The middle 95 percent of the 20,000 differences form the interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies. Each question keeps its results under all 4 policies when it is drawn, and questions with identical text are drawn together because they share one answer. A fixed seed (24905310) makes the random draws repeatable. If the interval includes zero, the data cannot tell whether the change helps or hurts, which is not the same as showing that the policies are equal. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval takes the AI labels as correct. It does not cover a judge that is wrong in a consistent way, a reference that misses a condition or a biased set of questions, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with 2 further judges.
+
+\textbf{The sign test.} A second check looks only at gains and losses. If a policy change made no difference, gains and losses should be about equally common, like heads and tails of a coin. The exact sign test gives the probability, called the p-value, of seeing gains and losses at least as unequal as the observed ones if the change made no difference. A small p-value, conventionally below 0.05, suggests a real effect. A p-value near 1 means the gains and losses are as balanced as chance would make them.
+
+\textbf{Other measures.} Table~\ref{tab:metrics} lists the measures used to explain the results. Timing comes from two places. The deployment's PostHog usage analytics give request counts and typical durations in real use, and the experiment records how long each hosted model call took.
 
 \begin{table}[htbp]
 \centering\small
-\caption[Measures of the controlled experiment]{Measures of the controlled experiment. Differences in the assistance measure are given in percentage points.}
+\caption[Further measures of the controlled experiment]{Further measures of the controlled experiment, used to explain the assistance results.}
 \label{tab:metrics}
 \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
 \toprule
-Measure & Definition & Denominator and caveat \\
+Measure & What it counts & What to keep in mind \\
 \midrule
-Assistance $Y_{i,p}$ & One if the answer is labeled supported answer or useful routing after the reference check (the guard). & All 96 questions per sample and policy. Rejections, invalid judgments and uncertainty count as zero. \\
-Floor effect & Mean of $Y_{i,\mathrm{lower}}-Y_{i,\mathrm{base}}$ (Equation~\ref{eq:thesis-primary}). & Per sample. The main comparison. \\
-Interval & Bootstrap interval, taken from the percentiles of 20,000 repeated resamples of question groups (identical questions merged into one group) with seed 24905310, keeping each question's 4 outcomes together~\cite{efron1993bootstrap}. & Keeps pairing and answer reuse. Based on the AI labels. \\
-Flag rate & Questions flagged for an unsupported material claim, out of the records that could be judged. & Invalid and unspecified flags are not false flags. \\
-Agreement & Counts, percentages and Cohen's kappa~\cite{cohen1960kappa}, which is agreement corrected for chance (0 is chance level and 1 is perfect agreement). & Raw agreement can be high while kappa is lower when one label is very common~\cite{feinstein1990kappa}. \\
-Empty context & No retrieved text in the prompt. & If a context changes from empty to not empty, the fallback was triggered. This is worked out by comparing the paired contexts. \\
-Quotation presence & Share of the checked reference quotations found in the context. & Counts matching quotation strings and does not measure meaning. \\
-Strict completion & Answer covers every reference fact and behavior, with no unsupported claim, citation error or reference concern. & Prompt comparison only. Not comparable with assistance. \\
+Flag rate & Answers that the judge flagged for an unsupported material claim, out of the answers it could judge. & Unusable judgments and flags left unspecified are not counted as unflagged. \\
+Agreement & How often two judgments give the same label, as a count, a percentage and Cohen's kappa~\cite{cohen1960kappa}. Kappa is agreement beyond what chance alone would give, where 0 is chance level and 1 is full agreement. & When one label is very common, raw agreement can be high while kappa is low~\cite{feinstein1990kappa}. \\
+Empty context & Prompts that contain no retrieved text. & When a context is empty without the fallback and not empty with it, the fallback was used. \\
+Context length & The mean number of characters of retrieved text in the prompt, and the mean number of document candidates. & More text is not necessarily better evidence. \\
+Quotation presence & The share of the reference's checked quotations that appear word for word in the context. & Shows whether the needed evidence reached the model, not whether the model used it. \\
+Strict completion & Answers that cover every reference fact and required step, with no unsupported claim, citation error or problem with the reference. & Prompt comparison only. Stricter than assistance and not comparable with it. \\
 \bottomrule
 \end{tabularx}
 \end{table}
-
-Email and production are reported separately. Intervals show how much results vary across the sampled questions, given the saved AI labels. They do not correct a judge that is always wrong, a missing condition in a reference or a biased set of questions. An interval that includes zero does not show that the policies are equal.
-
-The retrieval diagnostics are the number of empty contexts, the mean context length, the mean number of document candidates and the share of reference quotations found in the context (Section~\ref{sec:more-evidence}). Timing has 2 parts. The first is the request counts and the median and 95th percentile duration from the deployment's PostHog usage analytics, which are observations and not outcome labels. The second is the latency of each hosted generation call.
-
-\subsubsection{How to read the results}
-\label{sec:read-results}
-
-The results count how many of the 96 questions in each sample received a useful response, that is, a supported answer or useful routing. Comparisons between two policies are given as differences in percentage points. A difference of $-1.04$ points means that, per 100 questions, about one fewer question received a useful response under the second policy than under the first. Because every question is answered under every policy, the difference compares the same questions and is not affected by which questions happened to be drawn.
-
-Each difference comes with a 95 percent interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies, given the AI labels and the sampled questions. If the interval includes zero, the data cannot tell whether the change helps or hurts. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval does not account for errors of the judge itself, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with 2 further judges.
 
 \subsection{Results of the main experiment}
 
@@ -163,11 +154,11 @@ Unsupported material claims and incomplete answers remain common. Under the base
 
 \input{figures/policy_effects}
 
-The main comparison, the lower floor against the baseline, is $-1/96$, or approximately $-1.04$ percentage points, in each sample. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has 5 gains, 6 losses and 85 ties. Production has 4 gains, 5 losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both samples. A p-value near 1 means the gains and losses are about as balanced as chance would give.
+Figure~\ref{fig:policy-effects} and Table~\ref{tab:luna-effects} show the differences between the policies, read as described in Section~\ref{sec:read-results}.
 
-Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about 6 points for email or 5 for production. With the main judge's labels, the study finds no clear benefit from the lower document threshold (for 2 further judges, see Section~\ref{sec:sonnet-rejudge}). It does not show that the policies are equal or that a better threshold cannot exist.
+For the main comparison, the lower floor against the baseline, email has 5 questions that gain a good response, 6 that lose one and 85 that stay the same. Production has 4 gains, 5 losses and 87 unchanged. In both samples there is one more loss than gain, a difference of $-1.04$ points. The interval is $[-8.33, 6.25]$ for email and $[-7.29, 5.21]$ for production. Both include zero, so the data cannot tell whether the lower floor helps or hurts. They do rule out, under this judge, a gain larger than about 6 points for email and 5 for production. The sign test gives $p=1.0$ in both samples, the highest possible value, because 5 against 6 and 4 against 5 are as balanced as gains and losses can be. With the main judge's labels, the study therefore finds no clear benefit from the lower document threshold (for 2 further judges, see Section~\ref{sec:sonnet-rejudge}). It does not show that the policies are equal or that a better threshold cannot exist.
 
-The other comparisons and the interaction ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
+The other rows of the table repeat the comparison with the fallback on, and measure what adding the fallback does under each floor. The last row, the interaction, asks whether the fallback works differently under the two floors. It is the fallback's effect under the lower floor minus its effect under the baseline, $-1.04$ points for email and $+2.08$ for production. All of these intervals include zero.
 
 The fallback is used much more often with the higher threshold of the baseline. Comparing the baseline with and without fallback, 33 email and 27 production cases change from an empty to a non-empty context. Comparing the lower floor with and without fallback, no email and only 3 production contexts change. With the lower floor, both fallback settings select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
 
