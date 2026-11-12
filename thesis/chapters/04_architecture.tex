@@ -53,7 +53,10 @@ Two more properties of the deployed system change what the model receives. The r
 \subsection{Answer construction and structured lookup}
 \label{sec:arch-answer}
 
-Answer construction puts together the question, the selected evidence, useful links, the date, any history and the instructions for the interface.
+Answer construction puts together the question, the selected evidence, useful links, the date, any history and the instructions for the interface. Figure~\ref{fig:prompt-assembly} shows these inputs.
+
+\input{figures/prompt_assembly}
+
 This description matches the controlled configuration. The deployed agent instead calls knowledge-base search as one of its tools, with a short Macedonian query that it writes itself. It may search several times within a limit per answer, and its prompt contains no pre-retrieved sources. The replay reproduces only the fixed path, so the controlled findings say nothing about when and what the agent decides to search.
 
 The agent can also find tools offered through the Model Context Protocol (MCP), a standard way to connect a model to outside services, and call them, for example to look up courses, rooms, schedules or announcements. Their failures differ from retrieval failures. A structured service may be unavailable or return an ambiguous entity match.

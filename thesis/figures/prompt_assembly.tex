@@ -1,0 +1,30 @@
+% How the prompt for one answer is put together. Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  inp/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=4.6cm,minimum height=.7cm,inner sep=3pt},
+  mid/.style={draw=black!75,rounded corners=1.5pt,fill=black!8,align=center,text width=2.6cm,minimum height=1.1cm,inner sep=3pt},
+  ans/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=2.4cm,minimum height=1.1cm,inner sep=3pt},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  note/.style={align=center,font=\footnotesize\itshape,text=black!70,text width=5.2cm}
+]
+  \node[inp] (q) at (-0.4, 2.5) {The student's question};
+  \node[inp] (e) at (-0.4, 1.5) {Selected FAQs and passages};
+  \node[inp] (l) at (-0.4, 0.5) {Useful links};
+  \node[inp] (d) at (-0.4,-0.5) {Today's date};
+  \node[inp] (h) at (-0.4,-1.5) {Earlier turns of the chat};
+  \node[inp] (i) at (-0.4,-2.5) {Instructions for the interface};
+
+  \node[mid] (p) at (4.4,0) {Prompt};
+  \node[mid] (m) at (8.0,0) {Language model};
+  \node[ans] (a) at (11.4,0) {Answer with sources};
+
+  \foreach \n in {q,e,l,d,h,i} \draw[flow] (\n.east) -- (p.west);
+  \draw[flow] (p) -- (m);
+  \draw[flow] (m) -- (a);
+
+  \node[note] at (9.0,-1.9) {In the deployed agent, the FAQs, passages and links come from the agent's own search calls instead of one fixed search.};
+\end{tikzpicture}
+\caption[How the prompt for an answer is put together]{How the prompt for an answer is put together. Six inputs are combined into one prompt, which the language model answers. In the controlled configuration the evidence and links come from one fixed search before the model call. In the deployed system the agent gets them itself by calling the knowledge-base search tool, so they are added during the answer.}
+\label{fig:prompt-assembly}
+\end{figure}
