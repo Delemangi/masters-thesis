@@ -7,7 +7,7 @@ This chapter describes how the chatbot implements the architecture. It marks whe
 
 \subsection{Preparing the knowledge base}
 
-The author built every component: the web application, the chat service, the model server, the Discord bot, the document pipeline, the tool servers and the FAQs. Original PDF and DOCX files are kept next to their Markdown conversions. PDF conversion extracts the embedded text, removes repeated headers, footers and page numbers, recognizes Macedonian legal-article headings and joins wrapped lines. Scanned PDFs are transcribed by a vision model instead. The author reads each conversion side by side with its original.
+The author built every component: the web application, the chat service, the model server, the Discord bot, the document pipeline, the tool servers and the FAQs. Original PDF and DOCX files are kept next to their Markdown conversions. PDF conversion extracts the embedded text, removes repeated headers, footers and page numbers, recognizes Macedonian legal-article headings and joins wrapped lines. The two scanned PDFs were instead transcribed by Claude Opus 4.8, which reads page images. The author reads each conversion side by side with its original.
 
 Each Markdown file is split into chunks at legal-article headings where they exist, and otherwise at Markdown headings. The target chunk size is 1,300 characters, a unit under 1,650 characters stays whole, and chunks overlap by 150 characters. Documents also have fields for date, validity and authority. These fields do not affect ranking. When they are filled in, they are passed to the model as labeled text next to the passage.
 
