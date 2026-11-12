@@ -44,6 +44,7 @@ Opus & Claude Opus 5.5, the judge model of the tuned-set runs and the first grad
 Production question & A question recorded by the deployed chatbot, as opposed to a historical email question. \\
 Qwen & Qwen3-8B, a local model compressed to 4 bits. It re-judged a subset of answers in the controlled experiments, and the generator and judge of the component study. \\
 RAG & Retrieval-augmented generation. \\
+Recall@$k$ & The share of a question's relevant passages that are among the top $k$ results, averaged over the questions. \\
 Reference & The AI-produced description of required facts, evidence, action and uncertainty used for assessment. \\
 Reference check & The automatic check that each quotation in a reference occurs in its named source. If it fails, a good label is downgraded to uncertain. Also called the guard. \\
 Replay & Re-running the production retrieval and prompt logic on captured candidates, with controlled policy changes. \\

@@ -189,23 +189,23 @@ Individual changes were also compared in blind A/B runs on hard sets chosen from
 
 On holdout 3 the largest loss was Gap (38 rows, 12.8 percent of all rows, in both runs). Partial answers came next (41 across the 2 runs combined). Of these, 15 were flagged Hedge, for hedged wording, and 16 Noise, for added irrelevant detail. Wrong answers were last (3 and 8 rows). On holdout 3 the deterministic script found no invented date, amount or URL, and every flagged detail was computed or taken from the question.
 
-Retrieval was scored on holdout 3 against AI-judged relevance combined over all methods (4,804 judgments, and 275 of 298 emails have a relevant item, 654 relevant items in all, 70 percent of them FAQs). Items not judged count as non-relevant, so hit@10 is a lower bound. BM25 is weakest, and both the reranker and HyDE (written by Sonnet, not the deployed model) raise the top ranks (Table~\ref{tab:recall}). The agent's own searches raise in-context recall from 85.5 to 94.5 percent. Retrieval misses explain at most about 4 percent of the answers (13 of 298 rows), and 18 of 22 partial answers had relevant evidence in context, which points to answer construction.
+Retrieval was scored on holdout 3 against AI-judged relevance combined over all methods (4,804 judgments, and 275 of 298 emails have a relevant item, 654 relevant items in all, 70 percent of them FAQs). Items not judged count as non-relevant, so hit@10 is a lower bound. BM25 is weakest, and both the reranker and HyDE (written by Sonnet, not the deployed model) raise the top ranks (Table~\ref{tab:recall}). The agent's own searches raise the share of emails with a relevant item in context from 85.5 to 94.5 percent, and recall in context from 68.2 to 86.6 percent. Retrieval misses explain at most about 4 percent of the answers (13 of 298 rows), and 18 of 22 partial answers had relevant evidence in context, which points to answer construction.
 
 \begin{table}[t]
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
-\caption{Retrieval on holdout 3 (percent of 275 emails with a relevant item). + rerank: reranked with BGE-reranker-v2-m3. Context rows: any relevant item / share of relevant items in the model's context. hit@k: share of emails with a relevant item in the top $k$. MRR: mean of 1/rank of the first relevant item. BM25: keyword ranking. HyDE: search with a model-written hypothetical answer.}\label{tab:recall}
-\begin{tabular}{@{}lrrr@{}}
+\caption{Retrieval on holdout 3 (percent of 275 emails with a relevant item). + rerank: reranked with BGE-reranker-v2-m3. Context rows: any relevant item / recall in the model's context. hit@k: share of emails with a relevant item in the top $k$. R@10 (recall@10): average share of an email's relevant items in the top 10. MRR: mean of 1/rank of the first relevant item. BM25: keyword ranking. HyDE: search with a model-written hypothetical answer.}\label{tab:recall}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Method & hit@1 & hit@10 & MRR\\
+Method & hit@1 & hit@10 & R@10 & MRR\\
 \midrule
-BM25 & 32.0 & 73.5 & 0.453\\
-Dense (BGE-M3) & 51.3 & 86.2 & 0.624\\
-Hybrid + rerank & 54.5 & 90.2 & 0.670\\
-HyDE + rerank & 56.7 & 91.3 & 0.690\\
+BM25 & 32.0 & 73.5 & 50.7 & 0.453\\
+Dense (BGE-M3) & 51.3 & 86.2 & 68.6 & 0.624\\
+Hybrid + rerank & 54.5 & 90.2 & 75.5 & 0.670\\
+HyDE + rerank & 56.7 & 91.3 & 76.8 & 0.690\\
 \midrule
-Production context & \multicolumn{3}{r}{85.5 / 68.2}\\
-Agent context & \multicolumn{3}{r}{94.5 / 86.6}\\
+Production context & \multicolumn{4}{r}{85.5 / 68.2}\\
+Agent context & \multicolumn{4}{r}{94.5 / 86.6}\\
 \bottomrule
 \end{tabular}
 \end{table}

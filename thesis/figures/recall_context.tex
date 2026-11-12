@@ -6,7 +6,7 @@
     \draw[black!15] ({\p*0.08},0.6) -- ({\p*0.08},-2.5);
     \node[below] at ({\p*0.08},-2.5) {\p};
   }
-  \node[below] at (4,-3.0) {Percent of the 275 emails (any item) or of the relevant items (share)};
+  \node[below] at (4,-3.0) {Percent of the 275 emails (any item) or recall};
   \node[left,align=right] at (-0.2,0.15) {Production\\one search, 6.2 items\\on average};
   \node[left,align=right] at (-0.2,-1.65) {Agent\\own searches, 10.4 items\\on average};
   \foreach \y/\v/\f in {0.3/85.5/black!70, -0.1/68.2/black!25, -1.5/94.5/black!70, -1.9/86.6/black!25} {
@@ -16,8 +16,8 @@
   \fill[black!70] (0,1.0) rectangle (0.3,1.2);
   \node[right] at (0.3,1.1) {any relevant item};
   \fill[black!25,draw=black] (3.8,1.0) rectangle (4.1,1.2);
-  \node[right] at (4.1,1.1) {share of relevant items};
+  \node[right] at (4.1,1.1) {recall (share of relevant items)};
 \end{tikzpicture}
-\caption[Relevant knowledge in the model's context on holdout 3]{Relevant knowledge in the model's context on holdout 3. Production retrieval makes one call on the raw email, and the agent searches about 1.7 times per answer. The dark bars give the percentage of emails with at least one relevant item in context, the light bars the share of all relevant items that reached the context.}
+\caption[Relevant knowledge in the model's context on holdout 3]{Relevant knowledge in the model's context on holdout 3. Production retrieval makes one call on the raw email, and the agent searches about 1.7 times per answer. The dark bars give the percentage of emails with at least one relevant item in context, the light bars the recall, the share of an email's relevant items that reached the context, averaged over the emails.}
 \label{fig:recall-context}
 \end{figure}
