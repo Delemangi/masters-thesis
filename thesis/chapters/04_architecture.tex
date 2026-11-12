@@ -62,7 +62,7 @@ A read-only lookup cannot settle an individual case. It may inform the guidance,
 
 \subsection{Channels, state and failure boundaries}
 
-Web and Discord adapters send requests to the same backend but differ in conversation handling and delivery. The web path has saved conversations and streams that can be restarted. Discord splits messages to fit its length limits. Its conversations are stored on the server and can be deleted with a bot command. Both channels show tool-call steps while the agent works, but source displays can differ.
+Web and Discord clients send requests to the same backend. Both show the agent's tool calls while it works, and both store conversations that users can delete, but only the web client shows source cards.
 
 Stored data is kept apart by purpose (knowledge, conversations, caches, telemetry, research files).
 
