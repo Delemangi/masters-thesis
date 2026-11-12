@@ -30,6 +30,6 @@
 
   \draw[dashed,black!40] (7.0,7.0) -- (7.0,-0.4);
 \end{tikzpicture}
-\caption[Dual encoder and cross-encoder]{Dual encoder and cross-encoder, drawn after the setups of Karpukhin et al.~\cite{karpukhin2020dpr} and Nogueira and Cho~\cite{nogueira2019bertrerank}. A dual encoder turns the question and each passage into embeddings separately, so passage embeddings can be computed once and searched quickly. A cross-encoder reads the question and one passage together, which is slower but usually ranks better, so it is used only to rescore a short list of candidates. The chatbot uses BGE-M3 as the dual encoder and BGE-reranker-v2-m3 as the cross-encoder, and its score floors apply to the cross-encoder score $r(q,d)$.}
+\caption[Dual encoder and cross-encoder]{Dual encoder and cross-encoder, drawn after the setups of Karpukhin et al.~\cite{karpukhin2020dpr} and Nogueira and Cho~\cite{nogueira2019bertrerank}. A dual encoder turns the question and each passage into embeddings separately, so passage embeddings can be computed once and searched quickly. A cross-encoder reads the question and one passage together, which is slower but usually ranks better, so it is used only to score a short list of candidates again. The chatbot uses BGE-M3 as the dual encoder and BGE-reranker-v2-m3 as the cross-encoder, and its score floors apply to the cross-encoder score $r(q,d)$.}
 \label{fig:encoders}
 \end{figure}

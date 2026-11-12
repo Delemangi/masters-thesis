@@ -37,11 +37,11 @@ Recent chats & 38 & New first questions arriving after the real-traffic window. 
 \end{tabularx}
 \end{table}
 
-A sampling script drew the held-out sets with the fixed seed 249053, stratified over the 24 topic groups of the archive so that every topic is covered. The topic groups play no part in the results. The script left out every email already used, rows with privacy signals, duplicates, rows marked unusable, and questions shorter than 40 or longer than 1,500 characters. It drew 304 and 289 emails for the first 2 sets, and the third set is the 303 eligible emails that remained. The archive was already anonymized, and an extra pass by 2 Claude Sonnet 5.5 agents removed any names and signatures that were left. Rows that were not student questions were then dropped (33, 14 and 5), which gives 271, 275 and 298 emails.
+A sampling script drew the held-out sets with the fixed seed 249053, drawn separately from each of the 24 topic groups of the archive so that every topic is covered. The topic groups play no part in the results. The script left out every email already used, rows with privacy signals, duplicates, rows marked unusable, and questions shorter than 40 or longer than 1,500 characters. It drew 304 and 289 emails for the first 2 sets, and the third set is the 303 eligible emails that remained. The archive was already anonymized, and an extra pass by 2 Claude Sonnet 5.5 agents removed any names and signatures that were left. Rows that were not student questions were then dropped (33, 14 and 5), which gives 271, 275 and 298 emails.
 
 \subsection{Grading}
 
-AI agents graded the answers blind, with labels shuffled per row and up to 3 runs graded side by side. The rows were split into chunks of about 33, and one judge agent graded each chunk. Every answer therefore received one grade, and no vote was taken. Holdout 3 used 9 agents, the Sonnet regrades of holdouts 1 and 2 used 6 and 8, and the decision-model test used 4. The decision model is a model that answers yes or no for each passage, and its probability is the ranking score (Section~\ref{sec:live-decisions}). The original gradings of holdouts 1 and 2 and of the tuned-set runs used Claude Opus 5.5 judges (Opus from here on). The final set and the hedge test (an A/B test of a prompt rule against vague answers, Section~\ref{sec:live-ab}) used Claude Sonnet 5.5 judges (Sonnet). Holdouts 1 and 2 were later regraded with Sonnet judges under the current rubric on the same blinded inputs, so all 5 clean runs share one judge model and one rubric. No human grades were collected.
+AI agents graded the answers blind, with labels shuffled per row and up to 3 runs graded side by side. The rows were split into chunks of about 33, and one judge agent graded each chunk. Every answer therefore received one grade, and no vote was taken. Holdout 3 used 9 agents, the later Sonnet grading of holdouts 1 and 2 used 6 and 8, and the decision-model test used 4. The decision model is a model that answers yes or no for each passage, and its probability is the ranking score (Section~\ref{sec:live-decisions}). The original grading of holdouts 1 and 2 and of the tuned-set runs used Claude Opus 5.5 judges (Opus from here on). The final set and the hedge test (an A/B test of a prompt rule against vague answers, Section~\ref{sec:live-ab}) used Claude Sonnet 5.5 judges (Sonnet). Holdouts 1 and 2 were later graded again by Sonnet judges under the current rubric on the same blinded inputs, so all 5 clean runs share one judge model and one rubric. No human grades were collected.
 
 \textbf{Truth sources.} Judges compare each answer with 6 sources. These are the current FAQs (104, up from 74), the list of official links, course syllabi, the rules on which questions the bot should answer, facts confirmed by the author, and the staff reply. The staff reply is only a hint and may be out of date. A fact counts as available only if one of these sources states it.
 
@@ -65,7 +65,7 @@ Grade & Meaning & How it is counted \\
 \end{tabularx}
 \end{table}
 
-Two rules separate neighboring grades. An answer that gives part of an available fact is \textsc{Partial}, and one that gives none of it is \textsc{Wrong}. When no source covers the question, a reasonable answer is \textsc{Gap}, but an answer that invents a specific detail is \textsc{Wrong}. Judges also set 2 flags, which do not change the grade. The hedge flag marks an answer that avoids or defers a fact that was available. The noise flag marks an answer that adds unneeded or off-topic detail. The flags are used only to explain \textsc{Partial} answers (Section~\ref{sec:live-failures}). The original Opus grading of holdout 1 used an older rubric that counted a correct personal-record referral as \textsc{Gap}. The current rubric counts it as \textsc{N/A}.
+Two rules separate neighboring grades. An answer that gives part of an available fact is \textsc{Partial}, and one that gives none of it is \textsc{Wrong}. When no source covers the question, a reasonable answer is \textsc{Gap}, but an answer that invents a specific detail is \textsc{Wrong}. Judges also set 2 flags, which do not change the grade. The hedge flag marks an answer that avoids or postpones a fact that was available. The noise flag marks an answer that adds unneeded or off-topic detail. The flags are used only to explain \textsc{Partial} answers (Section~\ref{sec:live-failures}). The original Opus grading of holdout 1 used an older rubric that counted a correct personal-record referral as \textsc{Gap}. The current rubric counts it as \textsc{N/A}.
 
 For agreement between judges, the grades are compared in 2 ways: all 5 grades, and correct versus not correct, where \textsc{Partial}, \textsc{Wrong} and \textsc{Gap} are all not correct.
 
@@ -73,7 +73,7 @@ For agreement between judges, the grades are compared in 2 ways: all 5 grades, a
 
 \textbf{Run-to-run variation.} The same configuration run twice (runs $a$ and $b$) on holdout 2 differs in grade on 32 of 275 rows (12 percent, Opus grading), mostly between \textsc{Correct} and \textsc{Partial}. Between the 2 runs of a set, the correct rate differs by 0.3 to 1.9 points (Table~\ref{tab:live-holdout}). Differences below about 3 points between single runs are treated as noise.
 
-\textbf{Judge model.} The Opus gradings of the same answers gave higher correct rates than Sonnet: 76.3 against 70.5 percent on holdout 1, and 78.6 and 80.5 against 77.0 and 77.3 percent on the 2 runs of holdout 2. The holdout 1 difference partly reflects the older rubric that Opus used there. On holdout 2 the 2 judges agreed exactly on 449 of 550 answers (81.6 percent) and on correct versus not correct for 484 of 550 (88.0 percent). On holdout 1 the figures are 203 of 271 (74.9 percent, including the effect of the rubric change) and 228 of 271 (84.1 percent). The same answers can also be graded differently in different batches. The Stage~10 run scored 84.0 percent when graded side by side with Stage~11, against 81.7 percent when graded alone.
+\textbf{Judge model.} The Opus grades of the same answers gave higher correct rates than Sonnet: 76.3 against 70.5 percent on holdout 1, and 78.6 and 80.5 against 77.0 and 77.3 percent on the 2 runs of holdout 2. The holdout 1 difference partly reflects the older rubric that Opus used there. On holdout 2 the 2 judges agreed exactly on 449 of 550 answers (81.6 percent) and on correct versus not correct for 484 of 550 (88.0 percent). On holdout 1 the figures are 203 of 271 (74.9 percent, including the effect of the rubric change) and 228 of 271 (84.1 percent). The same answers can also be graded differently in different batches. The Stage~10 run scored 84.0 percent when graded side by side with Stage~11, against 81.7 percent when graded alone.
 
 \subsection{Results on clean held-out sets}
 
@@ -104,7 +104,7 @@ Holdout 2$^\dagger$ (Opus) & $b$ & 275 & \multicolumn{5}{c}{not counted} & 83.0 
 
 Table~\ref{tab:live-holdout} and Figure~\ref{fig:live-holdout} give the central result. On sets the fixes had not targeted, the deployed agent was graded correct on 70.5 to 77.3 percent of graded questions (roughly three quarters) and wrong on 0.8 to 3.0 percent. Four runs lie within 1.3 points of each other. Holdout 1 is lower, but it was measured at an earlier development stage, so its rate may reflect the system as well as the sample. Each run has sampling uncertainty of about 5 points. For example, the Wilson 95 percent interval (a standard confidence interval for a percentage) is 64.4 to 76.0 percent for holdout 1 and 71.7 to 82.1 percent for holdout 2 run $b$. All 5 clean intervals overlap.
 
-The tuned set was measured at Stage~11 alongside the first holdout with Opus judges. It scored 87.8 percent correct (95 percent interval 83.7 to 91.0) and 1.3 percent wrong, against 76.3 and 2.3 percent on the first holdout under the same Opus grading. The tuned set therefore overstates how well the system does on new emails by 11.5 points. Most of the difference is in \textsc{Gap}. \textsc{Gap} was 7 percent of graded rows on the tuned set (21 of 312) and 13 percent on the first holdout.
+The tuned set was measured at Stage~11 alongside the first holdout with Opus judges. It scored 87.8 percent correct (95 percent interval 83.7 to 91.0) and 1.3 percent wrong, against 76.3 and 2.3 percent on the first holdout under the same Opus grading. The tuned set therefore makes the system look 11.5 points better than it does on new emails. Most of the difference is in \textsc{Gap}. \textsc{Gap} was 7 percent of graded rows on the tuned set (21 of 312) and 13 percent on the first holdout.
 
 The judge model changes the correct rate by a few points (Opus graded 1.6 to 5.8 points higher than Sonnet, see the grading section), so the clean runs are compared only with each other.
 
@@ -128,7 +128,7 @@ Stage & State of the system & Correct \% & Wrong \% & \textsc{Gap} \% \\
 1 & After first FAQ fixes, fixed pipeline & 59.0 & 19.0 & 22.1 \\
 2 & After a review of all FAQs by the author and document titles that name the study cycle & 70.4 & 18.9 & 10.7 \\
 3 & Context floor lowered to 0.03, reranking on the original question, FAQ edits (the retrieval repairs) & 78.0 & 11.7 & 10.3 \\
-4 & Fixed pipeline, graded pairwise with Stage 5 & 75.9 & 8.9 & 12.0 \\
+4 & Fixed pipeline, graded side by side with Stage 5 & 75.9 & 8.9 & 12.0 \\
 5 & Agent searches the knowledge base itself (experimental version, graded side by side with Stage 4) & 83.8 & 1.4 & 12.0 \\
 6 & Agent search as deployed (graded alone) & 78.9 & 3.1 & n/a \\
 7 & Step limit and announcement scope fixes & 80.6 & 2.4 & n/a \\
@@ -142,7 +142,7 @@ Stage & State of the system & Correct \% & Wrong \% & \textsc{Gap} \% \\
 
 The 109 real first questions and the 38 recent questions served as monitoring sets. The first measurement compared the answers students had received with the build current at that time. The received answers were 40.0 percent correct and 27.0 percent wrong, against 57.7 and 4.1 percent for the build. From the first run with tool evidence on, both sets stay between about 82 and 90 percent correct, with mostly 0 to 3 percent wrong. These questions guided fixes, so they say little about new emails.
 
-\textbf{Latency.} Sequential runs at Stages~9 and 10 gave a median time to first token of 5.0 to 5.4 seconds (90th percentile 10.7 to 13.6 seconds). Concurrent runs make this figure larger, so they are not used for latency.
+\textbf{Response time.} Runs that sent one question at a time, at Stages~9 and 10, gave a median time of 5.0 to 5.4 seconds until the first words of the answer appeared, and 90 percent of answers started within 10.7 to 13.6 seconds. Runs that sent many questions at once make this time longer, so they are not used here.
 
 \subsection{A/B comparisons on the live system}
 \label{sec:live-ab}
@@ -277,7 +277,7 @@ Three limits apply. The relevance labels come from AI judges using a rule simila
 \subsection{Multi-turn memory}
 \label{sec:live-memory}
 
-This test checks whether the agent uses earlier turns. A Claude Sonnet 5.5 agent wrote 60 short conversations of 2 to 3 user turns from the FAQ snapshot, 15 for each of 4 types. In ellipsis, the follow-up omits what it refers to. In profile, the student gave a fact earlier. In correction, the student corrects or narrows an earlier question, for example from undergraduate to master's fees. In reference, the follow-up points back to an earlier answer. Each conversation was asked turn by turn with the bot's own earlier answers in the request, as the web client does. The last turn was also asked alone as a control. Three Sonnet judges judged whether the answer used the earlier context and was correct against the expected facts.
+This test checks whether the agent uses earlier turns. A Claude Sonnet 5.5 agent wrote 60 short conversations of 2 to 3 user turns from the FAQ snapshot, 15 for each of 4 types. In ellipsis, the follow-up question leaves out what it refers to. In profile, the student gave a fact earlier. In correction, the student corrects or narrows an earlier question, for example from undergraduate to master's fees. In reference, the follow-up points back to an earlier answer. Each conversation was asked turn by turn with the bot's own earlier answers in the request, as the web client does. The last turn was also asked alone as a control. Three Sonnet judges judged whether the answer used the earlier context and was correct against the expected facts.
 
 \begin{table}[htbp]
 \centering
@@ -307,7 +307,7 @@ As Table~\ref{tab:live-memory} shows, the agent used the earlier context in all 
   \item \textbf{AI judges only.} No human labels exist. Identical runs on holdout 2 differ on 12 percent of rows, and judges were wrong on invented details.
   \item \textbf{Judge model and rubric.} All 5 clean runs are Sonnet-graded under the current rubric, but Opus and Sonnet agree on only 81.6 percent of rows, so absolute rates depend on the judge by a few points. The Opus figures for holdout 1 (older rubric), the tuned set and the second measurement of holdout 2 are not comparable with the clean rows.
   \item \textbf{Partial automatic check.} The script checks only dates, amounts, URLs and email addresses. It skipped the second measurement of holdout 2 and the hedge test.
-  \item \textbf{Contamination.} Only holdout 3 and the first measurements on holdouts 1 and 2 are clean. The tuned emails overstate quality by about 11 points, and the monitoring sets guided fixes.
+  \item \textbf{Contamination.} Only holdout 3 and the first measurements on holdouts 1 and 2 are clean. The tuned emails make quality look about 11 points higher than it is, and the monitoring sets guided fixes.
   \item \textbf{Population.} Archive emails are written to staff rather than a chatbot, and the traffic set is small.
   \item \textbf{Moving targets.} The knowledge base grew from 74 to 104 FAQs, and the agent, prompts and tools changed. Runs of different stages therefore compare different systems against different references. The full live configuration, including provider-side behavior, cannot be replayed.
   \item \textbf{Retrieval and decision-model tests.} Relevance labels are combined AI judgments, the end-to-end comparison has 100 emails and a different API route, and HyDE and rewrite texts came from a different model than the deployed one.
@@ -319,7 +319,7 @@ The evidence supports only a limited statement. AI judges rated the deployed age
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item On clean held-out emails the agent was graded correct on 70.5 to 77.3 percent of graded questions and wrong on 0.8 to 3.0 percent. The tuned set overstates this by about 11 points.
+  \item On clean held-out emails the agent was graded correct on 70.5 to 77.3 percent of graded questions and wrong on 0.8 to 3.0 percent. The tuned set makes this look about 11 points higher.
   \item Evidence selection, tool and prompt changes each helped on some sets, and the gains cannot be ranked because the sets differ. Data fixes worked where instructions did not.
   \item The largest single loss is \textsc{Gap} (38 rows), which mostly means missing knowledge. Retrieval misses explain at most about 4 percent of answers.
   \item A decision-model reranker ranks better against AI labels but gave no better answers. With the cross-encoder 74.5 percent were correct, and with the decision model 69.1 percent, a difference within chance. In a synthetic test the agent used history in 42 of 42 real memory items and answered 41 correctly.

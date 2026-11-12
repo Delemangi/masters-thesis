@@ -10,8 +10,8 @@ Term & Meaning in this thesis \\
 \midrule
 \endhead
 API & Application programming interface. \\
-Assistance & The combined outcome of a supported answer or useful routing (a clarification, verification step or referral). It is an AI-assessed endpoint, not verified factual accuracy. \\
-Bootstrap & A way to get an interval by repeatedly resampling the questions and recomputing the result. \\
+Assistance & The combined outcome of a supported answer or useful routing (a clarification, verification step or referral). It is an AI-assessed measure, not verified factual accuracy. \\
+Bootstrap & A way to get an interval by repeatedly drawing new samples of the questions and calculating the result again. \\
 BM25 & A keyword ranking based on how often the query words appear in a passage. \\
 CI & Confidence interval. The reported paired intervals are based on saved AI labels. \\
 Clean and contaminated sets & A set is clean if no fix had been aimed at it before it was measured. It is contaminated once fixes were made for failures seen on it. \\
@@ -24,12 +24,12 @@ FCSE & Faculty of Computer Science and Engineering. \\
 Floor & The minimum reranker score a passage needs to enter the model's prompt. Threshold means the same thing. \\
 Baseline & The controlled policy with both score floors at 0.10, run with the fallback off or on. \\
 \textsc{Gap} & A grade in the live evaluation: no confirmed fact covers the question and the answer is reasonable. \\
-GPU & Graphics processing unit used for embedding, reranking or local inference. \\
+GPU & Graphics processing unit used for embedding, reranking or running local models. \\
 Guard & See reference check. \\
 Hedge & Vague wording that avoids stating a rule plainly. \\
 Hit@$k$ & The share of questions where a relevant passage is among the top $k$ results. \\
 Holdout & A set of questions kept apart from the fixes made to the system, so it can test the system fairly. \\
-Kappa ($\kappa$) & Agreement between two raters corrected for chance. 0 is chance level and 1 is perfect agreement. \\
+Kappa ($\kappa$) & Agreement between two judges beyond what chance alone would give. 0 is chance level and 1 is perfect agreement. \\
 LLM & Large language model. \\
 LQ1/LQ2 & The 2 questions about the deployed agent in Chapter~\ref{ch:introduction}. RQ1 to RQ3 are the questions about the controlled experiments. \\
 Luna & GPT-5.6 Luna, the hosted model used for references, generation and primary judgments in the controlled experiments. The live evaluation used GPT-6 Luna. \\
@@ -37,7 +37,7 @@ Material claim & An important statement about matters such as eligibility, fees,
 MCP & Model Context Protocol, used by the application for structured tool access. \\
 MRR & Mean reciprocal rank, the average of 1 divided by the rank of the first relevant passage. \\
 nDCG@10 & Normalized discounted cumulative gain over the top 10 ranked candidates. Higher is better. \\
-Opus & Claude Opus 5.5, the judge model of the tuned-set runs and the first gradings of holdouts 1 and 2. \\
+Opus & Claude Opus 5.5, the judge model of the tuned-set runs and the first grading of holdouts 1 and 2. \\
 Production question & A question recorded by the deployed chatbot, as opposed to a historical email question. \\
 Qwen & Qwen3-8B, a local model compressed to 4 bits. It re-judged a subset of answers in the controlled experiments, and the generator and judge of the component study. \\
 RAG & Retrieval-augmented generation. \\
