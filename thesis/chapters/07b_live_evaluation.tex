@@ -238,7 +238,7 @@ Threshold & Shown & Relevant among shown & Irrelevant hidden & Relevant kept & E
 \end{tabularx}
 \end{table}
 
-\textbf{Findings.} Both the reranker and HyDE raise the top ranks, and HyDE with the reranker is best (hit@10 91.3 percent, MRR 0.69). Retrieval misses explain at most about 4 percent of the holdout-3 answers (13 of 298 rows). These are the rows of run $a$ with a relevant item outside the context: 3 \textsc{Correct}, 4 \textsc{Partial}, 1 \textsc{Wrong} and 5 \textsc{Gap}. Partial answers are mostly answer-construction failures (18 of 22 had a relevant item in context), in line with the controlled finding. \textsc{Gap} is mostly missing knowledge, although 24 of the 38 \textsc{Gap} rows had an item judged relevant in context. The judges were less strict and also marked passages that were only about the same topic.
+\textbf{Findings.} Both the reranker and HyDE raise the top ranks, and HyDE with the reranker is best (hit@10 91.3 percent, MRR 0.69). In 13 of the 298 holdout-3 rows (about 4 percent), relevant items existed but none reached the context. These rows of run $a$ are 3 \textsc{Correct}, 4 \textsc{Partial}, 1 \textsc{Wrong} and 5 \textsc{Gap}. Partial answers are more often answer-construction failures, in line with the controlled finding, but retrieval also plays a part. 18 of the 22 had a relevant item in context, yet in 8 of these 18 another relevant item did not reach the context. For 5 of the 8, the missing item is an FAQ that holds the fact that the grader's note says the answer lacks. Together with the 4 partial answers without any relevant item in context, about 9 of the 22 trace back to retrieval. A missing relevant item does not by itself predict a worse grade, because many items repeat the same fact. Of the 145 correct answers to emails with several relevant items, 44 also lacked one of them. \textsc{Gap} is mostly missing knowledge, although 24 of the 38 \textsc{Gap} rows had an item judged relevant in context. The judges were less strict and also marked passages that were only about the same topic.
 
 \subsection{Reranking with a decision model}
 \label{sec:live-decisions}
@@ -323,6 +323,6 @@ The evidence supports only a limited statement. AI judges rated the deployed age
 \begin{itemize}
   \item On clean held-out emails the agent was graded correct on 70.5 to 77.3 percent of graded questions and wrong on 0.8 to 3.0 percent. The tuned set makes this look about 11 points higher.
   \item Evidence selection, tool and prompt changes each helped on some sets, and the gains cannot be ranked because the sets differ. Data fixes worked where instructions did not.
-  \item The largest single loss is \textsc{Gap} (38 rows), which mostly means missing knowledge. Retrieval misses explain at most about 4 percent of answers.
+  \item The largest single loss is \textsc{Gap} (38 rows), which mostly means missing knowledge. Only about 4 percent of answers had no relevant item in context although one existed. Incomplete retrieval also explains about 9 of the 22 partial answers.
   \item A decision-model reranker ranks better against AI labels but gave no better answers. With the cross-encoder 74.5 percent were correct, and with the decision model 69.1 percent, a difference within chance. In a synthetic test the agent used history in 42 of 42 real memory items and answered 41 correctly.
 \end{itemize}
