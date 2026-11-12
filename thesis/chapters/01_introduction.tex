@@ -31,7 +31,7 @@ The thesis has 4 goals.
   \item \textbf{Goal 4.} Evaluate the deployed agent on real emails and locate where its answers still fail.
 \end{itemize}
 
-Five questions guide the work. The first three concern the controlled experiments.
+The work is guided by 5 questions. The first 3 concern the controlled experiments.
 
 \begin{description}
   \item[RQ1.] How often do the evaluated responses receive supported-answer or useful-routing labels, and what shortcomings remain?
@@ -39,7 +39,7 @@ Five questions guide the work. The first three concern the controlled experiment
   \item[RQ3.] How do the choice of questions, the way references are built and the behavior of the AI judge limit what the results show?
 \end{description}
 
-Two further questions concern the deployed agent.
+The other 2 questions concern the deployed agent.
 
 \begin{description}
   \item[LQ1.] How often are the deployed agent's answers to real student emails graded correct, and where do the remaining losses arise?
@@ -50,7 +50,7 @@ Two further questions concern the deployed agent.
 
 The main evaluation contains 192 questions. 96 come from an anonymized archive of historical student emails and 96 from questions typed into the deployed chatbot during one month of logging (production questions). A separate pilot of 20 other emails comes first and only checks that the pipeline runs. The 2 sources are reported separately.
 
-The experiment uses a simplified version of the chatbot, the fixed pipeline: it runs one search with the student's question and then one model call, without the agent, its tools or the conversation history. It reuses the production retrieval and prompt code. A hosted model, GPT-5.6 Luna (from here on Luna), generates the answers. Four fixed retrieval policies are compared on the original questions, without rewriting them. A floor (also called a threshold) is the minimum relevance score a passage needs to enter the model's prompt. The 0.10 FAQ context floor of the experiment differs from the deployed setting. Conversation history, remote tools and the delivery path are outside the experiment.
+The experiment uses a simplified version of the chatbot, the fixed pipeline: it runs one search with the student's question and then one model call, without the agent, its tools or the conversation history. It reuses the production retrieval and prompt code. A hosted model, GPT-5.6 Luna (from here on Luna), generates the answers. The experiment compares 4 fixed retrieval policies on the original questions, without rewriting them. A floor (also called a threshold) is the minimum relevance score a passage needs to enter the model's prompt. The 0.10 FAQ context floor of the experiment differs from the deployed setting. Conversation history, remote tools and the delivery path are outside the experiment.
 
 A second evaluation tests the deployed agent, with its tools and prompts, on real student emails. It uses 3 held-out sets, which are sets kept apart from the fixes made to the system. Each set was unseen when first measured, and the third was never used for fixes. The evaluation was done in repeated rounds and was not pre-registered, so it is reported apart from the controlled experiments (Chapter~\ref{ch:live}). All outcomes in both parts are AI-assessed. The author graded a sample of 100 answers by hand to check the AI judges. The architecture has not been shown to work at a second institution.
 

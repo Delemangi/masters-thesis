@@ -9,7 +9,7 @@
   \node[st] (r) {\textbf{Reference}\\facts a correct answer needs, one per question, quotations checked};
   \node[st,right=0.4cm of r] (a) {\textbf{Answer}\\one per policy, reused when the prompt is identical};
   \node[st,right=0.4cm of a] (j) {\textbf{Judge}\\sees one answer, its question, the reference and the prompt, not the policy};
-  \node[st,right=0.4cm of j] (l) {\textbf{Labels}\\one category and three flags per answer};
+  \node[st,right=0.4cm of j] (l) {\textbf{Labels}\\one category and 3 flags per answer};
   \node[res,right=0.4cm of l] (g) {\textbf{Guard}\\a positive label becomes uncertain if the reference failed its check};
   \foreach \p/\q in {r/a,a/j,j/l,l/g} {
     \draw[arr] (\p) -- (\q);

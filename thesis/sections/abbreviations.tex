@@ -31,7 +31,9 @@ Guard & See reference check. \\
 Hedge & Vague wording that avoids stating a rule plainly. \\
 Hit@$k$ & The share of questions where a relevant passage is among the top $k$ results. \\
 Holdout & A set of questions kept apart from the fixes made to the system, so it can test the system fairly. \\
-Kappa ($\kappa$) & Agreement between two judges beyond what chance alone would give. 0 is chance level and 1 is perfect agreement. \\
+HyDE & Hypothetical document embeddings: searching with an answer that a language model writes for the question, instead of with the question itself. \\
+Kappa ($\kappa$) & Agreement between 2 judges beyond what chance alone would give. 0 is chance level and 1 is perfect agreement. \\
+LightRAG & A retrieval method that builds a knowledge graph of the entities and relations in the documents and searches it together with the text chunks. \\
 LLM & Large language model. \\
 Lower floor & The controlled policy with the FAQ floor at 0.10 and no document floor, run with the fallback off or on. \\
 LQ1/LQ2 & The 2 questions about the deployed agent in Chapter~\ref{ch:introduction}. RQ1 to RQ3 are the questions about the controlled experiments. \\
@@ -49,6 +51,7 @@ Reference & The AI-produced description of required facts, evidence, action and 
 Reference check & The automatic check that each quotation in a reference occurs in its named source. If it fails, a good label is downgraded to uncertain. Also called the guard. \\
 Replay & Re-running the production retrieval and prompt logic on captured candidates, with controlled policy changes. \\
 Reranker & A model that scores the retrieved candidates again against the question and puts them in a new order. \\
+RRF & Reciprocal rank fusion, which merges ranked lists by adding 1/rank from each list. \\
 Rubric & A written set of grading rules that says which label or grade an answer gets in which case. \\
 Sign test & A paired test of whether gains and losses are balanced. A p-value near 1 means they are about equal. \\
 Sonnet & Claude Sonnet 5.5, the judge model of all clean live-evaluation runs. It is also the app's default model for signed-in users, but it did not answer in the evaluations. \\
