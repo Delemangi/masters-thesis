@@ -16,7 +16,7 @@ This thesis therefore judges each response on its own. A good response is either
 \subsection{Why retrieval and architecture matter}
 
 Retrieval-augmented generation (RAG) gives a language model external evidence when it constructs an answer~\cite{lewis2020rag}. The evidence can be inspected, and institutional material can be updated without changing the generator. RAG also creates several places where a request can fail: converting the sources to text, cutting them into passages (chunking), storing them for search (indexing), selecting the evidence, building the prompt and delivering the answer.
-A reference architecture names the responsibilities in such a system, the information each part passes to the next and what it must do with it (contracts), and the parts that can be swapped (variation points). Here, 6 responsibilities (source preparation, knowledge retention, evidence selection, answer construction, channel delivery and observation) are separated, so a failure can be traced to the stage where it happens. The architecture is derived from the implemented chatbot and evaluated through that implementation.
+A reference architecture names the responsibilities in such a system, the information each part passes to the next and what it must do with it (contracts), and the parts that can be swapped (variation points). Here, 6 responsibilities (source preparation, knowledge retention, evidence selection, answer construction, channel delivery and observation) are separated, so a failure can be traced to the stage where it happens. This thesis defines the architecture and evaluates it through the chatbot, which implements it.
 
 The controlled study varies the rule that admits FAQs and document passages into the generation context. One score threshold can decide for both source types, or each can have its own. A best-candidate fallback keeps the top candidate when all fall below the threshold. This can give the model useful evidence, but it can also hide that the system has no good support. The candidate passages and their scores are saved once, so the selection rules can change while the prompt and generation settings stay fixed.
 
@@ -25,7 +25,7 @@ The controlled study varies the rule that admits FAQs and document passages into
 The thesis has 4 goals.
 
 \begin{itemize}
-  \item \textbf{Goal 1.} Derive a reference architecture from the implemented chatbot.
+  \item \textbf{Goal 1.} Define a reference architecture for domain-specific retrieval-augmented assistants, with the chatbot as its reference implementation.
   \item \textbf{Goal 2.} Measure, in a controlled comparison, how often responses are supported or useful routing, and how the rule for choosing evidence changes this.
   \item \textbf{Goal 3.} Show how far the automated assessment can be trusted.
   \item \textbf{Goal 4.} Evaluate the deployed agent on real emails and locate where its answers still fail.
@@ -58,7 +58,7 @@ A second evaluation tests the deployed agent, with its tools and prompts, on rea
 
 The thesis makes 5 contributions.
 \begin{enumerate}
-  \item A reference architecture grounded in the chatbot implementation, with explicit responsibilities, contracts and variation points (Chapters~\ref{ch:architecture} and~\ref{ch:implementation}).
+  \item A reference architecture with explicit responsibilities, contracts and variation points, and the chatbot as its reference implementation (Chapters~\ref{ch:architecture} and~\ref{ch:implementation}).
   \item A controlled comparison of 4 retrieval policies on real institutional questions, with failures mapped to the architecture's stages (Chapters~\ref{ch:methodology} and~\ref{ch:discussion}).
   \item A check of how reliable the automated assessment is, using reference checks, repeated judgments, a comparison of 3 judges and the author's review of 100 answers (Chapter~\ref{ch:methodology}).
   \item An evaluation of the deployed agent on 3 held-out sets of real student emails (Chapter~\ref{ch:live}).

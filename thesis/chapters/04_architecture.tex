@@ -1,7 +1,7 @@
 \section{Reference architecture}
 \label{ch:architecture}
 
-This chapter describes how an institutional question becomes an answer that a student can check and act on. The architecture comes from the chatbot implementation. It is written as responsibilities and contracts that another implementation could follow. What can be reused elsewhere is a proposal based on one system.
+This chapter describes how an institutional question becomes an answer that a student can check and act on. The architecture is written as responsibilities and contracts that any implementation can follow, and Chapter~\ref{ch:implementation} describes the chatbot as its reference implementation. Reuse in other systems is proposed but not tested, because only one system implements it so far.
 
 Figure~\ref{fig:architecture} shows the application as deployed, where the answering agent calls knowledge-base search and structured tools itself. It also shows the smaller path that the controlled experiment replays. There, retrieval runs first and the agent is skipped (the fixed pipeline).
 
