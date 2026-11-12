@@ -3,24 +3,27 @@
 % Intervals are percentage points conditional on AI labels.
 \begin{table}[!htbp]
 \centering\small
-\setlength{\tabcolsep}{5pt}
-\caption[AI-assessed outcome categories (fixed pipeline, not the deployed settings) with all 96 selected cases kept per sample and policy]{AI-assessed outcome categories (fixed pipeline, not the deployed settings) with all 96 selected cases kept per sample and policy. Answer is the judge's supported-answer category, which can include conversational replies, and is not independently validated factual accuracy. Route is useful routing, Unsup. is unsupported material claim, Incomp. is incomplete, Refusal is an unnecessary refusal, Uncert. is uncertain, and Fail is failure.}
+\setlength{\tabcolsep}{4pt}
+\caption[Outcome categories under each policy]{Outcome categories under each policy. Each row splits the 96 questions of one sample among the categories of Table~\ref{tab:categories}, so every row adds up to 96. The bold column is the number of good responses, the assistance count used in the rest of the chapter. A positive label whose reference failed its check is counted as uncertain.}
 \label{tab:luna-outcomes}
-\begin{tabular}{llrrrrrrrr}
+\begin{tabular}{@{}llrrrrrrrr@{}}
 \toprule
-Sample & Policy & $N$ & Answer & Route & Unsup. & Incomp. & Refusal & Uncert. & Fail \\
+ & & \multicolumn{3}{c}{Good} & \multicolumn{3}{c}{Bad} & \multicolumn{2}{c}{Not judged} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(l){9-10}
+Sample & Policy & Answer & Routing & Total & Unsup. & Incomp. & Refusal & Uncert. & Fail \\
 \midrule
-Email & Baseline & 96 & 9 & 22 & 20 & 31 & 0 & 9 & 5 \\
-Email & Baseline + fallback & 96 & 9 & 23 & 25 & 23 & 0 & 12 & 4 \\
-Email & Lower floor & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
-Email & Lower floor + fallback & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
-Production & Baseline & 96 & 25 & 28 & 12 & 22 & 4 & 4 & 1 \\
-Production & Baseline + fallback & 96 & 25 & 27 & 11 & 24 & 4 & 3 & 2 \\
-Production & Lower floor & 96 & 25 & 27 & 11 & 24 & 4 & 4 & 1 \\
-Production & Lower floor + fallback & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
+Email & Baseline & 9 & 22 & \textbf{31} & 20 & 31 & 0 & 9 & 5 \\
+Email & Baseline + fallback & 9 & 23 & \textbf{32} & 25 & 23 & 0 & 12 & 4 \\
+Email & Lower floor & 10 & 20 & \textbf{30} & 19 & 30 & 0 & 10 & 7 \\
+Email & Lower floor + fallback & 10 & 20 & \textbf{30} & 19 & 30 & 0 & 10 & 7 \\
+\addlinespace
+Production & Baseline & 25 & 28 & \textbf{53} & 12 & 22 & 4 & 4 & 1 \\
+Production & Baseline + fallback & 25 & 27 & \textbf{52} & 11 & 24 & 4 & 3 & 2 \\
+Production & Lower floor & 25 & 27 & \textbf{52} & 11 & 24 & 4 & 4 & 1 \\
+Production & Lower floor + fallback & 25 & 28 & \textbf{53} & 11 & 23 & 4 & 4 & 1 \\
 \bottomrule
 \end{tabular}
-\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The main measure, assistance, combines Answer and Route. Answer and Route are the good outcomes. A positive label whose reference failed its check is counted as Uncert. Figure~\ref{fig:outcome-bars} plots the baseline and the lower floor.\end{minipage}
+\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Answer: supported answer. Routing: useful routing. Unsup.: unsupported material claim. Incomp.: incomplete answer. Refusal: unnecessary refusal. Uncert.: uncertain. Fail: rejected question, failed generation or unusable judgment. Figure~\ref{fig:outcome-bars} plots the baseline and the lower floor.\end{minipage}
 \end{table}
 \begin{table}[!htbp]
 \centering\footnotesize
@@ -32,7 +35,7 @@ Production & Lower floor + fallback & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
 Comparison & Email & Production \\
 \midrule
 Lower floor vs.\ baseline & $-1.04$ [$-8.33$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
-Same, with fallback & $-2.08$ [$-9.38$, 5.21] & 1.04 [$-4.17$, 6.25] \\
+Same, both with fallback & $-2.08$ [$-9.38$, 5.21] & 1.04 [$-4.17$, 6.25] \\
 Fallback, baseline & 1.04 [$-4.17$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
 Fallback, lower floor & 0.00 [0.00, 0.00]$^{a}$ & 1.04 [0.00, 3.13] \\
 Interaction & $-1.04$ [$-6.25$, 4.17] & 2.08 [$-3.13$, 8.33] \\
