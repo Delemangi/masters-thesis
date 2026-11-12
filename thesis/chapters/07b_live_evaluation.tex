@@ -221,26 +221,9 @@ Figure~\ref{fig:recall-steps} follows the evidence step by step. Reranking the d
 
 Figure~\ref{fig:error-attribution} joins these results with the grades of run $a$: a relevant item was in context for 196 of 205 \textsc{Correct} answers and for 18 of 22 \textsc{Partial} answers.
 
-\textbf{Source-display threshold.} The same labels also show what the 0.30 source-display threshold does. The local reranker scored the 1,672 items that reached the production context and had saved text. Table~\ref{tab:display-threshold} gives the result for several thresholds. At 0.30, half of the shown sources are relevant, 85 percent of the irrelevant ones are hidden, and 43 percent of the relevant ones are still shown. Lower thresholds keep more relevant sources but show mostly irrelevant ones, and higher thresholds hide most of the relevant ones too. So 0.30 is about the point where a shown source becomes as likely to be useful as not. Long emails receive low reranker scores, so short chatbot questions would see more sources at the same threshold.
+\textbf{Source-display threshold.} The same labels also show what the 0.30 source-display threshold does. The local reranker scored the 1,672 items that reached the production context and had saved text. Figure~\ref{fig:display-threshold} shows the result as the threshold changes. At 0.30, half of the shown sources are relevant, 85 percent of the irrelevant ones are hidden, and 43 percent of the relevant ones are still shown. Lower thresholds keep more relevant sources but show mostly irrelevant ones, and higher thresholds hide most of the relevant ones too. So 0.30 is about the point where a shown source becomes as likely to be useful as not. Long emails receive low reranker scores, so short chatbot questions would see more sources at the same threshold.
 
-\begin{table}[htbp]
-\centering
-\caption[Effect of the source-display threshold on holdout 3]{Effect of the source-display threshold on holdout 3. Items are the 1,672 context items with saved text (431 relevant, 1,241 not relevant by the AI labels), scored by the local BGE-reranker-v2-m3 against the original email. The last column counts the 234 emails with a relevant item in context.}
-\label{tab:display-threshold}
-\small
-\begin{tabularx}{\linewidth}{@{}rr>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X@{}}
-\toprule
-Threshold & Shown & Relevant among shown & Irrelevant hidden & Relevant kept & Emails with a relevant source shown \\
-\midrule
-0.03 & 1,121 & 32.6\% & 39.1\% & 84.7\% & 90.2\% \\
-0.10 & 746 & 37.7\% & 62.5\% & 65.2\% & 73.5\% \\
-0.20 & 508 & 44.3\% & 77.2\% & 52.2\% & 62.8\% \\
-0.30 & 371 & 49.9\% & 85.0\% & 42.9\% & 55.1\% \\
-0.40 & 276 & 55.8\% & 90.2\% & 35.7\% & 47.9\% \\
-0.50 & 219 & 59.8\% & 92.9\% & 30.4\% & 41.9\% \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\input{figures/display_threshold}
 
 \textbf{Findings.} Both the reranker and HyDE raise the top ranks, and HyDE with the reranker is best (hit@10 91.3 percent, MRR 0.69). In 13 of the 298 holdout-3 rows (about 4 percent), relevant items existed but none reached the context. These rows of run $a$ are 3 \textsc{Correct}, 4 \textsc{Partial}, 1 \textsc{Wrong} and 5 \textsc{Gap}. Partial answers are more often answer-construction failures, in line with the controlled finding, but retrieval also plays a part. 18 of the 22 had a relevant item in context, yet in 8 of these 18 another relevant item did not reach the context. For 5 of the 8, the missing item is an FAQ that holds the fact that the grader's note says the answer lacks. Together with the 4 partial answers without any relevant item in context, about 9 of the 22 trace back to retrieval. A missing relevant item does not by itself predict a worse grade, because many items repeat the same fact. Of the 145 correct answers to emails with several relevant items, 44 also lacked one of them. \textsc{Gap} is mostly missing knowledge, although 24 of the 38 \textsc{Gap} rows had an item judged relevant in context. For these rows the judges also marked passages that were only about the same topic as relevant.
 
@@ -277,6 +260,10 @@ LightRAG mix (graph and chunks) & 53.5 & 86.9 & 56.6 & 0.628 & 2.1 s \\
 \end{table}
 
 \textbf{The graph did not help.} The 2 graph modes reach a hit@10 of 86.9 percent and a recall@10 of about 56.5 percent, about the same as plain dense search and below the methods with the reranker. They also need a model call for every question, which raises the time from 0.1 to about 2 seconds, on top of the cost of building the graph. The naive mode, which ignores the graph, does best. Its hit@10 and recall@10 are as high as those of the best reranked methods, but it puts a relevant item first less often, and its MRR stays lower. LightRAG's chunks are longer than the production chunks, which may explain its good recall, but this was not tested separately. With only the original labels, the mix mode reaches a hit@10 of 78.2 percent and the naive mode 84.4 percent. The author's relevance labels cannot score LightRAG fairly, because about half of its top 10 lies outside the pool the author graded. The result matches the expectation of Chapter~\ref{ch:background}. Students mostly ask for a rule or procedure that one FAQ entry or a few passages state, so linking entities across documents adds little. LightRAG ran with its default settings, one extraction model and no reranker, and only its retrieval was tested, not its answers. Other settings could change the result.
+
+\input{figures/retrieval_overlap}
+
+Figure~\ref{fig:retrieval-overlap} shows which relevant items each method finds in its top 10. LightRAG overlaps strongly with dense search, but 14.8 percent of all relevant items appear only in LightRAG's top 10, against 8.2 percent only in dense search and 7.2 percent only in BM25. Together the 3 methods find 78.7 percent of the relevant items, against 55.4 percent for dense search alone. LightRAG thus reaches a different part of the evidence, even though it does not rank better overall. Part of this region comes from the deeper judging of LightRAG's results, so it is an upper bound. Combining the methods could raise recall, but this was not tested.
 
 The deeper judging also shows how much the pooled labels miss. With the 163 added items, recall@10 of the earlier methods falls by 8.5 to 12.1 points, while their hit@10 changes by at most 1.4 points. The hit rates of Figure~\ref{fig:recall-heatmap} are therefore robust, but its recall values are too high, by roughly 10 points.
 

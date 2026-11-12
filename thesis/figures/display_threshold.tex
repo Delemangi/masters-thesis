@@ -1,0 +1,35 @@
+% Effect of the source-display threshold on holdout 3 (context items with saved text, AI relevance labels).
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=15cm,y=0.04cm,font=\small]
+  \foreach \p in {0,20,40,60,80,100} {
+    \draw[black!12] (0,\p) -- (0.72,\p);
+    \node[left,font=\scriptsize] at (0,\p) {\p};
+  }
+  \foreach \t in {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7} {
+    \draw (\t,0) -- (\t,-1.5);
+    \node[below,font=\scriptsize] at (\t,-1.5) {\t};
+  }
+  \draw (0,0) -- (0.72,0);
+  \node[below,font=\scriptsize] at (0.36,-9) {Source-display threshold (reranker score)};
+  \node[rotate=90,font=\scriptsize] at (-0.06,50) {Percent};
+  \draw[black!60,dashed] (0.3,0) -- (0.3,100);
+  \node[above,font=\scriptsize] at (0.3,100) {production: 0.30};
+  % relevant among shown (precision)
+  \draw[very thick,black] (0.03,32.6) -- (0.05,34.5) -- (0.1,37.7) -- (0.2,44.3) -- (0.3,49.9) -- (0.4,55.8) -- (0.5,59.8) -- (0.6,66.0) -- (0.7,72.6);
+  % relevant kept
+  \draw[thick,black!55] (0.03,84.7) -- (0.05,78.0) -- (0.1,65.2) -- (0.2,52.2) -- (0.3,42.9) -- (0.4,35.7) -- (0.5,30.4) -- (0.6,24.4) -- (0.7,19.7);
+  % irrelevant hidden
+  \draw[thick,black!55,dashed] (0.03,39.1) -- (0.05,48.7) -- (0.1,62.5) -- (0.2,77.2) -- (0.3,85.0) -- (0.4,90.2) -- (0.5,92.9) -- (0.6,95.6) -- (0.7,97.4);
+  % emails with a relevant source shown
+  \draw[thick,black,dotted] (0.03,90.2) -- (0.05,85.0) -- (0.1,73.5) -- (0.2,62.8) -- (0.3,55.1) -- (0.4,47.9) -- (0.5,41.9) -- (0.6,34.2) -- (0.7,28.6);
+  \begin{scope}[yshift=-0.3cm]
+  \draw[very thick,black] (0.05,-22) -- (0.1,-22); \node[right,font=\scriptsize] at (0.1,-22) {relevant among shown sources};
+  \draw[thick,black!55] (0.05,-30) -- (0.1,-30); \node[right,font=\scriptsize] at (0.1,-30) {relevant sources kept};
+  \draw[thick,black!55,dashed] (0.4,-22) -- (0.45,-22); \node[right,font=\scriptsize] at (0.45,-22) {irrelevant sources hidden};
+  \draw[thick,black,dotted] (0.4,-30) -- (0.45,-30); \node[right,font=\scriptsize] at (0.45,-30) {emails with a relevant source shown};
+  \end{scope}
+\end{tikzpicture}
+\caption[Effect of the source-display threshold on holdout 3]{Effect of the source-display threshold on holdout 3. The items are the 1,672 context items with saved text (431 relevant and 1,241 not relevant by the AI labels), scored by the local BGE-reranker-v2-m3 against the original email. At the production threshold of 0.30, 371 sources are shown. The dotted line counts the 234 emails with a relevant item in context.}
+\label{fig:display-threshold}
+\end{figure}
