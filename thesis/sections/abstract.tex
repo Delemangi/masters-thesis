@@ -1,7 +1,7 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
-Students at the Faculty of Computer Science and Engineering (FCSE) ask many questions about rules, deadlines and procedures, often the same ones. A chatbot that answers from the faculty's documents could help, but only if its answers are supported by the right sources. Without a person checking every answer, it is hard to know how often that holds.
+Students at the Faculty of Computer Science and Engineering (FCSE) ask many questions about rules, deadlines and procedures. A chatbot that answers from the faculty's documents could help, but only if its answers are supported by the right sources. Without a person checking every answer, it is hard to know how often that holds.
 
 This thesis proposes a reference architecture for domain-specific retrieval-augmented conversational assistants, which answer from a collection of documents. The architecture separates 6 responsibilities (source preparation, knowledge storage, evidence selection, answer construction, channel delivery and observation) and states what information each part passes to the next. A student-support chatbot at FCSE is its reference implementation, and the thesis evaluates it in 2 ways. A controlled experiment reduces the chatbot to a fixed pipeline (one search, then one model call) and compares 4 rules for choosing evidence on 96 anonymized student emails and 96 questions recorded by the chatbot. A live evaluation tests the deployed agent, a language model that decides by itself when to search, on held-out student emails that no fix had targeted. AI models judge the answers, and the author graded 100 answers and 317 retrieved passages by hand to check them.
 
@@ -9,6 +9,6 @@ In the controlled experiment, an answer counts as good if the sources support it
 
 In the live evaluation, about 70 to 77 percent of the answers to held-out emails were graded correct and 1 to 3 percent wrong. The largest remaining loss is missing knowledge, not retrieval, since the agent's searches put relevant evidence in its context for 94.5 percent of the emails. A reranker that ranked better against AI labels did not give better answers, and a graph-based retriever (LightRAG) found the evidence no better than plain search. The author's grades agree with the live AI judge on 85 percent of the answers, but show that the judges of the controlled experiment are much stricter than a person, so its rates likely understate the share of good answers.
 
-For such an assistant, confirmed knowledge and the way answers are built matter more than further tuning of retrieval, and AI judges need checking against people before their rates are trusted. The architecture lets other institutions build such an assistant so that each failure can be traced to the stage where it happens.
+For such an assistant, confirmed knowledge and the way answers are built matter more than further tuning of retrieval, and AI judges need checking against people before their rates are trusted. The architecture is meant to let other institutions build such an assistant so that each failure can be traced to the stage where it happens, although this reuse was not tested.
 
 \noindent\textbf{Keywords:} retrieval-augmented generation, reference architecture, university assistance, Macedonian, answer quality, automated assessment.
