@@ -21,8 +21,7 @@ The thesis focuses on **how effectively FINKI Hub answers student questions and 
 | `chapters/03_data.tex` | Data sources, correspondence, production questions and source authority |
 | `chapters/04_architecture.tex` | Component responsibilities, contracts and variation points |
 | `chapters/05_implementation.tex` | Chatbot, document, GPU, MCP and Discord implementation |
-| `chapters/06_methodology.tex` | Fixed policies, sampling, replay, judgments, paired analysis and the prompt comparison |
-| `chapters/07_results.tex` | Completed outcomes, diagnostics, judge sensitivity, prompt comparison and delivery observations |
+| `chapters/06_controlled_experiment.tex` | The controlled experiment: design, replay, judging and measures, then outcomes, diagnostics, judge sensitivity, the prompt comparison and delivery observations |
 | `chapters/07b_live_evaluation.tex` | Live-system evaluation of the deployed agent on tuned and held-out emails, A/B changes, error analysis and limits |
 | `chapters/08_discussion.tex`, `09_conclusion.tex` | Findings, limitations and proposed effectiveness extensions |
 | `figures/`, `tables/`, `references.bib` | Native architecture diagram, controlled result-table content and audited literature |
