@@ -12,15 +12,15 @@
   % instructions (system message)
   \node[sys,minimum height=4.6cm] (s1) at (0,0) {Written for this evaluation: use only the pool, list the required facts with word-for-word quotations, state how fully the sources answer the question, never invent fees, deadlines or contacts.};
   \node[sys,minimum height=4.6cm] (s2) at (4.75,0) {The chatbot's own instructions, taken unchanged from the application (in Macedonian, about 4,300 characters): identity, scope, safety, how to use the sources, tools, language and style, web format.};
-  \node[sys,minimum height=4.6cm] (s3) at (9.5,0) {Written for this evaluation: the six categories, the three flags, the order of the categories, what a material claim is, that no transaction tools exist, and that Cyrillic and Latin Macedonian are both valid.};
+  \node[sys,minimum height=4.6cm] (s3) at (9.5,0) {Written for this evaluation: the 6 categories, the 3 flags, the order of the categories, what a material claim is, that no transaction tools exist, and that Cyrillic and Latin Macedonian are both valid.};
   % data (user message)
-  \node[dat,minimum height=3.75cm] (d1) at (0,-4.85) {The question.\\[2pt] The evidence pool: the best eight FAQs and eight document chunks from the saved retrieval for this question.};
+  \node[dat,minimum height=3.75cm] (d1) at (0,-4.85) {The question.\\[2pt] The evidence pool: the best 8 FAQs and 8 document chunks from the saved retrieval for this question.};
   \node[dat,minimum height=3.75cm] (d2) at (4.75,-4.85) {The date, fixed for all runs.\\[2pt] The passages selected by the policy, or a note that nothing was found.\\[2pt] The list of useful links (50 in most prompts).\\[2pt] The question.};
   \node[dat,minimum height=3.75cm] (d3) at (9.5,-4.85) {The question.\\[2pt] The checked reference.\\[2pt] The generator's data message, exactly as on the left.\\[2pt] The answer.};
   \node[lab] at (-2.2,-2.3) {Instructions};
   \node[lab] at (-2.2,-6.5) {Data};
   \draw[-{Stealth[length=2mm]},thick] (d2.east) -- (d3.west);
 \end{tikzpicture}
-\caption[What each model call of the controlled experiment receives]{What each model call of the controlled experiment receives. Every call has two messages: instructions (the system message, gray) and data (the user message, white). All three calls use GPT-5.6 Luna. The judge sees the generator's data but not the generator's instructions. The checks in Section~\ref{sec:judge-checks} send exactly the same two judge messages to other models.}
+\caption[What each model call of the controlled experiment receives]{What each model call of the controlled experiment receives. Every call has 2 messages: instructions (the system message, gray) and data (the user message, white). All 3 calls use GPT-5.6 Luna. The judge sees the generator's data but not the generator's instructions. The checks in Section~\ref{sec:judge-checks} send exactly the same 2 judge messages to other models.}
 \label{fig:call-inputs}
 \end{figure}

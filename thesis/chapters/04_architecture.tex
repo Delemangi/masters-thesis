@@ -9,7 +9,7 @@ Figure~\ref{fig:architecture} shows the application as deployed, where the answe
 
 \subsection{Responsibilities and architectural contracts}
 
-The system has six connected responsibilities: preparing sources, storing knowledge, selecting evidence, building and generating answers, delivering conversations, and recording state and observations. In the deployed system, knowledge-base search is one of the agent's tools (Section~\ref{sec:arch-answer}). In the fixed pipeline, selection and construction are sequential stages.
+The system has 6 connected responsibilities: preparing sources, storing knowledge, selecting evidence, building and generating answers, delivering conversations, and recording state and observations. In the deployed system, knowledge-base search is one of the agent's tools (Section~\ref{sec:arch-answer}). In the fixed pipeline, selection and construction are sequential stages.
 
 Table~\ref{tab:architecture-contracts} lists the main boundaries. A contract here means the information that crosses a boundary and what each side must do with it. The system does not enforce every obligation automatically.
 
@@ -36,17 +36,17 @@ Request to observation & Request and response identifiers and stage outcomes & K
 
 The life of a document begins with an original file and a text version made from it. Keeping both makes it possible to compare a conversion with its source. Ingestion gives each document a stable identity and divides the text into chunks that stay linked to their parent and position. This matters when a retrieved sentence depends on a heading or an earlier condition.
 
-A source has four separate properties: which original file it is, how good the conversion is, how official it is, and whether it is still in force. Whether a rule is still in force must be stored as metadata. A recent ingestion date does not show it.
+A source has 4 separate properties: which original file it is, how good the conversion is, how official it is, and whether it is still in force. Whether a rule is still in force must be stored as metadata. A recent ingestion date does not show it.
 
 \subsection{Retrieval as an evidence-selection stage that can be checked}
 
-Retrieval over the main knowledge base uses two corpora: short FAQ records and passages from longer documents. Dense (embedding) search finds candidates in each corpus. Optional lexical expansion adds FAQ matches found by shared words instead of embedding similarity, and a cross-encoder reranker (a model that reads the question and a passage together and scores the pair) scores the combined candidates. Selected candidates keep their source type, identity and score. This way the selection rule can change while the evidence stays easy to inspect.
+Retrieval over the main knowledge base uses 2 corpora: short FAQ records and passages from longer documents. Dense (embedding) search finds candidates in each corpus. Optional lexical expansion adds FAQ matches found by shared words instead of embedding similarity, and a cross-encoder reranker (a model that reads the question and a passage together and scores the pair) scores the combined candidates. Selected candidates keep their source type, identity and score. This way the selection rule can change while the evidence stays easy to inspect.
 
 A third path, for the thesis-committee recommender (a tool that suggests committee members for a diploma thesis, Chapter~\ref{ch:implementation}), reranks similar diploma theses with the same cross-encoder and has its own 0.10 minimum score. It is not evaluated here.
 
-A FAQ may repeat the user's question, while a regulation may state the relevant condition in formal language. The same reranker score therefore may not mean the same for the two source types, so the architecture makes the thresholds variation points. FAQ candidates get priority within the final limit on candidates. Neighboring passages can be added around selected document chunks, so a limit on candidates does not limit the amount of text the model sees. Comparisons must report these choices. Otherwise an apparent threshold effect may also include changes in ordering or context.
+A FAQ may repeat the user's question, while a regulation may state the relevant condition in formal language. The same reranker score therefore may not mean the same for the 2 source types, so the architecture makes the thresholds variation points. FAQ candidates get priority within the final limit on candidates. Neighboring passages can be added around selected document chunks, so a limit on candidates does not limit the amount of text the model sees. Comparisons must report these choices. Otherwise an apparent threshold effect may also include changes in ordering or context.
 
-Letting evidence into the prompt is not the same as showing it as a source. In the fixed pipeline the FAQ context floor (the minimum reranker score for a candidate to enter the prompt) is 0.10, and the source-display threshold is 0.30. A passage may therefore influence generation without producing a visible source card, the link to a source that the web client shows under an answer. The deployed system uses a single shared context floor of 0.03 and the same display threshold. The 0.03 floor is not one of the four policies tested in the controlled experiment.
+Letting evidence into the prompt is not the same as showing it as a source. In the fixed pipeline the FAQ context floor (the minimum reranker score for a candidate to enter the prompt) is 0.10, and the source-display threshold is 0.30. A passage may therefore influence generation without producing a visible source card, the link to a source that the web client shows under an answer. The deployed system uses a single shared context floor of 0.03 and the same display threshold. The 0.03 floor is not one of the 4 policies tested in the controlled experiment.
 
 Two more properties of the deployed system change what the model receives. The reranker scores candidates against the original question, not the rewritten query. A context that only just passes the score floor is flagged as a weak match, so the model can ask for clarification instead of guessing. Useful links are collected separately from retrieval. This keeps useful routing (pointing the student to the right place) apart from a supported answer.
 
@@ -61,7 +61,7 @@ This description matches the fixed pipeline. The deployed agent instead calls kn
 
 The agent can also find tools offered through the Model Context Protocol (MCP), a standard way to connect a model to outside services, and call them, for example to look up courses, rooms, schedules or announcements. Their failures differ from retrieval failures. A structured service may be unavailable or return an ambiguous entity match.
 
-A read-only lookup cannot settle an individual case. It may inform the guidance, but it does not appoint a committee, approve a request or register a student. The architecture therefore keeps three things apart: explaining a procedure, finding information and acting with the institution's authority. Clarification and referral are valid outcomes when the evidence cannot support a direct answer.
+A read-only lookup cannot settle an individual case. It may inform the guidance, but it does not appoint a committee, approve a request or register a student. The architecture therefore keeps 3 things apart: explaining a procedure, finding information and acting with the institution's authority. Clarification and referral are valid outcomes when the evidence cannot support a direct answer.
 
 \subsection{Channels, state and failure boundaries}
 
@@ -81,7 +81,7 @@ The experiment covers a smaller part. It reuses production retrieval and prompt 
 
 \paragraph{Summary.}
 \begin{itemize}
-  \item The architecture has six responsibilities joined by the contracts of Table~\ref{tab:architecture-contracts}.
+  \item The architecture has 6 responsibilities joined by the contracts of Table~\ref{tab:architecture-contracts}.
   \item Evidence selection is a stage that can be inspected, with explicit variation points.
   \item The deployed agent calls knowledge-base search and structured tools itself. The fixed pipeline always searches once before the model answers.
   \item The controlled experiment covers only evidence selection and answer construction. The live evaluation covers the rest.
