@@ -5,11 +5,11 @@ This chapter answers the three research questions, shows where failures happen a
 
 \subsection{RQ1: observed assistance and remaining shortcomings}
 
-\paragraph{Short answer.} The system both answers and guides, but many answers are incomplete or have unsupported claims (under G0, 31 of 96 email and 22 of 96 production answers were incomplete). The absolute rates do not show how often the answers are factually correct.
+\paragraph{Short answer.} The system both answers and guides, but many answers are incomplete or have unsupported claims (under the baseline, 31 of 96 email and 22 of 96 production answers were incomplete). The absolute rates do not show how often the answers are factually correct.
 
 \begin{table}[htbp]
 \centering
-\caption[Outcomes under G0 (the shared document threshold without fallback), out of 96 responses per sample]{Outcomes under G0 (the shared document threshold without fallback), out of 96 responses per sample. Assistance is the sum of supported-answer and useful-routing labels.}
+\caption[Outcomes under the baseline, out of 96 responses per sample]{Outcomes under the baseline (both floors 0.10, no fallback), out of 96 responses per sample. Assistance is the sum of supported-answer and useful-routing labels.}
 \label{tab:rq1-g0}
 \small
 \begin{tabular}{@{}lrrrrr@{}}
@@ -24,17 +24,17 @@ Production & 53 & 25 & 28 & 22 & 12 \\
 
 The totals count the AI labels that were kept. They do not give the share of questions answered correctly. The failure counts show which kinds of failure occur, but not how common each kind is. Guidance (routing) makes up much of the positive result. A referral can be the right response, but it does not solve the student's problem, so answering and routing are reported separately (Table~\ref{tab:rq1-g0}).
 
-The supported-answer category also includes responses with no factual targets. Twenty of the 25 production supported-answer labels under G0 use references that list no facts. Such labels should not count toward factual accuracy. An empty list can also mean that the AI model failed to extract the facts when it wrote the reference. RQ1 is therefore answered only by description.
+The supported-answer category also includes responses with no factual targets. Twenty of the 25 production supported-answer labels under the baseline use references that list no facts. Such labels should not count toward factual accuracy. An empty list can also mean that the AI model failed to extract the facts when it wrote the reference. RQ1 is therefore answered only by description.
 
 \subsection{RQ2: the effect of retrieval policy}
 
 \paragraph{Short answer.} Under the main judge, lowering the document threshold gave no measurable benefit. A second judge from another model family, Claude Sonnet 5.5, finds a gain of 7.29 points for production questions and none for email (Section~\ref{sec:sonnet-rejudge}). The result therefore depends on the judge, and the evidence does not show that one threshold is best everywhere.
 
-S0 differs from G0 only in a lower document threshold. Assistance changes by $-1/96$ in each sample. The 95\% intervals span zero (Section~\ref{sec:policy-effects}), so they allow both improvement and decline. This holds even though the retrieved text changes a great deal. Mean context length rises from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production. Empty contexts fall from 36 to 3 and from 76 to 52 (Table~\ref{tab:context-diagnostics}).
+The lower floor differs from the baseline only in its document threshold. Assistance changes by $-1/96$ in each sample. The 95\% intervals span zero (Section~\ref{sec:policy-effects}), so they allow both improvement and decline. This holds even though the retrieved text changes a great deal. Mean context length rises from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production. Empty contexts fall from 36 to 3 and from 76 to 52 (Table~\ref{tab:context-diagnostics}).
 
 The added passages may be irrelevant or repeat what was already there. The remaining problem may be that the question needs clarification, or that it is unclear whether the rule applies to the student. The reference may also leave out a condition. The experiment does not separate these causes. A larger context does not mean a better answer.
 
-Fallback (G1 and S1) changes empty contexts to contexts that are not empty in 33 email and 27 production cases under the shared threshold, yet assistance moves by only $+1/96$ and $-1/96$. Under the lower threshold, S0 and S1 have identical contexts for every email case and 93 of 96 production cases, so the lack of a difference tells us little about fallback in general. How candidates are split between FAQs and documents, whether neighboring passages are added, the order of passages and whether citations are shown were not tested.
+The fallback changes empty contexts to contexts that are not empty in 33 email and 27 production cases under the shared threshold, yet assistance moves by only $+1/96$ and $-1/96$. Under the lower floor, the policies with and without fallback have identical contexts for every email case and 93 of 96 production cases, so the lack of a difference tells us little about fallback in general. How candidates are split between FAQs and documents, whether neighboring passages are added, the order of passages and whether citations are shown were not tested.
 
 The prompt comparison points the same way from the generation side. A prompt that checks source dates and whether a rule applies changes strict completion from 6/40 to 5/40, and the interval spans zero (Section~\ref{sec:results-prompt}). The first labels, made without the full evidence the generator had, showed a five-point gain for the same answers. A judge that lacks the generator's evidence can therefore report an improvement that is not real. The comparison also mixes several changes, because other things changed at the same time: the audit also changed the scope guidance and the judgment token cap.
 
@@ -79,7 +79,7 @@ Table~\ref{tab:validity} lists the threats, their effect on the conclusions and 
 \toprule
 Threat & Effect & What limits it \\
 \midrule
-Combined measure (answering plus useful routing) & Does not measure factual accuracy, and empty factual targets skew it. & Answering and routing are reported separately. An extra check, made after seeing the results, counts a direct answer only if its reference is valid and not empty. It changes production assistance from 33/96 under G0 to 32/96 under S0. This is not a corrected accuracy. \\
+Combined measure (answering plus useful routing) & Does not measure factual accuracy, and empty factual targets skew it. & Answering and routing are reported separately. An extra check, made after seeing the results, counts a direct answer only if its reference is valid and not empty. It changes production assistance from 33/96 under the baseline to 32/96 under the lower floor. This is not a corrected accuracy. \\
 Judge design & The judge gives a category, flags and quotations. It does not check claim by claim. & Quotation checks show that the text occurs in the source. They do not show that the source supports the claim or is still in force. \\
 Shared model family and unstable judgments & The roles may share the same omissions. Repeated and cross-model judgments disagree (RQ3). & References are written before answers, policy labels are hidden from the judge, and agreement is reported. A judge from another family, Claude Sonnet 5.5, re-judged every answer (Section~\ref{sec:sonnet-rejudge}). No human labels exist. \\
 Reference authority and whether rules are still in force & Faculty provisions from 2013 and university provisions from 2019 set different credit requirements for overlapping transfers, and a 2022 supplement adds an exception~\cite{finki2013study,ukim2019study,ukim2022supplement}. The fee schedule applies from 2024/25 until replaced~\cite{finki2024fees}. Retrieval does not decide which source applies. & The study does not certify current rules or whether a student is eligible. Of 49 rejected main-reference quotations, 32 appear in another block of the same evidence pool and seventeen are absent. \\

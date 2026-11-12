@@ -11,7 +11,7 @@ The experiment asks whether two choices about selecting evidence change the resp
 
 The main sample contains 192 questions, divided equally between anonymized email questions and production questions (the two samples). A separate pilot of 20 emails from the development set (Chapter~\ref{ch:data}) came before it. Sampling uses seed 24905307 (a fixed number that makes a random draw repeatable), and the selected questions are saved in lists. The email questions had already been examined in the component study (Section~\ref{sec:component-study}). The production sample takes the latest message of each recorded conversation, and the chatbot recorded the text of only some requests. Chapter~\ref{ch:data} explains why neither sample shows everything students need.
 
-The four policies cross two factors. The first is the document score floor, the minimum reranker score for a document chunk to enter the prompt. The second is a fallback that keeps the best candidate when every candidate falls below the floor. The FAQ floor stays at 0.10. The document floor is 0.10 in the shared-threshold policies (G0 and G1) and 0.00 in the separate-threshold policies (S0 and S1). G0 and S0 turn the fallback off, and G1 and S1 turn it on. The value 0.10 is the floor of the code under test (Chapter~\ref{ch:implementation}), so G0 is the baseline. The value 0.00 removes the document floor completely, which is the largest possible step toward more document context. Keeping the FAQ floor at 0.10 in every policy means that any difference comes from the document passages alone. The deployed system uses a shared floor of 0.03, chosen in the live evaluation (Section~\ref{sec:live-ab}), which is not one of the four policies.
+The four policies cross two factors. The first is the document score floor, the minimum reranker score for a document chunk to enter the prompt. The second is a fallback that keeps the best candidate when every candidate falls below the floor. The FAQ floor stays at 0.10. The four policies get plain names. \emph{The baseline} keeps both floors at 0.10. \emph{The lower floor} keeps the FAQ floor at 0.10 and sets the document floor to 0.00. Each of the two is run with the fallback off and on, which gives \emph{the baseline with fallback} and \emph{the lower floor with fallback}. The value 0.10 is the floor of the code under test (Chapter~\ref{ch:implementation}), so this policy is the baseline. The value 0.00 removes the document floor completely, which is the largest possible step toward more document context. Keeping the FAQ floor at 0.10 in every policy means that any difference comes from the document passages alone. The deployed system uses a shared floor of 0.03, chosen in the live evaluation (Section~\ref{sec:live-ab}), which is not one of the four policies.
 
 \begin{table}[htbp]
 \centering
@@ -21,15 +21,15 @@ The four policies cross two factors. The first is the document score floor, the 
 \toprule
 Policy & FAQ floor & Document floor & Fallback \\
 \midrule
-G0 & 0.10 & 0.10 & Off \\
-G1 & 0.10 & 0.10 & On \\
-S0 & 0.10 & 0.00 & Off \\
-S1 & 0.10 & 0.00 & On \\
+Baseline & 0.10 & 0.10 & Off \\
+Baseline with fallback & 0.10 & 0.10 & On \\
+Lower floor & 0.10 & 0.00 & Off \\
+Lower floor with fallback & 0.10 & 0.00 & On \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The main comparison is S0 minus G0. The other comparisons repeat it with the fallback on, examine the fallback under each threshold, and test whether the fallback effect differs between thresholds (the interaction). The fallback applies only when no candidate from either corpus is above the floor, so under S0 it may change nothing.
+The main comparison is the lower floor against the baseline. The other comparisons repeat it with the fallback on, examine the fallback under each threshold, and test whether the fallback effect differs between thresholds (the interaction). The fallback applies only when no candidate from either corpus is above the floor, so under the lower floor it may change nothing.
 
 The deployed system uses a single shared context floor of 0.03 and reranks against the original question. This matches none of the four policies, so the results do not evaluate the deployed system.
 
@@ -95,7 +95,7 @@ Assessment is repeated with identical prompts for 48 unique answers drawn with s
 
 Let $Y_{i,p}$ equal one when question $i$ under policy $p$ keeps a supported-answer or useful-routing label, and zero otherwise. For each sample, the main estimate is
 \begin{equation}
-\widehat{\Delta}_{\mathrm{floor}}=\frac{1}{96}\sum_{i=1}^{96}\left(Y_{i,S0}-Y_{i,G0}\right).
+\widehat{\Delta}_{\mathrm{floor}}=\frac{1}{96}\sum_{i=1}^{96}\left(Y_{i,\mathrm{lower}}-Y_{i,\mathrm{base}}\right).
 \label{eq:thesis-primary}
 \end{equation}
 The reported percentage-point difference is $100\widehat{\Delta}_{\mathrm{floor}}$. A percentage point is the difference between two percentages, so a change from 53 to 52 percent is one point. Table~\ref{tab:metrics} defines this and the other measures used in this chapter and in Chapter~\ref{ch:live}.
@@ -109,7 +109,7 @@ The reported percentage-point difference is $100\widehat{\Delta}_{\mathrm{floor}
 Measure & Definition & Denominator and caveat \\
 \midrule
 Assistance $Y_{i,p}$ & One if the answer is labeled supported answer or useful routing after the reference check (the guard). & All 96 questions per sample and policy. Rejections, invalid judgments and uncertainty count as zero. \\
-Floor effect & Mean of $Y_{i,S0}-Y_{i,G0}$ (Equation~\ref{eq:thesis-primary}). & Per sample. The main comparison. \\
+Floor effect & Mean of $Y_{i,\mathrm{lower}}-Y_{i,\mathrm{base}}$ (Equation~\ref{eq:thesis-primary}). & Per sample. The main comparison. \\
 Interval & Bootstrap interval, taken from the percentiles of 20,000 repeated resamples of question groups (identical questions merged into one group) with seed 24905310, keeping each question's four outcomes together~\cite{efron1993bootstrap}. & Keeps pairing and answer reuse. Based on the AI labels. \\
 Flag rate & Questions flagged for an unsupported material claim, out of the records that could be judged. & Invalid and unspecified flags are not false flags. \\
 Agreement & Counts, percentages and Cohen's kappa~\cite{cohen1960kappa}, which is agreement corrected for chance (0 is chance level and 1 is perfect agreement). & Raw agreement can be high while kappa is lower when one label is very common~\cite{feinstein1990kappa}. \\
@@ -127,11 +127,18 @@ The retrieval diagnostics are the number of empty contexts, the mean context len
 \subsection{Changes to the plan}
 \label{sec:method-deviations}
 
-The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the main comparison S0 minus G0, how references and judgments are made, the outcome categories and the analysis. A fingerprint (hash) of every input file was saved, so later changes would show. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
+The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the main comparison of the lower floor against the baseline, how references and judgments are made, the outcome categories and the analysis. A fingerprint (hash) of every input file was saved, so later changes would show. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
 
 The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Six steps were added after the results were seen. They are marked as such and replace no main result. The research questions were reworded, with the same hypotheses, policies, outcomes and labels. Three extra checks were run: the analysis without empty references, the Qwen run on the thirty control prompts, and the search for rejected reference quotations. The prompt comparison was graded a second time. Finally, all answers were judged again by Claude Sonnet 5.5 (Section~\ref{sec:sonnet-rejudge}). That grading used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
 
 The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The controlled experiment lacks a complete database snapshot, while the prompt comparison keeps one.
+
+\subsection{How to read the results}
+\label{sec:read-results}
+
+The results count how many of the 96 questions in each sample received a useful response, that is, a supported answer or useful routing. Comparisons between two policies are given as differences in percentage points. A difference of $-1.04$ points means that, per 100 questions, about one fewer question received a useful response under the second policy than under the first. Because every question is answered under every policy, the difference compares the same questions and is not affected by which questions happened to be drawn.
+
+Each difference comes with a 95 percent interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies, given the AI labels and the sampled questions. If the interval includes zero, the data cannot tell whether the change helps or hurts. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval does not account for errors of the judge itself, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with a second judge.
 
 \subsection{Completion of the runs}
 
@@ -147,27 +154,27 @@ Figure~\ref{fig:outcome-bars} and Table~\ref{tab:luna-outcomes} show the outcome
 
 \input{tables/controlled_results}
 
-Under G0, email has nine supported-answer and 22 useful-routing labels (31 of 96), and production has 25 and 28 (53 of 96). Under S0 the totals are 30 and 52. Not every positive label is a complete factual answer. A greeting or a scope explanation can receive a supported-answer label when the question has no institutional fact in it.
+Under the baseline, email has nine supported-answer and 22 useful-routing labels (31 of 96), and production has 25 and 28 (53 of 96). Under the lower floor the totals are 30 and 52. Not every positive label is a complete factual answer. A greeting or a scope explanation can receive a supported-answer label when the question has no institutional fact in it.
 
-Unsupported material claims and incomplete answers remain common. Under G0 and S0, the unsupported categories number twenty and nineteen for email and twelve and eleven for production. Incomplete answers number 31 and 30 for email and 22 and 24 for production. The flag rates for material claims divide by the records that could be assessed. The email counts under G0, G1, S0 and S1 are 20/91, 25/91, 19/88 and 19/88. The production counts are 12/95, 11/94, 11/95 and 11/95. The email decline from 20 to 19 is not clear evidence of safer answers. The records with a specified flag fall from 91 to 88, and invalid judgments with a raw unsupported flag rise from one to three.
+Unsupported material claims and incomplete answers remain common. Under the baseline and the lower floor, the unsupported categories number twenty and nineteen for email and twelve and eleven for production. Incomplete answers number 31 and 30 for email and 22 and 24 for production. The flag rates for material claims divide by the records that could be assessed. The email counts for the baseline, the baseline with fallback, the lower floor and the lower floor with fallback are 20/91, 25/91, 19/88 and 19/88. The production counts are 12/95, 11/94, 11/95 and 11/95. The email decline from 20 to 19 is not clear evidence of safer answers. The records with a specified flag fall from 91 to 88, and invalid judgments with a raw unsupported flag rise from one to three.
 
 \subsection{Paired retrieval-policy effects}
 \label{sec:policy-effects}
 
 \input{figures/policy_effects}
 
-The main comparison, S0 minus G0, is $-1/96$, or approximately $-1.04$ percentage points, in each sample. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both samples. A p-value near 1 means the gains and losses are about as balanced as chance would give.
+The main comparison, the lower floor against the baseline, is $-1/96$, or approximately $-1.04$ percentage points, in each sample. The paired 95\% interval is $[-8.33,6.25]$ for email and $[-7.29,5.21]$ for production. Email has five gains, six losses and 85 ties. Production has four gains, five losses and 87 ties. An exact sign test, a paired test of whether gains and losses are balanced, gives $p=1.0$ in both samples. A p-value near 1 means the gains and losses are about as balanced as chance would give.
 
 Both intervals include both an improvement and a decline. With these labels the data rule out a gain larger than about six points for email or five for production. With the main judge's labels, the study finds no clear benefit from the lower document threshold (for a second judge, see Section~\ref{sec:sonnet-rejudge}). It does not show that the policies are equal or that a better threshold cannot exist.
 
 The other comparisons and the interaction ($-1.04$ points for email, $+2.08$ for production) all have intervals that include zero (Table~\ref{tab:luna-effects}).
 
-The fallback is used much more often with the higher threshold (G0 and G1). Comparing G1 with G0, 33 email and 27 production cases change from an empty to a non-empty context. Comparing S1 with S0, no email and only three production contexts change. S0 and S1 select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
+The fallback is used much more often with the higher threshold of the baseline. Comparing the baseline with and without fallback, 33 email and 27 production cases change from an empty to a non-empty context. Comparing the lower floor with and without fallback, no email and only three production contexts change. With the lower floor, both fallback settings select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
 
 \subsection{More evidence without a clear gain}
 \label{sec:more-evidence}
 
-The mean context grows from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production (Table~\ref{tab:context-diagnostics}), while the share of good answers stays the same. Even when no evidence is retrieved, the prompt still contains the list of useful links and the role instructions. This may explain why routing responses are still possible. Among the 55 empty S0 contexts (three email and 52 production), 23 still received a useful-routing label (three email and twenty production).
+The mean context grows from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production (Table~\ref{tab:context-diagnostics}), while the share of good answers stays the same. Even when no evidence is retrieved, the prompt still contains the list of useful links and the role instructions. This may explain why routing responses are still possible. Among the 55 empty contexts under the lower floor (three email and 52 production), 23 still received a useful-routing label (three email and twenty production).
 
 \begin{table}[htbp]
 \centering
@@ -175,7 +182,7 @@ The mean context grows from 5,110 to 16,481 characters for email and from 1,010 
 \label{tab:context-diagnostics}
 \begin{tabular}{llrr}
 \toprule
-Sample & Measure & G0 & S0 \\
+Sample & Measure & Baseline & Lower floor \\
 \midrule
 Email & Empty contexts & 36 & 3 \\
 Email & Mean context characters & 5,110 & 16,481 \\
@@ -186,14 +193,14 @@ Production & Mean context characters & 1,010 & 5,808 \\
 \end{tabular}
 \end{table}
 
-Empty contexts have two causes. Under G0, candidates were retrieved but none reached the 0.10 floor in 33 of the 36 empty email contexts and 27 of the 76 empty production contexts. Under S0 the document floor is 0.00, so these candidates are kept. For most S0 contexts that stay empty, the saved replay holds no candidate at all (all three email and 49 of the 52 production contexts). Examples include greetings and very short or off-topic messages. In the other three production cases, only FAQ candidates were found and they fell below the FAQ floor of 0.10.
+Empty contexts have two causes. Under the baseline, candidates were retrieved but none reached the 0.10 floor in 33 of the 36 empty email contexts and 27 of the 76 empty production contexts. Under the lower floor the document floor is 0.00, so these candidates are kept. For most contexts that stay empty under the lower floor, the saved replay holds no candidate at all (all three email and 49 of the 52 production contexts). Examples include greetings and very short or off-topic messages. In the other three production cases, only FAQ candidates were found and they fell below the FAQ floor of 0.10.
 
-Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under G0 to 0.661 under S0. All quotations are present in eighteen cases under G0 and 29 under S0. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. To avoid picking a convenient example, it was chosen by a fixed rule that does not look at the outcomes, from 72 cases with a valid, non-empty reference, completed answers under both policies and a longer S0 context. The question asks whether admission under a special category drops the tuition. G0 selects three FAQ candidates and one document candidate (6,470 characters), and S0 selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
+Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under the baseline to 0.661 under the lower floor. All quotations are present in eighteen cases under the baseline and 29 under the lower floor. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. To avoid picking a convenient example, it was chosen by a fixed rule that does not look at the outcomes, from 72 cases with a valid, non-empty reference, completed answers under both policies and a longer context under the lower floor. The question asks whether admission under a special category drops the tuition. The baseline selects three FAQ candidates and one document candidate (6,470 characters), and the lower floor selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
 
 \subsection{Reference quality and the guard}
 \label{sec:reference-quality}
 
-Of 212 pilot and main references, 182 pass the quotation checks and thirty fail. In the main sample, 78 email and 88 production references pass (Table~\ref{tab:reference-states}). The guard changes a positive label to uncertain when the reference quotations fail their checks. It changes 47 otherwise positive policy records in the main sample, 32 for email and fifteen for production. Policies reuse identical answers, so these records come from 28 unique answers. Under G0 and S0 the email counts are seven and eight, and production has four under each. The guard does not check whether a source is official or whether a passing reference is complete.
+Of 212 pilot and main references, 182 pass the quotation checks and thirty fail. In the main sample, 78 email and 88 production references pass (Table~\ref{tab:reference-states}). The guard changes a positive label to uncertain when the reference quotations fail their checks. It changes 47 otherwise positive policy records in the main sample, 32 for email and fifteen for production. Policies reuse identical answers, so these records come from 28 unique answers. Under the baseline and the lower floor the email counts are seven and eight, and production has four under each. The guard does not check whether a source is official or whether a passing reference is complete.
 
 \begin{table}[htbp]
 \centering
@@ -209,9 +216,9 @@ Production & 25 & 63 & 8 & 96 \\
 \end{tabular}
 \end{table}
 
-The 182 passing references include 76 with no facts left, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both G0 and S0 use empty references. A true completeness flag can therefore mean that there was no fact to miss.
+The 182 passing references include 76 with no facts left, and 75 of the 166 passing references in the main sample are of this kind. Twenty of the 25 production supported-answer labels under both the baseline and the lower floor use empty references. A true completeness flag can therefore mean that there was no fact to miss.
 
-A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the G0 and S0 totals become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. A check made afterwards found 32 of the 49 rejected main quotations in a different source block of the same pool and seventeen nowhere in it. This can guide repairs to the references, and it changes no labels.
+A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the totals of the baseline and the lower floor become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. A check made afterwards found 32 of the 49 rejected main quotations in a different source block of the same pool and seventeen nowhere in it. This can guide repairs to the references, and it changes no labels.
 
 \subsection{Judge consistency and disagreement between models}
 \label{sec:judge-consistency}
@@ -247,12 +254,12 @@ Table~\ref{tab:sonnet-rejudge} compares the assistance counts. Sonnet labels mor
 
 \begin{table}[htbp]
 \centering
-\caption[Assistance under the two judges]{Assistance under the two judges, out of 96 questions per sample. The last column is the paired S0 minus G0 difference in percentage points with its 95\% bootstrap interval.}
+\caption[Assistance under the two judges]{Assistance under the two judges, out of 96 questions per sample. The last column is the difference between the lower floor and the baseline in percentage points, with the 95\% interval in brackets.}
 \label{tab:sonnet-rejudge}
 \small
 \begin{tabular}{@{}llrrrrr@{}}
 \toprule
-Sample & Judge & G0 & G1 & S0 & S1 & S0 minus G0 \\
+Sample & Judge & Baseline & + fallback & Lower floor & + fallback & Difference \\
 \midrule
 Email & Luna & 31 & 32 & 30 & 30 & $-1.04$ $[-8.3, 6.3]$ \\
 Email & Sonnet & 40 & 34 & 41 & 41 & $+1.04$ $[-7.3, 9.4]$ \\
@@ -262,7 +269,7 @@ Production & Sonnet & 54 & 58 & 61 & 62 & $+7.29$ $[1.0, 13.5]$ \\
 \end{tabular}
 \end{table}
 
-The main comparison depends on the judge. For email, both judges find no clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while Luna finds none. Sonnet also finds that the fallback lowers email assistance under the shared threshold ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under the main judge and not under the second one.
+The main comparison depends on the judge. For email, both judges find no clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while Luna finds none. Sonnet also finds that the fallback lowers email assistance under the baseline ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under the main judge and not under the second one.
 
 \subsection{Component study with a local generator}
 \label{sec:component-study}
@@ -308,7 +315,7 @@ The production telemetry comes from the deployed system, with the author's own t
 \paragraph{Summary.}
 \begin{itemize}
   \item Four policies cross a document score floor with a fallback rule on the fixed pipeline, which does not evaluate the deployed system. One shared AI reference and one anonymous AI judge produce the labels, and no check is human validation.
-  \item Under G0 and S0, incomplete answers (22 to 31 of 96 per sample) and unsupported claims (11 to 20) remain common.
+  \item Under the baseline and the lower floor, incomplete answers (22 to 31 of 96 per sample) and unsupported claims (11 to 20) remain common.
   \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both samples, and every interval includes zero.
   \item The same change ranks relevant passages higher in the component study, so better ranking does not mean better assessed answers.
   \item Many passing references are empty, and the judge's inputs and strictness can move the apparent results.

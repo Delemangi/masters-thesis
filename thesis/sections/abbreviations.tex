@@ -22,7 +22,7 @@ Fallback & Keeping the best candidate when neither the FAQ nor the document corp
 FAQ & Frequently asked question and its stored answer. \\
 FCSE & Faculty of Computer Science and Engineering. \\
 Floor & The minimum reranker score a passage needs to enter the model's prompt. Threshold means the same thing. \\
-G0/G1 & Policies with one shared FAQ/document score floor, with fallback off (G0) or on (G1). \\
+Baseline & The controlled policy with both score floors at 0.10, run with the fallback off or on. \\
 \textsc{Gap} & A grade in the live evaluation: no confirmed fact covers the question and the answer is reasonable. \\
 GPU & Graphics processing unit used for embedding, reranking or local inference. \\
 Guard & See reference check. \\
@@ -44,7 +44,7 @@ RAG & Retrieval-augmented generation. \\
 Reference & The AI-produced description of required facts, evidence, action and uncertainty used for assessment. \\
 Reference check & The automatic check that each quotation in a reference occurs in its named source. If it fails, a good label is downgraded to uncertain. Also called the guard. \\
 Replay & Re-running the production retrieval and prompt logic on captured candidates, with controlled policy changes. \\
-S0/S1 & Policies with separate FAQ and document score floors, with fallback off (S0) or on (S1). \\
+Lower floor & The controlled policy with the FAQ floor at 0.10 and no document floor, run with the fallback off or on. \\
 Sign test & A paired test of whether gains and losses are balanced. A p-value near 1 means they are about equal. \\
 Sonnet & Claude Sonnet 5.5, the judge model of all clean live-evaluation runs. It is also the app's default model for signed-in users, but it did not answer in the evaluations. \\
 Stage & A numbered step in the development of the deployed agent (Stages 1 to 11 in Chapter~\ref{ch:live}). In the architecture, a stage is one part of the answering pipeline. \\

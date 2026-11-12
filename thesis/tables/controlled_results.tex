@@ -10,33 +10,33 @@
 \toprule
 Sample & Policy & $N$ & Answer & Route & Unsup. & Incomp. & Refusal & Uncert. & Fail \\
 \midrule
-Email & G0 & 96 & 9 & 22 & 20 & 31 & 0 & 9 & 5 \\
-Email & G1 & 96 & 9 & 23 & 25 & 23 & 0 & 12 & 4 \\
-Email & S0 & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
-Email & S1 & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
-Production & G0 & 96 & 25 & 28 & 12 & 22 & 4 & 4 & 1 \\
-Production & G1 & 96 & 25 & 27 & 11 & 24 & 4 & 3 & 2 \\
-Production & S0 & 96 & 25 & 27 & 11 & 24 & 4 & 4 & 1 \\
-Production & S1 & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
+Email & Baseline & 96 & 9 & 22 & 20 & 31 & 0 & 9 & 5 \\
+Email & Baseline + fallback & 96 & 9 & 23 & 25 & 23 & 0 & 12 & 4 \\
+Email & Lower floor & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
+Email & Lower floor + fallback & 96 & 10 & 20 & 19 & 30 & 0 & 10 & 7 \\
+Production & Baseline & 96 & 25 & 28 & 12 & 22 & 4 & 4 & 1 \\
+Production & Baseline + fallback & 96 & 25 & 27 & 11 & 24 & 4 & 3 & 2 \\
+Production & Lower floor & 96 & 25 & 27 & 11 & 24 & 4 & 4 & 1 \\
+Production & Lower floor + fallback & 96 & 25 & 28 & 11 & 23 & 4 & 4 & 1 \\
 \bottomrule
 \end{tabular}
-\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The main measure, assistance, combines Answer and Route. A success whose reference failed its check is counted as Uncert. Figure~\ref{fig:outcome-bars} plots G0 and S0.\end{minipage}
+\par\smallskip\begin{minipage}{0.94\textwidth}\footnotesize Fail includes application-input rejection, generation failure, and invalid assessment. All primary records are complete. The main measure, assistance, combines Answer and Route. A success whose reference failed its check is counted as Uncert. Figure~\ref{fig:outcome-bars} plots the baseline and the lower floor.\end{minipage}
 \end{table}
 \begin{table}[!htbp]
 \centering\footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption[Paired assistance differences in percentage points for the fixed pipeline, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples)]{Paired assistance differences in percentage points for the fixed pipeline, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples). The intervals take the AI labels as given and do not correct judge error. G0, G1, S0 and S1 are the retrieval policies defined in Table~\ref{tab:thesis-policies}. Figure~\ref{fig:policy-effects} plots the same estimates.}
+\caption[Paired assistance differences in percentage points for the fixed pipeline, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples)]{Paired assistance differences in percentage points for the fixed pipeline, not the deployed settings, with 95\% question-group bootstrap intervals (20,000 resamples). The intervals take the AI labels as given and do not correct judge error. The policies are defined in Table~\ref{tab:thesis-policies}. Figure~\ref{fig:policy-effects} plots the same estimates.}
 \label{tab:luna-effects}
 \begin{tabular}{lrr}
 \toprule
-Comparison & Email: $\Delta$ [CI] & Production: $\Delta$ [CI] \\
+Comparison & Email & Production \\
 \midrule
-S0-G0 & $-1.04$ [$-8.33$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
-S1-G1 & $-2.08$ [$-9.38$, 5.21] & 1.04 [$-4.17$, 6.25] \\
-G1-G0 & 1.04 [$-4.17$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
-S1-S0 & 0.00 [0.00, 0.00]$^{a}$ & 1.04 [0.00, 3.13] \\
+Lower floor vs.\ baseline & $-1.04$ [$-8.33$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
+Same, with fallback & $-2.08$ [$-9.38$, 5.21] & 1.04 [$-4.17$, 6.25] \\
+Fallback, baseline & 1.04 [$-4.17$, 6.25] & $-1.04$ [$-7.29$, 5.21] \\
+Fallback, lower floor & 0.00 [0.00, 0.00]$^{a}$ & 1.04 [0.00, 3.13] \\
 Interaction & $-1.04$ [$-6.25$, 4.17] & 2.08 [$-3.13$, 8.33] \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize $^{a}$S0 and S1 select identical contexts for all 96 email questions, so every pair has the same outcome.\par}
+\par\smallskip{\footnotesize $^{a}$With the lower floor, both fallback settings select identical contexts for all 96 email questions, so every pair has the same outcome.\par}
 \end{table}

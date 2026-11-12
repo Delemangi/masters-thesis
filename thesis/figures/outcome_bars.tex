@@ -1,4 +1,4 @@
-% Outcome categories for G0 and S0, per sample (96 questions each), as stacked bars.
+% Outcome categories for the baseline and the lower floor, per sample (96 questions each), as stacked bars.
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=0.1cm,y=1cm,font=\small]
@@ -7,10 +7,10 @@
     \node[below] at (\p,-3.6) {\p};
   }
   \node[below] at (48,-4.1) {Number of the 96 questions};
-  \node[left] at (-1,0) {Email, G0};
-  \node[left] at (-1,-1) {Email, S0};
-  \node[left] at (-1,-2) {Production, G0};
-  \node[left] at (-1,-3) {Production, S0};
+  \node[left] at (-1,0) {Email, baseline};
+  \node[left] at (-1,-1) {Email, lower floor};
+  \node[left] at (-1,-2) {Production, baseline};
+  \node[left] at (-1,-3) {Production, lower floor};
   % cumulative boundaries: Answer, Route, Unsup., Incomp., Abstain, Uncert., Fail
   \foreach \y/\pa/\pb/\pc/\pd/\pe/\pf/\pg/\ph in {
     0/0/9/31/51/82/82/91/96,
@@ -44,6 +44,6 @@
     \node[right] at (\x+3.5,-6.35) {\tx};
   }
 \end{tikzpicture}
-\caption[Outcome categories of the AI judge for G0 and S0 in each sample, out of 96 questions]{Outcome categories of the AI judge for G0 and S0 in each sample, out of 96 questions. Answer is a supported answer and Route is useful routing. Together they count as assistance. Segments of one or two questions are not labeled. Counts for all four policies are in Table~\ref{tab:luna-outcomes}.}
+\caption[Outcome categories of the AI judge for the baseline and the lower floor, out of 96 questions]{Outcome categories of the AI judge for the baseline and the lower floor in each sample, out of 96 questions. Answer is a supported answer and Route is useful routing. Together they count as assistance. Segments of one or two questions are not labeled. Counts for all four policies are in Table~\ref{tab:luna-outcomes}.}
 \label{fig:outcome-bars}
 \end{figure}
