@@ -1,0 +1,30 @@
+% Where the chatbot keeps its data, separated by purpose. Grayscale, plain TikZ.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
+  store/.style={draw=black!75,rounded corners=1.5pt,fill=white,align=center,text width=3.8cm,minimum height=1.3cm,inner sep=3pt},
+  core/.style={draw=black!75,rounded corners=1.5pt,fill=black!8,align=center,text width=3.0cm,minimum height=1.3cm,inner sep=3pt},
+  src/.style={draw=black!50,dashed,rounded corners=1.5pt,fill=white,align=center,text width=3.4cm,minimum height=.8cm,inner sep=3pt},
+  flow/.style={-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  two/.style={{Stealth[length=1.6mm,width=1.15mm]}-{Stealth[length=1.6mm,width=1.15mm]},line width=.5pt},
+  lab/.style={font=\footnotesize,fill=white,inner sep=1.5pt,align=center}
+]
+  \node[core] (svc) at (7.3,0) {\textbf{Chat service}\\and agent};
+
+  \node[src] (pipe) at (1.8,3.0) {Document pipeline and the author's FAQs};
+  \node[store] (kb) at (1.8,1.3) {\textbf{Knowledge base}\\FAQs, passages, embeddings};
+  \node[store] (conv) at (1.8,-1.6) {\textbf{Conversations}\\web and Discord, deletable by users};
+  \node[store] (cache) at (12.8,1.3) {\textbf{Tool data cache}\\courses, timetables, announcements};
+  \node[store] (stats) at (12.8,-1.6) {\textbf{Usage analytics}\\request metadata, no question text};
+  \node[store] (res) at (7.3,-3.6) {\textbf{Research files}\\test sets, answers and grades, kept private and never added to the knowledge base};
+
+  \draw[flow] (pipe) -- (kb);
+  \draw[flow] (kb) -- node[lab,above,sloped] {search} (svc);
+  \draw[two] (conv) -- node[lab,below,sloped] {history} (svc);
+  \draw[flow] (cache) -- node[lab,above,sloped] {lookups} (svc);
+  \draw[flow] (svc) -- node[lab,below,sloped] {metadata} (stats);
+  \draw[flow] (svc) -- node[lab,right] {test-run answers} (res);
+\end{tikzpicture}
+\caption[Where the chatbot keeps its data]{Where the chatbot keeps its data. Each store has one purpose and its own rules. Only the document pipeline writes to the knowledge base. Conversations give follow-up questions their history, and users can delete them. Cached tool data can be out of date until the next refresh. Usage analytics hold no question text. The research files of the evaluation stay private and never enter the knowledge base.}
+\label{fig:state-stores}
+\end{figure}
