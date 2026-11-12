@@ -25,6 +25,6 @@
   \draw[flow] (svc) -- node[lab,below,sloped] {metadata} (stats);
   \draw[flow] (svc) -- node[lab,right] {test-run answers} (res);
 \end{tikzpicture}
-\caption[Where the chatbot keeps its data]{Where the chatbot keeps its data. Each store has one purpose and its own rules. Only the document pipeline writes to the knowledge base. Conversations give follow-up questions their history, and users can delete them. Cached tool data can be out of date until the next refresh. Usage analytics hold no question text. The research files of the evaluation stay private and never enter the knowledge base.}
+\caption[Where the reference implementation keeps its data]{Where the reference implementation keeps its data. Each store has one purpose and its own rules. Only the document pipeline writes to the knowledge base. Conversations give follow-up questions their history, and users can delete them. Cached tool data can be out of date until the next refresh. Usage analytics hold no question text. The research files of the evaluation stay private and never enter the knowledge base.}
 \label{fig:state-stores}
 \end{figure}

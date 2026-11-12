@@ -41,6 +41,6 @@
   \draw[opt] (agent) -- (tools);
   \draw[flow,line width=.9pt] (search) -- (replay);
 \end{tikzpicture}
-\caption{Chatbot architecture and the parts tested. Official documents become checked text versions and, with our FAQs, are split into passages with embeddings in a search index. The chat service passes each question to the AI agent, which decides when to search the knowledge base and when to call the faculty data tools (dashed). A separate model server computes embeddings and reranking scores. Bold boxes are the parts the controlled experiment tested, where one search runs first and a single model call answers, without the agent or tools.}
+\caption{The architecture as realized by our chatbot, its reference implementation, and the parts tested. Official documents become checked text versions and, with our FAQs, are split into passages with embeddings in a search index. The chat service passes each question to the AI agent, which decides when to search the knowledge base and when to call the faculty data tools (dashed). A separate model server computes embeddings and reranking scores. Bold boxes are the parts the controlled experiment tested, where one search runs first and a single model call answers, without the agent or tools.}
 \label{fig:architecture}
 \end{figure*}
