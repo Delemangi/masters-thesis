@@ -215,6 +215,27 @@ Figure~\ref{fig:recall-context} shows what reaches the model. One production sea
 
 Figure~\ref{fig:error-attribution} joins these results with the grades of run $a$: a relevant item was in context for 196 of 205 \textsc{Correct} answers and for 18 of 22 \textsc{Partial} answers.
 
+\textbf{Source-display threshold.} The same labels also show what the 0.30 source-display threshold does. The local reranker scored the 1,672 items that reached the production context and had saved text. Table~\ref{tab:display-threshold} gives the result for several thresholds. At 0.30, half of the shown sources are relevant, 85 percent of the irrelevant ones are hidden, and 43 percent of the relevant ones are still shown. Lower thresholds keep more relevant sources but show mostly irrelevant ones, and higher thresholds hide most of the relevant ones too. So 0.30 is about the point where a shown source becomes as likely to be useful as not. Long emails receive low reranker scores, so short chatbot questions would see more sources at the same threshold.
+
+\begin{table}[htbp]
+\centering
+\caption[Effect of the source-display threshold on holdout 3]{Effect of the source-display threshold on holdout 3. Items are the 1,672 context items with saved text (431 relevant, 1,241 not relevant by the AI labels), scored by the local BGE-reranker-v2-m3 against the original email. The last column counts the 234 emails with a relevant item in context.}
+\label{tab:display-threshold}
+\small
+\begin{tabularx}{\linewidth}{@{}rr>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X@{}}
+\toprule
+Threshold & Shown & Relevant among shown & Irrelevant hidden & Relevant kept & Emails with a relevant source shown \\
+\midrule
+0.03 & 1,121 & 32.6\% & 39.1\% & 84.7\% & 90.2\% \\
+0.10 & 746 & 37.7\% & 62.5\% & 65.2\% & 73.5\% \\
+0.20 & 508 & 44.3\% & 77.2\% & 52.2\% & 62.8\% \\
+0.30 & 371 & 49.9\% & 85.0\% & 42.9\% & 55.1\% \\
+0.40 & 276 & 55.8\% & 90.2\% & 35.7\% & 47.9\% \\
+0.50 & 219 & 59.8\% & 92.9\% & 30.4\% & 41.9\% \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \textbf{Findings.} Both the reranker and HyDE raise the top ranks, and HyDE with the reranker is best (hit@10 91.3 percent, MRR 0.69). Retrieval misses explain at most about 4 percent of the holdout-3 answers (13 of 298 rows). These are the rows of run $a$ with a relevant item outside the context: 3 \textsc{Correct}, 4 \textsc{Partial}, 1 \textsc{Wrong} and 5 \textsc{Gap}. Partial answers are mostly answer-construction failures (18 of 22 had a relevant item in context), in line with the controlled finding. \textsc{Gap} is mostly missing knowledge, although 24 of the 38 \textsc{Gap} rows had an item judged relevant in context. The judges were less strict and also marked passages that were only about the same topic.
 
 \subsection{Reranking with a decision model}
