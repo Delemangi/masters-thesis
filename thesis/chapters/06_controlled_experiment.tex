@@ -1,15 +1,22 @@
 \section{The controlled experiment}
 \label{ch:methodology}
 
-This chapter describes the controlled experiment and its results. The experiment compares four retrieval policies on the same questions using the fixed pipeline. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from, and Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced. Table~\ref{tab:metrics} defines the measures, and Section~\ref{sec:method-deviations} lists the changes to the plan. The main result is that lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but under the main judge the share of good answers does not clearly rise. Of two further judges, one finds a gain for production questions and the other finds none (Section~\ref{sec:sonnet-rejudge}).
+This chapter describes the controlled experiments and their results. It starts with the component study that led to them. The main experiment compares four retrieval policies on the same questions using the fixed pipeline. Its design comes first and its results follow. The checks on the judging come next, again with their design before their results, and then a second, smaller experiment on the prompt. The chapter ends with the changes to the original plan. Figure~\ref{fig:eval-dataflow} shows where the evaluation data come from, Figure~\ref{fig:assessment-pipeline} shows how references, answers and judgments are produced, and Table~\ref{tab:metrics} defines the measures. The main result is that lowering the document threshold gives the model about three times as much context text for email and almost six times as much for production, but under the main judge the share of good answers does not clearly rise. Of two further judges, one finds a gain for production questions and the other finds none (Section~\ref{sec:sonnet-rejudge}).
 
 \input{figures/eval_dataflow}
 
-\subsection{Purpose and comparison design}
+\subsection{The component study}
+\label{sec:component-study}
+
+The component study came before the controlled experiments and shaped their design. It used a simplified retrieval path, a locally served Qwen3-8B generator and a fixed corpus of 74 FAQs and 1,403 chunks from nineteen documents, with the 24-email development set and the 320-email random sample (Chapter~\ref{ch:data}). Ranking was measured against AI relevance judgments of each candidate pool, and the same local Qwen3-8B model judged the answers. It has 306 test cases with positive AI relevance judgments. For each case, nDCG@10 measures how high the relevant passages rank among the candidates in the pool (higher is better). It rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a group-bootstrap interval of $[0.124,0.166]$, and independently built reference labels make the gain smaller (0.050 instead of 0.201 on a 24-case audit). A separate audit by an AI coding agent (GPT-6 Astra) covered 24 random test cases with their own references and 48 answers, of which 44 were completed. It flagged unsupported important claims in 31 of the 44 and matched the primary category in only 12. These findings led to testing threshold and fallback separately in the controlled experiment. Its AI audit used a different judge and rubric, so it cannot be combined with the judgments of the main experiment.
+
+\subsection{Design of the main experiment}
+
+\subsubsection{Purpose and comparison design}
 
 The experiment asks whether two choices about selecting evidence change the responses to institutional questions. It reduces the deployed system to the fixed pipeline, which replaces the agent with one retrieval call and one generation call. Production retrieval and prompt construction are reused. The conclusions apply only to this narrower path.
 
-The main sample contains 192 questions, divided equally between anonymized email questions and production questions (the two samples). A separate pilot of 20 emails from the development set (Chapter~\ref{ch:data}) came before it. Sampling uses seed 24905307 (a fixed number that makes a random draw repeatable), and the selected questions are saved in lists. The email questions had already been examined in the component study (Section~\ref{sec:component-study}). The production sample takes the latest message of each recorded conversation, and the chatbot recorded the text of only some requests. Chapter~\ref{ch:data} explains why neither sample shows everything students need.
+The main sample contains 192 questions, divided equally between anonymized email questions and production questions (the two samples). A separate pilot of 20 emails from the development set (Chapter~\ref{ch:data}) came before it. The pilot only checks that the pipeline runs, and no threshold is selected by searching pilot or main outcomes. Sampling uses seed 24905307 (a fixed number that makes a random draw repeatable), and the selected questions are saved in lists. The email questions had already been examined in the component study (Section~\ref{sec:component-study}). The production sample takes the latest message of each recorded conversation, and the chatbot recorded the text of only some requests. Chapter~\ref{ch:data} explains why neither sample shows everything students need.
 
 The four policies cross two factors. The first is the document score floor, the minimum reranker score for a document chunk to enter the prompt. The second is a fallback that keeps the best candidate when every candidate falls below the floor. The FAQ floor stays at 0.10. The four policies get plain names. \emph{The baseline} keeps both floors at 0.10. \emph{The lower floor} keeps the FAQ floor at 0.10 and sets the document floor to 0.00. Each of the two is run with the fallback off and on, which gives \emph{the baseline with fallback} and \emph{the lower floor with fallback}. The value 0.10 is the floor of the code under test (Chapter~\ref{ch:implementation}), so this policy is the baseline. The value 0.00 removes the document floor completely, which is the largest possible step toward more document context. Keeping the FAQ floor at 0.10 in every policy means that any difference comes from the document passages alone. The deployed system uses a shared floor of 0.03, chosen in the live evaluation (Section~\ref{sec:live-ab}), which is not one of the four policies.
 
@@ -33,13 +40,13 @@ The main comparison is the lower floor against the baseline. The other compariso
 
 The deployed system uses a single shared context floor of 0.03 and reranks against the original question. This matches none of the four policies, so the results do not evaluate the deployed system.
 
-\subsection{Retrieval capture and replay}
+\subsubsection{Retrieval capture and replay}
 
 The evaluation imports the production retrieval function and saves the candidate order, the source text, the dense and lexical results and the neighboring document chunks, so each policy sees the same evidence. The saved candidates contain 9,329 rows, one for each time a passage was a candidate for a question, covering 681 unique identifiers. The text used for reranking is identical whenever an identifier repeats, so the saved batches agree with each other. They are not a snapshot of the whole database.
 
 BGE-M3 embeddings and BGE-reranker-v2-m3 scores are computed by importing the deployed GPU modules separately~\cite{chen2024m3,baaiBgeRerankerV2M3} and saved for reuse. Replay changes only the comparison with the score floor and the fallback condition. The limit on candidates, the ordering and the source display stay fixed, and scores equal to the floor remain eligible. Raw retrieval allows up to 31 dense candidates per corpus before merging. A passage may enter the context without reaching the 0.30 source-display floor.
 
-\subsection{Generation settings}
+\subsubsection{Generation settings}
 
 The main query mode is raw. It uses neither query rewriting nor generation of hypothetical documents (HyDE)~\cite{gao2023hyde}, both of which cost extra model calls. The experiment also excludes conversation history and remote MCP tools. Chapter~\ref{ch:live} evaluates the agent that calls search itself.
 
@@ -49,7 +56,7 @@ The chat schema still applies and rejects questions longer than 2,000 characters
 
 Luna is the GPT-5.6 Luna model, accessed through an OpenAI-compatible gateway. The gateway reports a versioned identifier, which is saved with the records. The gateway is an outside service, so what model stands behind the identifier cannot be checked. The model does not spend extra thinking steps before it answers (reasoning effort none). Each answer is limited to 1,024 tokens, where a token is a small piece of a word. Failed calls are not retried, and the gateway's default sampling settings are used. When the question, the prompt bytes and the settings are identical across policies, one generated answer is reused, so two policies do not differ only through random variation between generations. A reused answer stays linked to every policy it represents, so one assessment problem can appear in several policy records.
 
-\subsection{References and answer assessment}
+\subsubsection{References and answer assessment}
 
 Luna builds one reference per question, shared by all policies. It uses the question and a limited pool of evidence and does not see the answers to be judged. The same model family builds the references, generates the answers and judges them, so errors specific to this model can remain.
 
@@ -83,15 +90,9 @@ Failure & Assigned by the analysis, not the judge: rejected input, failed genera
 
 When more than one category could apply, the judge follows a fixed order: unsupported material claim first, then uncertain, unnecessary refusal, supported answer and useful routing. An answer that fits none of these is an incomplete answer. A material claim is one about important information such as eligibility, fees, deadlines, binding procedures or whether a transaction was completed. Besides the category, the judge sets flags for an unsupported material claim, for whether all required facts are covered and for whether citations are supported. Each flag can be true, false or unspecified, which changes the denominator when flag agreement is computed. A format check rejects records that contradict themselves, for example a supported answer with an unsupported material claim, but a record that passes may still be wrong.
 
-For example, one of these controls about credit recognition gives only the 50-denar fee (the denar is the Macedonian currency) and omits the certificates and submission steps. The fee is supported, but the answer is incomplete. The example only shows how the grading works.
+For example, a control answer about credit recognition (Section~\ref{sec:judge-checks}) gives only the 50-denar fee (the denar is the Macedonian currency) and omits the certificates and submission steps. The fee is supported, but the answer is incomplete. The example only shows how the grading works.
 
-\subsection{Checking the judge}
-
-The evaluation includes 18 controls that an AI coding agent (GPT-6 Astra) wrote from the sources, for example answers with contradictions, omissions and invented transactions. An addition to the evaluation plan, written down before any answer was generated, adds twelve Macedonian versions as six Cyrillic/Latin pairs. These are development checks, not validated gold-standard examples. The primary judge reproduces the expected category for seventeen of the eighteen original controls and the expected flag for all eighteen. In the remaining case it labels useful routing as a supported answer. The 20-case pilot only checks that the pipeline runs. No threshold is selected by searching pilot or main outcomes.
-
-Assessment is repeated with identical prompts for 48 unique answers drawn with seed 24905309 (41 main-study and seven pilot). The same prompts also go to a fixed local Qwen3-8B model in a compressed 4-bit form~\cite{yang2025qwen3} (Qwen from here on) with temperature zero, a 1,024-token limit and no retry. Repeated Luna judgments show how consistent one judge is with itself. Qwen judgments show how much two different judges differ. Neither is human validation. The models disagreed substantially (Section~\ref{sec:judge-consistency}), so Qwen was also run on the thirty control prompts. This extra check, added afterwards, changes no main label and does not mean that the stricter model is correct.
-
-\subsection{Measures and uncertainty}
+\subsubsection{Measures and uncertainty}
 
 Let $Y_{i,p}$ equal one when question $i$ under policy $p$ keeps a supported-answer or useful-routing label, and zero otherwise. For each sample, the main estimate is
 \begin{equation}
@@ -122,31 +123,24 @@ Strict completion & Answer covers every reference fact and behavior, with no uns
 
 Email and production are reported separately. Intervals show how much results vary across the sampled questions, given the saved AI labels. They do not correct a judge that is always wrong, a missing condition in a reference or a biased set of questions. An interval that includes zero does not show that the policies are equal.
 
-The retrieval diagnostics are the number of empty contexts, the mean context length, the mean number of document candidates and the share of reference quotations found in the context (Section~\ref{sec:more-evidence}). Timing has two parts. The first is the request counts and the median and 95th percentile duration from the deployment's PostHog usage analytics, which are observations and not outcome labels. The second is the latency of each hosted generation call. At planning rates of USD~2 per million input tokens and USD~12 per million output tokens, the two controlled campaigns used an estimated USD~31, excluding hosting and GPU costs.
+The retrieval diagnostics are the number of empty contexts, the mean context length, the mean number of document candidates and the share of reference quotations found in the context (Section~\ref{sec:more-evidence}). Timing has two parts. The first is the request counts and the median and 95th percentile duration from the deployment's PostHog usage analytics, which are observations and not outcome labels. The second is the latency of each hosted generation call.
 
-\subsection{Changes to the plan}
-\label{sec:method-deviations}
-
-The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the main comparison of the lower floor against the baseline, how references and judgments are made, the outcome categories and the analysis. A fingerprint (hash) of every input file was saved, so later changes would show. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
-
-The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Six steps were added after the results were seen. They are marked as such and replace no main result. The research questions were reworded, with the same hypotheses, policies, outcomes and labels. Three extra checks were run: the analysis without empty references, the Qwen run on the thirty control prompts, and the search for rejected reference quotations. The prompt comparison was graded a second time. Finally, all answers were judged again by Claude Sonnet 5.5 and by GPT-6 Luna (Section~\ref{sec:sonnet-rejudge}). Both gradings used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
-
-The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The controlled experiment lacks a complete database snapshot, while the prompt comparison keeps one.
-
-\subsection{How to read the results}
+\subsubsection{How to read the results}
 \label{sec:read-results}
 
 The results count how many of the 96 questions in each sample received a useful response, that is, a supported answer or useful routing. Comparisons between two policies are given as differences in percentage points. A difference of $-1.04$ points means that, per 100 questions, about one fewer question received a useful response under the second policy than under the first. Because every question is answered under every policy, the difference compares the same questions and is not affected by which questions happened to be drawn.
 
 Each difference comes with a 95 percent interval, written in brackets, for example $[-8.3, 6.3]$. It is the range in which the true difference most likely lies, given the AI labels and the sampled questions. If the interval includes zero, the data cannot tell whether the change helps or hurts. If it lies entirely above or below zero, the change has a clear effect on this sample under that judge. The interval does not account for errors of the judge itself, which is why Section~\ref{sec:sonnet-rejudge} repeats the analysis with two further judges.
 
-\subsection{Completion of the runs}
+\subsection{Results of the main experiment}
+
+\subsubsection{Completion of the runs}
 
 All 192 main questions have four policy records. Of the 768 records, sixteen are rejected inputs and 752 can go to generation. These use 354 unique main generations with 398 reuses of identical prompts. The pilot adds 39 unique generations, giving 393 saved requests, all completed within the output limit.
 
 Of the 393 saved judgments (354 main and 39 pilot), 386 passed the consistency checks. Seven contradicted themselves: the raw material-claim flag was true, but the category was incomplete or uncertain. One belongs to the pilot and six map to twelve of the main outcomes. They count as failures and are not repaired. The pilot (38 valid assessments from 39 generations) is excluded from the main results, which keep all 96 questions per sample and policy in the count.
 
-\subsection{Supported answering and useful routing}
+\subsubsection{Supported answering and useful routing}
 
 Figure~\ref{fig:outcome-bars} and Table~\ref{tab:luna-outcomes} show the outcome categories after the guard, the reference check against invalid references (Section~\ref{sec:reference-quality}). Table~\ref{tab:thesis-policies} defines the policy names. A useful-routing label means the answer points the student to the right office or link without giving the full fact.
 
@@ -158,7 +152,7 @@ Under the baseline, email has nine supported-answer and 22 useful-routing labels
 
 Unsupported material claims and incomplete answers remain common. Under the baseline and the lower floor, the unsupported categories number twenty and nineteen for email and twelve and eleven for production. Incomplete answers number 31 and 30 for email and 22 and 24 for production. The flag rates for material claims divide by the records that could be assessed. The email counts for the baseline, the baseline with fallback, the lower floor and the lower floor with fallback are 20/91, 25/91, 19/88 and 19/88. The production counts are 12/95, 11/94, 11/95 and 11/95. The email decline from 20 to 19 is not clear evidence of safer answers. The records with a specified flag fall from 91 to 88, and invalid judgments with a raw unsupported flag rise from one to three.
 
-\subsection{Paired retrieval-policy effects}
+\subsubsection{Paired retrieval-policy effects}
 \label{sec:policy-effects}
 
 \input{figures/policy_effects}
@@ -171,7 +165,7 @@ The other comparisons and the interaction ($-1.04$ points for email, $+2.08$ for
 
 The fallback is used much more often with the higher threshold of the baseline. Comparing the baseline with and without fallback, 33 email and 27 production cases change from an empty to a non-empty context. Comparing the lower floor with and without fallback, no email and only three production contexts change. With the lower floor, both fallback settings select the same context for all 96 email and 93 production cases. The zero email difference therefore comes from identical inputs and does not mean the fallback never matters. These counts are computed from the paired contexts.
 
-\subsection{More evidence without a clear gain}
+\subsubsection{More evidence without a clear gain}
 \label{sec:more-evidence}
 
 The mean context grows from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production (Table~\ref{tab:context-diagnostics}), while the share of good answers stays the same. Even when no evidence is retrieved, the prompt still contains the list of useful links and the role instructions. This may explain why routing responses are still possible. Among the 55 empty contexts under the lower floor (three email and 52 production), 23 still received a useful-routing label (three email and twenty production).
@@ -197,7 +191,30 @@ Empty contexts have two causes. Under the baseline, candidates were retrieved bu
 
 Among 66 email cases with valid, non-empty references, the mean share of the reference quotations that appear in the context rises from 0.486 under the baseline to 0.661 under the lower floor. All quotations are present in eighteen cases under the baseline and 29 under the lower floor. Missing evidence is therefore not the only reason for weak answers. How the response combines conditions and handles uncertainty may also matter, but this was not tested. One case shows the pattern. To avoid picking a convenient example, it was chosen by a fixed rule that does not look at the outcomes, from 72 cases with a valid, non-empty reference, completed answers under both policies and a longer context under the lower floor. The question asks whether admission under a special category drops the tuition. The baseline selects three FAQ candidates and one document candidate (6,470 characters), and the lower floor selects three FAQ and seven document candidates (17,979 characters). Both answers explain the exemption, separate it from other semester charges and advise contacting Student Services, and both keep the supported-answer label. Yet the reference says the question can only be partly answered, and its third required quotation is absent from both contexts. The case is an example and does not show how often extra evidence leaves outcomes unchanged.
 
-\subsection{Reference quality and the guard}
+The component study points the same way. There the separate-threshold policy ranked the relevant passages higher within the pool (Section~\ref{sec:component-study}), yet in this experiment no gain appears in the assessed answers. Better ranking therefore does not mean better assessed answers.
+
+\subsubsection{Delivery, latency and cost}
+
+The production telemetry comes from the deployed system, with the author's own test requests removed. It records 699 request events over 69 days, with a median generation time of 12.2 seconds and a 95th percentile of 37.2 seconds. The latency and cost figures describe the fixed path only, with median hosted-call times of 2.1 seconds for email and 1.5 for production. At planning rates of USD~2 per million input tokens and USD~12 per million output tokens, the two controlled campaigns used an estimated USD~31, excluding hosting and GPU costs. Chapter~\ref{ch:live} measures the deployed agent.
+
+\subsection{Checks on the judging}
+\label{sec:judge-checks}
+
+The labels above come from one AI judge and from references written by the same model family. The checks in this section test how far they can be trusted. Their design comes first and their results follow.
+
+\subsubsection{Design of the checks}
+
+The evaluation includes 18 controls that an AI coding agent (GPT-6 Astra) wrote from the sources, for example answers with contradictions, omissions and invented transactions. An addition to the evaluation plan, written down before any answer was generated, adds twelve Macedonian versions as six Cyrillic/Latin pairs. These are development checks, not validated gold-standard examples. Each control has an expected category and expected flags.
+
+Assessment is repeated with identical prompts for 48 unique answers drawn with seed 24905309 (41 main-study and seven pilot). The same prompts also go to a fixed local Qwen3-8B model in a compressed 4-bit form~\cite{yang2025qwen3} (Qwen from here on) with temperature zero, a 1,024-token limit and no retry. Repeated Luna judgments show how consistent one judge is with itself. Qwen judgments show how much two different judges differ. Neither is human validation. Because the two models disagreed substantially, Qwen was also run on the thirty control prompts. This extra check, added afterwards, changes no main label and does not mean that the stricter model is correct.
+
+To test how much the results depend on the judge, every saved answer was then judged again by two more models. Claude Sonnet 5.5 comes from a different family than the answers. GPT-6 Luna is the newer model of the same family, and it also answers questions in the live deployment. The questions, references, contexts and scoring rules were the same for both. Both judges received the full generation evidence, revised scope guidance and a 1,024-token judgment limit, as in the audit of the prompt comparison (Section~\ref{sec:results-prompt}). This check was added after the main results were known (Section~\ref{sec:method-deviations}).
+
+\subsubsection{Control answers}
+
+The primary judge reproduces the expected category for seventeen of the eighteen original controls and the expected flag for all eighteen. In the remaining case it labels useful routing as a supported answer. It also matches all twelve Macedonian versions. On the thirty control prompts Qwen matches the expected categories and flags on fourteen of eighteen original controls and ten of twelve script versions. In all six mismatches, Qwen labels an omission, useful routing or an unnecessary refusal as unsupported. These are development checks on AI-written controls.
+
+\subsubsection{Reference quality and the guard}
 \label{sec:reference-quality}
 
 Of 212 pilot and main references, 182 pass the quotation checks and thirty fail. In the main sample, 78 email and 88 production references pass (Table~\ref{tab:reference-states}). The guard changes a positive label to uncertain when the reference quotations fail their checks. It changes 47 otherwise positive policy records in the main sample, 32 for email and fifteen for production. Policies reuse identical answers, so these records come from 28 unique answers. Under the baseline and the lower floor the email counts are seven and eight, and production has four under each. The guard does not check whether a source is official or whether a passing reference is complete.
@@ -220,7 +237,7 @@ The 182 passing references include 76 with no facts left, and 75 of the 166 pass
 
 A sensitivity analysis made afterwards accepts the supported-answer category only when its reference is valid and not empty, and keeps useful routing. Under this rule the totals of the baseline and the lower floor become 31 and 29 for email and 33 and 32 for production. The email difference is $-2.08$ points with interval $[-9.38,5.21]$. The production difference remains $-1.04$ with interval $[-7.29,5.21]$. The rule does not give a corrected accuracy, because it also removes appropriate responses that contain no facts. A check made afterwards found 32 of the 49 rejected main quotations in a different source block of the same pool and seventeen nowhere in it. This can guide repairs to the references, and it changes no labels.
 
-\subsection{Judge consistency and disagreement between models}
+\subsubsection{Repeated and local judgments}
 \label{sec:judge-consistency}
 
 Table~\ref{tab:judge-agreement} shows the agreement. All 48 repeated Luna judgments returned outputs and 47 were valid. This leaves 47 category pairs, and one pair with an unspecified flag is left out of the material-claim agreement. Of 48 local Qwen judgments, 46 are valid, leaving 45 category pairs. Qwen flags an unsupported material claim in 23 pairs where Luna does not, and the reverse occurs once. Citation flags agree in fourteen of 32 pairs with specified values.
@@ -241,16 +258,16 @@ Local Qwen & Material flag & 20/44 & 45.5 & 0.104 \\
 \end{tabular}
 \end{table}
 
-The models differ in size, in quantization (a smaller numeric format for the model weights) and in how they read the rubric. The disagreement lowers confidence in the absolute scores. It does not mean that the stricter judge should replace the main one. On the thirty control prompts Qwen matches the expected categories and flags on fourteen of eighteen original controls and ten of twelve script versions. In all six mismatches, Qwen labels an omission, useful routing or an unnecessary refusal as unsupported. Luna matches all twelve Macedonian versions. These are development checks on AI-written controls.
+The models differ in size, in quantization (a smaller numeric format for the model weights) and in how they read the rubric. The disagreement lowers confidence in the absolute scores. It does not mean that the stricter judge should replace the main one.
 
 For the assistance labels, with the original guard and without pilot answers, repeated Luna agrees in 38 of 40 usable pairs (95.0\%), with fourteen assistance labels in each run. Qwen agrees in 25 of 38 pairs (65.8\%). Nine losses and four gains reduce its assistance count from thirteen to eight. The shared guard can inflate agreement. The check does not show which judge is correct and does not recompute the policy effect.
 
-\subsection{Re-judging with two further judges}
+\subsubsection{Two further judges}
 \label{sec:sonnet-rejudge}
 
-To test how much the results depend on the judge, every saved answer was judged again by two more models. Claude Sonnet 5.5 comes from a different family than the answers. GPT-6 Luna is the newer model of the same family, and it also answers questions in the live deployment. The prompts, references, contexts and scoring rules were the same for both, so only the judge changed. This check was added after the main results were known (Section~\ref{sec:method-deviations}). Sonnet gave a usable judgment for 363 of the 393 answers. The other 30 flagged an unsupported claim but chose another category, which the rules count as a failure, as they do for Luna's seven such judgments. GPT-6 Luna gave a usable judgment for 359 answers. Its other 34 judgments broke the same rule, did not finish within the token limit or failed to parse, and count as failures too.
+Sonnet gave a usable judgment for 363 of the 393 answers. The other 30 flagged an unsupported claim but chose another category, which the rules count as a failure, as they do for Luna's seven such judgments. GPT-6 Luna gave a usable judgment for 359 answers. Its other 34 judgments broke the same rule, did not finish within the token limit or failed to parse, and count as failures too.
 
-Table~\ref{tab:sonnet-rejudge} compares the assistance counts. Sonnet labels more answers as useful routing, so its totals are higher. GPT-6 Luna is the strictest of the three and labels more answers incomplete. Table~\ref{tab:judge-agreement} shows how often each pair of judges agrees. Here $\kappa$ (Cohen's kappa) is the agreement beyond what chance alone would give, where 0 means chance level and 1 means full agreement. No pair agrees on whether an answer counts as assistance for more than three quarters of the answers.
+Table~\ref{tab:sonnet-rejudge} compares the assistance counts. Sonnet labels more answers as useful routing, so its totals are higher. GPT-6 Luna is the strictest of the three and labels more answers incomplete. Table~\ref{tab:judge-pairs} shows how often each pair of judges agrees. Here $\kappa$ (Cohen's kappa) is the agreement beyond what chance alone would give, where 0 means chance level and 1 means full agreement. No pair agrees on whether an answer counts as assistance for more than three quarters of the answers.
 
 \begin{table}[htbp]
 \centering
@@ -275,7 +292,7 @@ Production & GPT-6 Luna & 37 & 37 & 36 & 36 & $-1.04$ $[-5.2, 3.1]$ \\
 \begin{table}[htbp]
 \centering
 \caption[Agreement between the judges]{Agreement between each pair of judges on the answers that both judged validly. Assistance agreement compares only whether the answer counts as assistance, and category agreement compares the exact outcome category.}
-\label{tab:judge-agreement}
+\label{tab:judge-pairs}
 \small
 \begin{tabular}{@{}lrrr@{}}
 \toprule
@@ -290,22 +307,19 @@ Sonnet and GPT-6 Luna & 334 & 66.8\% ($\kappa=0.38$) & 53.0\% ($\kappa=0.40$) \\
 
 The main comparison depends on the judge. For email, no judge finds a clear effect of the lower document threshold. For production questions, Sonnet finds a gain of 7.29 points, with an interval that excludes zero, while both Luna models find none. Sonnet also finds that the fallback lowers email assistance under the baseline ($-6.25$ points, interval $[-12.5,-1.0]$). Ten comparisons were made per judge, so an interval that excludes zero can appear by chance. Still, the conclusion that the lower document threshold gives no benefit holds under two of the three judges and not under Sonnet. GPT-6 Luna judges far fewer answers as useful than the other two, yet its policy differences match those of the main judge. The judges therefore disagree more on how good the answers are than on which policy is better, with Sonnet's production result as the exception.
 
-\subsection{Component study with a local generator}
-\label{sec:component-study}
+\subsection{The prompt comparison}
 
-The component study came before the controlled experiment. It used a simplified retrieval path, a locally served Qwen3-8B generator and a fixed corpus of 74 FAQs and 1,403 chunks from nineteen documents, with the 24-email development set and the 320-email random sample (Chapter~\ref{ch:data}). Ranking was measured against AI relevance judgments of each candidate pool, and the same local Qwen3-8B model judged the answers. It has 306 test cases with positive AI relevance judgments. For each case, nDCG@10 measures how high the relevant passages rank among the candidates in the pool (higher is better). It rises from 0.296 for a fixed 0.10 threshold without fallback to 0.441 for separate thresholds without fallback. The paired difference is 0.144 with a group-bootstrap interval of $[0.124,0.166]$, and independently built reference labels make the gain smaller (0.050 instead of 0.201 on a 24-case audit). A separate audit by an AI coding agent (GPT-6 Astra) covered 24 random test cases with their own references and 48 answers, of which 44 were completed. It flagged unsupported important claims in 31 of the 44 and matched the primary category in only 12. These findings led to testing threshold and fallback separately in the controlled experiment. Together with the controlled experiment, this is a main finding. The separate-threshold policy ranks the relevant passages higher within the pool, yet no gain appears in the assessed answers. The AI audit of this study cannot be combined with the Luna assessment.
-
-\subsection{Prompt comparison}
-\label{sec:results-prompt}
+\subsubsection{Design}
 \label{sec:method-prompt}
 
-A second, smaller experiment, the prompt comparison, compares a baseline prompt with a revised one. Where both are meant, the thesis calls them the controlled experiments. Neither is the deployed prompt. It runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks, with forty further emails that were not in the main sample, and with strict completion as its main measure. The FAQ text matches the controlled experiment, but the document set is larger.
+A second, smaller experiment, the prompt comparison, compares a baseline prompt with a revised one. Where both are meant, the thesis calls them the controlled experiments. Neither is the deployed prompt. It runs on snapshot B, a read-only snapshot of 74 FAQs, sixty documents and 2,391 chunks, with forty further emails that were not in the main sample, and with strict completion as its main measure. The FAQ text matches the controlled experiment, but the document set is larger. The comparison asks whether the revised prompt improves strict completion on the forty emails.
 
-A 32-question development sample, balanced between email and production questions, compared current retrieval, AI-selected reference evidence and no evidence. It led to a revision of the prompt only, fixed before the comparison. The revised prompt checks dates and whether a rule applies to the student, instead of automatically favoring FAQs or higher-ranked text. It also keeps needed steps of a procedure and states important gaps.
+A 32-question development sample, balanced between email and production questions, compared current retrieval, AI-selected reference evidence and no evidence. Giving the model AI-selected evidence instead of normal retrieval raised the reference facts covered by the answers from 29/73 to 50/73, and strict completion rose from 4/32 to 6/32. With no evidence at all, the answers reached 4/32 strict completions and 14/73 facts. This development work led to a revision of the prompt only, fixed before the comparison. The revised prompt checks dates and whether a rule applies to the student, instead of automatically favoring FAQs or higher-ranked text. It also keeps needed steps of a procedure and states important gaps.
 
 The forty emails are the first forty of a shuffled reserve of 64 archive emails kept apart from the main sample, after exact and near duplicates of evaluated questions were removed. It is not proved that they differ in meaning from the evaluated ones. Two passes of Luna prepared and reviewed the references before generation, and all forty references pass exact-text checks (34 partial, three insufficient, three not factual). Both conditions use production retrieval with the fallback enabled, useful links, Luna, the gateway's default sampling and a 1,536-token limit. Strict completion is stricter than the assistance measure and cannot be compared with it. Paired differences use 20,000 bootstrap resamples and an exact paired test on the cases where the two conditions differ.
 
-The comparison asks whether the revised prompt improves strict completion on the forty emails. On the development sample, giving the model AI-selected evidence instead of normal retrieval raises the reference facts covered by the answers from 29/73 to 50/73. Strict completion rises from 4/32 to 6/32. With no evidence at all, the answers reach 4/32 strict completions and 14/73 facts.
+\subsubsection{Results}
+\label{sec:results-prompt}
 
 In the forty-question comparison the first judge did not see part of the evidence given to the generator. It flagged fifteen citation errors per condition, while a rule-based check found one per condition. All pairs were therefore graded again with the full generation context, new scope guidance and a 1,024-token limit on the judgment (Section~\ref{sec:method-deviations}). This audit is the reported result (Table~\ref{tab:prompt}).
 
@@ -327,9 +341,14 @@ Audit citation-error flags & 1/37 & 1/36\\
 
 Under the audit the revised prompt changes strict completion from 6/40 to 5/40. The paired difference is $-2.5$ points (95\% bootstrap interval $[-12.5,7.5]$), from two gains and three losses, and an exact sign test gives $p=1.0$. The five-point gain under the first labels may have come from the judge's incomplete input, so it is not a finding about the prompt. The audit also changed the scope guidance and the token limit, so the change in labels cannot be put down to the evidence alone. Three inputs that were too long produce no answer in either condition but stay in the denominators. Because the references are partial, fewer unsupported-claim flags do not show an improvement.
 
-\subsection{Delivery, latency and cost}
+\subsection{Changes to the plan}
+\label{sec:method-deviations}
 
-The production telemetry comes from the deployed system, with the author's own test requests removed. It records 699 request events over 69 days, with a median generation time of 12.2 seconds and a 95th percentile of 37.2 seconds. The latency and cost figures describe the fixed path only, with median hosted-call times of 2.1 seconds for email and 1.5 for production. Chapter~\ref{ch:live} measures the deployed agent.
+The plan of the controlled experiment was fixed before any evaluated answer was generated. It fixed the sample and seed, the four policies, the main comparison of the lower floor against the baseline, how references and judgments are made, the outcome categories and the analysis. A fingerprint (hash) of every input file was saved, so later changes would show. An addition, also written down before generation, added the twelve Macedonian script controls and the input-rejection outcome for the four questions that were too long. It changed no threshold or rubric. The prompt comparison had its own plan, and its revised prompt was fixed before it ran.
+
+The executed assessment differs from the first design in three ways. It uses a compact judgment format instead of one entry per claim, repeats 48 assessments instead of 24, and leaves out a proposed fifth policy with a tuned threshold. Six steps were added after the results were seen. They are marked as such and replace no main result. The research questions were reworded, with the same hypotheses, policies, outcomes and labels. Three extra checks were run: the analysis without empty references, the Qwen run on the thirty control prompts, and the search for rejected reference quotations. The prompt comparison was graded a second time. Finally, all answers were judged again by Claude Sonnet 5.5 and by GPT-6 Luna (Section~\ref{sec:sonnet-rejudge}). Both gradings used the full generation evidence, revised scope guidance and a 1,024-token judgment limit, after a deterministic check had shown that the first judge lacked part of the generator's evidence.
+
+The saved records allow every reported count and interval to be recomputed without new model calls. The chatbot-log questions and the generated answers are not released, and calling the hosted model again would not necessarily give the same text. The controlled experiment lacks a complete database snapshot, while the prompt comparison keeps one.
 
 \paragraph{Summary.}
 \begin{itemize}
@@ -338,5 +357,5 @@ The production telemetry comes from the deployed system, with the author's own t
   \item Lowering the document threshold raises the mean context from 5,110 to 16,481 characters for email and from 1,010 to 5,808 for production, but the share of good answers does not rise. The main effect is $-1.04$ points in both samples, and every interval includes zero.
   \item The same change ranks relevant passages higher in the component study, so better ranking does not mean better assessed answers.
   \item Many passing references are empty, and the judge's inputs and strictness can move the apparent results.
-  \item Judged again by Claude Sonnet 5.5, the lower document threshold shows a 7.29-point gain for production questions, so the main result depends on the judge.
+  \item Judged again by Claude Sonnet 5.5, the lower document threshold shows a 7.29-point gain for production questions, while GPT-6 Luna, like the main judge, finds none. The main result therefore depends on the judge.
 \end{itemize}
