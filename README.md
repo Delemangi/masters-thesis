@@ -4,8 +4,6 @@ Master's thesis by Stefan Milev, mentored by Prof. Dr. Riste Stojanov, at the Fa
 
 The thesis proposes an architecture for chatbots that answer questions from an institution's own documents and data. It is implemented as the [FINKI Hub chatbot](https://chat.finki-hub.com) ([source code](https://github.com/finki-hub/chat-bot)) and evaluated on real student questions in Macedonian. On held-out student emails, AI graders marked 70 to 77% of the answers correct and 1 to 3% wrong.
 
-**Read it:** [thesis (PDF)](https://github.com/Delemangi/masters-thesis/releases/latest/download/master-thesis.pdf) | [defense slides (PDF)](https://github.com/Delemangi/masters-thesis/releases/latest/download/defense-slides.pdf)
-
 ## Contents
 
 | Folder | Contents |
